@@ -1,5 +1,6 @@
 org $128000
 
+build_map16_ext_jump_table:
   dw $8890, $8890, $8890, $8890             ; $128000 |
   dw $8890, $8890, $8890, $8890             ; $128008 |
   dw $8890, $8890, $88AD, $88AD             ; $128010 |
@@ -64,6 +65,8 @@ org $128000
   dw $0000, $0000, $0000, $0000             ; $1281E8 |
   dw $0000, $0000, $0000, $916B             ; $1281F0 |
   dw $9178, $9179, $9185, $9190             ; $1281F8 |
+
+build_map16_jump_table:
   dw $91D3, $9216, $9216, $92BB             ; $128200 |
   dw $92BB, $92DC, $92DC, $92DC             ; $128208 |
   dw $92DC, $9216, $9216, $9353             ; $128210 |
@@ -128,6 +131,8 @@ org $128000
   dw $A3C6, $A3D0, $0000, $0000             ; $1283E8 |
   dw $0000, $0000, $0000, $0000             ; $1283F0 |
   dw $0000, $0000, $0000, $0000             ; $1283F8 |
+
+; TODO are these used?
   dw $0000, $0000, $0000, $0000             ; $128400 |
   dw $0000, $0000, $0000, $0000             ; $128408 |
   dw $0000, $0000, $0000, $0000             ; $128410 |
@@ -286,7 +291,7 @@ CODE_12865C:
   ADC $1C                                   ; $12866D |
   TAX                                       ; $12866F |
   SEP #$10                                  ; $128670 |
-  JSR CODE_128824                           ; $128672 |
+  JSR get_map16_index_table_offset          ; $128672 |
 
 CODE_128675:
   STX $1D                                   ; $128675 |
@@ -376,7 +381,7 @@ CODE_1286FD:
   STA $00                                   ; $128705 |
   SEP #$20                                  ; $128707 |
   LDX $1C                                   ; $128709 |
-  JSR CODE_128824                           ; $12870B |
+  JSR get_map16_index_table_offset          ; $12870B |
   STX $1D                                   ; $12870E |
   LDA $7F8000,x                             ; $128710 |
   STA $12                                   ; $128714 |
@@ -526,7 +531,14 @@ CODE_1286FD:
   TAX                                       ; $128822 |
   RTL                                       ; $128823 |
 
+; if screen num not mapped in s_screen_num_to_id
+; then create new id mapping?
+; id 0 is not used
+; parameters:
+; X: screen num
+; $00: object xy
 CODE_128824:
+get_map16_index_table_offset:
   CPX #$80                                  ; $128824 |
   BCS CODE_12883A                           ; $128826 |
   LDA !s_screen_num_to_id,x                 ; $128828 |
@@ -590,6 +602,8 @@ CODE_128874:
   db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 |
   db $03, $02                               ; $12888F |
 
+; ext obj 00-09
+CODE_128891:
   REP #$20                                  ; $128891 |
   LDY $15                                   ; $128893 |
   LDA $8887,y                               ; $128895 |
@@ -603,6 +617,8 @@ CODE_128874:
   LDX #$12                                  ; $1288A6 |
   LDA #$A489                                ; $1288A8 |
   JMP CODE_12A3DB                           ; $1288AB |
+
+
   REP #$20                                  ; $1288AE |
   INC $2A                                   ; $1288B0 |
   INC $2E                                   ; $1288B2 |
@@ -613,6 +629,8 @@ CODE_128874:
   LDX #$12                                  ; $1288BC |
   LDA #$A4C8                                ; $1288BE |
   JMP CODE_12A3DB                           ; $1288C1 |
+
+
   REP #$20                                  ; $1288C4 |
   INC $2A                                   ; $1288C6 |
   LDA #$0004                                ; $1288C8 |
@@ -620,6 +638,8 @@ CODE_128874:
   LDX #$12                                  ; $1288CD |
   LDA #$A4EB                                ; $1288CF |
   JMP CODE_12A3DB                           ; $1288D2 |
+
+
   REP #$20                                  ; $1288D5 |
   LDA $15                                   ; $1288D7 |
   AND #$0002                                ; $1288D9 |
@@ -3911,9 +3931,13 @@ CODE_12A384:
   LDA #$FD84                                ; $12A3D5 |
   JMP CODE_12A3DB                           ; $12A3D8 |
 
+; common code for many build_map16_table subroutines
+; parameters
+; X: ???
+; A: some address??? DB=12?
 CODE_12A3DB:
   STZ $17                                   ; $12A3DB |
-
+; another entry point
 CODE_12A3DD:
   STX $24                                   ; $12A3DD |
   STX $21                                   ; $12A3DF |

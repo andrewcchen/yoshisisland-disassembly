@@ -991,7 +991,7 @@ unpack_level_header:
   STA $02                                   ; $108B32 | | |
   PHY                                       ; $108B34 | | |
   LDY $99                                   ; $108B35 | | | load in next byte to continue copying chunks
-  LDA [$32],y                               ; $108B37 | | | at stage_table[y]
+  LDA [!r_level_obj_ptr_dp],y               ; $108B37 | | | at stage_table[y]
   STA $06                                   ; $108B39 | | |
   INY                                       ; $108B3B | | | increment stage_table index
   STY $99                                   ; $108B3C | | |
@@ -1018,125 +1018,139 @@ unpack_level_header:
 ; dumb
   JSL unpack_level_header                   ; $108B5D |
 
-; Entry
-; build map16 table?
+; build the table storing map16 indices
+; for the current level at $7F8000-$7FFFFF
+;
+; arguments for subroutines:
+; $15: object id
+; $1C: screen num / high xy
+; $1B: low xy
+; $2A: width (only for 5 byte objects)
+; $2E: height
+build_map16_index_table:
   PHB                                       ; $108B61 |
   PHK                                       ; $108B62 |
   PLB                                       ; $108B63 |
-  JSL $109257                               ; $108B64 |
+  JSL $109257                               ; $108B64 | TODO
   REP #$20                                  ; $108B68 |
   PHB                                       ; $108B6A |
   LDX #$70                                  ; $108B6B |
   PHX                                       ; $108B6D |
-  PLB                                       ; $108B6E |
+  PLB                                       ; $108B6E | DB=$70
   LDX #$00                                  ; $108B6F |
 
-CODE_108B71:
-  STZ $449E,x                               ; $108B71 |
-  INX                                       ; $108B74 |
-  INX                                       ; $108B75 |
-  CPX #$78                                  ; $108B76 |
-  BCC CODE_108B71                           ; $108B78 |
+.loop_clear1:
+  STZ !s_opt_moving_platforms,x             ; $108B71 |\  clear sram $70449E-$704517 (120 bytes)
+  INX                                       ; $108B74 | | "offset per tile moving object table"
+  INX                                       ; $108B75 | |
+  CPX #$78                                  ; $108B76 | |
+  BCC .loop_clear1                          ; $108B78 |/
   LDX #$7F                                  ; $108B7A |
   PHX                                       ; $108B7C |
-  PLB                                       ; $108B7D |
+  PLB                                       ; $108B7D | DB=$7F
   REP #$10                                  ; $108B7E |
   LDX #$8200                                ; $108B80 |
 
-CODE_108B83:
-  STZ $7DFE,x                               ; $108B83 |
-  DEX                                       ; $108B86 |
-  DEX                                       ; $108B87 |
-  BNE CODE_108B83                           ; $108B88 |
-  PLB                                       ; $108B8A |
+.loop_clear2:
+  STZ $7DFE,x                               ; $108B83 |\  clear wram $7F7E00-$7FFFFF (0x8200 bytes)
+  DEX                                       ; $108B86 | | map16 table & screen exit table
+  DEX                                       ; $108B87 | |
+  BNE .loop_clear2                          ; $108B88 |/
+  PLB                                       ; $108B8A | DB=$10
   LDX #$000E                                ; $108B8B |
 
-CODE_108B8E:
-  STZ $0D4E,x                               ; $108B8E |
-  STZ $0D5E,x                               ; $108B91 |
-  STZ $0D6E,x                               ; $108B94 |
-  STZ $0D7E,x                               ; $108B97 |
-  DEX                                       ; $108B9A |
-  DEX                                       ; $108B9B |
-  BPL CODE_108B8E                           ; $108B9C |
+.loop_clear3:
+  STZ $0D4E,x                               ; $108B8E |\  clear wram $0D4D-$0D8D (65 bytes)
+  STZ $0D5E,x                               ; $108B91 | |
+  STZ $0D6E,x                               ; $108B94 | |
+  STZ $0D7E,x                               ; $108B97 | |
+  DEX                                       ; $108B9A | |
+  DEX                                       ; $108B9B | |
+  BPL .loop_clear3                          ; $108B9C |/
   SEP #$30                                  ; $108B9E |
   STZ $0D4D                                 ; $108BA0 |
   LDA #$80                                  ; $108BA3 |
   LDX #$7F                                  ; $108BA5 |
 
-CODE_108BA7:
-  STA !s_screen_num_to_id,x                 ; $108BA7 |
-  DEX                                       ; $108BAA |
-  BPL CODE_108BA7                           ; $108BAB |
-  STZ $97                                   ; $108BAD |
+.loop_init_table:
+  STA !s_screen_num_to_id,x                 ; $108BA7 |\  write $80 to sram $700CAA-$700DA9
+  DEX                                       ; $108BAA | | set every screen num to be disabled (no id mapped)
+  BPL .loop_init_table                      ; $108BAB |/
+  STZ $97                                   ; $108BAD | clear $97
+
+; subroutine calls return here
+.loop_objs
   REP #$30                                  ; $108BAF |
   LDA #$0001                                ; $108BB1 |
   STA $2A                                   ; $108BB4 |
   STA $2E                                   ; $108BB6 |
   STZ $15                                   ; $108BB8 |
   SEP #$20                                  ; $108BBA |
-  LDY $99                                   ; $108BBC |
-  LDA [$32],y                               ; $108BBE |
-  STA $15                                   ; $108BC0 |
+  LDY $99                                   ; $108BBC | saved loop index (into level object data)
+  LDA [!r_level_obj_ptr_dp],y               ; $108BBE |
+  STA $15                                   ; $108BC0 | object id -> $15
   INY                                       ; $108BC2 |
-  LDA [$32],y                               ; $108BC3 |
-  STA $1C                                   ; $108BC5 |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BC3 |
+  STA $1C                                   ; $108BC5 | screen num / high xy -> $1C
   INY                                       ; $108BC7 |
-  LDA [$32],y                               ; $108BC8 |
-  STA $1B                                   ; $108BCA |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BC8 |
+  STA $1B                                   ; $108BCA | low xy -> $1B
   LDA $15                                   ; $108BCC |
-  BEQ CODE_108C13                           ; $108BCE |
+  BEQ .extended_obj                         ; $108BCE | handle extended object
   CMP #$FF                                  ; $108BD0 |
-  BNE CODE_108C33                           ; $108BD2 |
-  LDA $1C                                   ; $108BD4 |
-  BMI CODE_108C04                           ; $108BD6 |
+  BNE .normal_obj                           ; $108BD2 | handle normal object
+
+; end of object data
+; read exit data
+  LDA $1C                                   ; $108BD4 | exit screen num
+  BMI .end                                  ; $108BD6 | num > 0x7f => end
   REP #$20                                  ; $108BD8 |
 
-CODE_108BDA:
-  AND #$007F                                ; $108BDA |
-  ASL A                                     ; $108BDD |
-  ASL A                                     ; $108BDE |
-  TAX                                       ; $108BDF |
-  LDA [$32],y                               ; $108BE0 |
-  STA $7F7E00,x                             ; $108BE2 |
-  INY                                       ; $108BE6 |
-  LDA [$32],y                               ; $108BE7 |
-  STA $7F7E01,x                             ; $108BE9 |
-  INY                                       ; $108BED |
-  LDA [$32],y                               ; $108BEE |
-  STA $7F7E02,x                             ; $108BF0 |
-  INY                                       ; $108BF4 |
-  LDA [$32],y                               ; $108BF5 |
-  INY                                       ; $108BF7 |
-  INY                                       ; $108BF8 |
-  XBA                                       ; $108BF9 |
-  AND #$00FF                                ; $108BFA |
-  CMP #$00FF                                ; $108BFD |
-  BNE CODE_108BDA                           ; $108C00 |
+.loop_exits:
+  AND #$007F                                ; $108BDA |\ TODO
+  ASL A                                     ; $108BDD | | table at $7F7E00
+  ASL A                                     ; $108BDE | |
+  TAX                                       ; $108BDF | |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BE0 | |
+  STA $7F7E00,x                             ; $108BE2 | |
+  INY                                       ; $108BE6 | |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BE7 | |
+  STA $7F7E01,x                             ; $108BE9 | |
+  INY                                       ; $108BED | |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BEE | |
+  STA $7F7E02,x                             ; $108BF0 | |
+  INY                                       ; $108BF4 | |
+  LDA [!r_level_obj_ptr_dp],y               ; $108BF5 | |
+  INY                                       ; $108BF7 | |
+  INY                                       ; $108BF8 | |
+  XBA                                       ; $108BF9 | |
+  AND #$00FF                                ; $108BFA | |
+  CMP #$00FF                                ; $108BFD | |
+  BNE .loop_exits                           ; $108C00 |/
   SEP #$20                                  ; $108C02 |
 
-CODE_108C04:
+.end:
   SEP #$10                                  ; $108C04 |
   LDX #$7F                                  ; $108C06 |
 
-CODE_108C08:
-  LDA !s_screen_num_to_id,x                 ; $108C08 |
-  STA $6D6A,x                               ; $108C0B |
-  DEX                                       ; $108C0E |
-  BPL CODE_108C08                           ; $108C0F |
+.loop_copy:
+  LDA !s_screen_num_to_id,x                 ; $108C08 |\ copy
+  STA $6D6A,x                               ; $108C0B | |
+  DEX                                       ; $108C0E | |
+  BPL .loop_copy                            ; $108C0F |/
   PLB                                       ; $108C11 |
-  RTL                                       ; $108C12 |
+  RTL                                       ; $108C12 | actual return
 
-CODE_108C13:
+.extended_obj:
   PHK                                       ; $108C13 |
   PEA $8BAE                                 ; $108C14 |
   LDA #$12                                  ; $108C17 |
   PHA                                       ; $108C19 |
   PHA                                       ; $108C1A |
-  PLB                                       ; $108C1B |
+  PLB                                       ; $108C1B | DB=$12
   INY                                       ; $108C1C |
-  LDA [$32],y                               ; $108C1D |
-  STA $15                                   ; $108C1F |
+  LDA [!r_level_obj_ptr_dp],y               ; $108C1D |
+  STA $15                                   ; $108C1F | extended id => $15
   INY                                       ; $108C21 |
   STY $99                                   ; $108C22 |
   REP #$20                                  ; $108C24 |
@@ -1146,58 +1160,58 @@ CODE_108C13:
   LDA $128000,x                             ; $108C2B |
   PHA                                       ; $108C2F |
   SEP #$30                                  ; $108C30 |
-  RTL                                       ; $108C32 |
+  RTL                                       ; $108C32 | call subroutine
 
-CODE_108C33:
+.normal_obj:
   PHK                                       ; $108C33 |
   PEA $8BAE                                 ; $108C34 |
   REP #$20                                  ; $108C37 |
   LDX $15                                   ; $108C39 |
-  LDA $1284EC,x                             ; $108C3B |
+  LDA $1284EC,x                             ; $108C3B | level object info
   AND #$0003                                ; $108C3F |
   CMP #$0001                                ; $108C42 |
-  BEQ CODE_108C6D                           ; $108C45 |
-  TAX                                       ; $108C47 |
+  BEQ .CODE_108C6D                          ; $108C45 | branch to handle 4 byte object
+  TAX                                       ; $108C47 | x = obj type
   INY                                       ; $108C48 |
-  LDA [$32],y                               ; $108C49 |
+  LDA [!r_level_obj_ptr_dp],y               ; $108C49 | width-1
   STA $0A                                   ; $108C4B |
-  BIT #$0080                                ; $108C4D |
-  BEQ CODE_108C62                           ; $108C50 |
-  LDA !r_header_bg1_tileset                 ; $108C52 |
-  CMP #$0002                                ; $108C55 |
-  BEQ CODE_108C62                           ; $108C58 |
+  BIT #$0080                                ; $108C4D | code to sign extend and +1 (if positive) / -1 (if negative)
+  BEQ .CODE_108C62                          ; $108C50 |
+  LDA !r_header_bg1_tileset                 ; $108C52 | special case:
+  CMP #$0002                                ; $108C55 | if bg1 tileset = 2
+  BEQ .CODE_108C62                          ; $108C58 | then treat as unsigned (always positive)
   LDA $0A                                   ; $108C5A |
   ORA #$FF00                                ; $108C5C |
   DEC A                                     ; $108C5F |
-  BRA CODE_108C68                           ; $108C60 |
+  BRA .CODE_108C68                          ; $108C60 |
 
-CODE_108C62:
+.CODE_108C62:
   LDA $0A                                   ; $108C62 |
   AND #$00FF                                ; $108C64 |
   INC A                                     ; $108C67 |
 
-CODE_108C68:
-  STA $2A                                   ; $108C68 |
+.CODE_108C68:
+  STA $2A                                   ; $108C68 | width => $2A
   TXA                                       ; $108C6A |
-  BEQ CODE_108C81                           ; $108C6B |
+  BEQ .CODE_108C81                          ; $108C6B |
 
-CODE_108C6D:
-  INY                                       ; $108C6D |
-  LDA [$32],y                               ; $108C6E |
-  BIT #$0080                                ; $108C70 |
-  BEQ CODE_108C7B                           ; $108C73 |
+.CODE_108C6D:
+  INY                                       ; $108C6D | 
+  LDA [!r_level_obj_ptr_dp],y               ; $108C6E | height-1
+  BIT #$0080                                ; $108C70 | code to sign extend and +1/-1
+  BEQ .CODE_108C7B                          ; $108C73 | 
   ORA #$FF00                                ; $108C75 |
   DEC A                                     ; $108C78 |
-  BRA CODE_108C7F                           ; $108C79 |
+  BRA .CODE_108C7F                          ; $108C79 |
 
-CODE_108C7B:
+.CODE_108C7B:
   AND #$00FF                                ; $108C7B |
   INC A                                     ; $108C7E |
 
-CODE_108C7F:
-  STA $2E                                   ; $108C7F |
+.CODE_108C7F:
+  STA $2E                                   ; $108C7F | height => $2E
 
-CODE_108C81:
+.CODE_108C81:
   INY                                       ; $108C81 |
   STY $99                                   ; $108C82 |
   LDA $15                                   ; $108C84 |
@@ -1208,12 +1222,13 @@ CODE_108C81:
   PHA                                       ; $108C8C |
   PHA                                       ; $108C8D |
   PLB                                       ; $108C8E |
-  LDA $81FF,x                               ; $108C8F |
+  LDA $81FF,x                               ; $108C8F | index into $128200 (indexing from 1)
   PHA                                       ; $108C92 |
   LDA $81FE,x                               ; $108C93 |
   PHA                                       ; $108C96 |
   SEP #$10                                  ; $108C97 |
-  RTL                                       ; $108C99 |
+  RTL                                       ; $108C99 | call subroutine
+; end build_map16_index_table
 
 check_cross_section_spawn:
   LDA !r_header_bg3_tileset                 ; $108C9A |\
@@ -2033,6 +2048,8 @@ load_partial_row:
   BNE load_partial_row                      ; $109254 |/ of the column
   RTS                                       ; $109256 |
 
+; Subroutine
+load_tileset_map16_indices:
   LDA #$00                                  ; $109257 |
   STA $02                                   ; $109259 |
   REP #$30                                  ; $10925B |
@@ -2070,6 +2087,7 @@ CODE_109281:
 CODE_109292:
   SEP #$30                                  ; $109292 |
   RTL                                       ; $109294 |
+; End of function load_tileset_map16_indices
 
 ; long subroutine
 ; change map16 tile
