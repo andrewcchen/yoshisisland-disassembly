@@ -5943,7 +5943,7 @@ CODE_01B149:
   STA !reg_vtimel                           ; $01B1BA |/
   LDA #$B1                                  ; $01B1BD |\ set all IRQ flags
   STA !reg_nmitimen                         ; $01B1BF |/
-  JSL build_map16_index_table               ; $01B1C2 |
+  JSL build_map16_table                     ; $01B1C2 |
   REP #$20                                  ; $01B1C6 |
 
 CODE_01B1C8:

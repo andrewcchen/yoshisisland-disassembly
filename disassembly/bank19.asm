@@ -11233,14 +11233,22 @@ org $198000
   db $EB, $15                               ; $19D618 |
 
 ; BG1 Tileset specific map16 index data
+; Used by load_tileset_map16_indices at $109257
+;
 ; Array of: {
 ;   uint8 count
-;   uint16 dest_addr
+;   uint16 dest     // address in page $00
 ;   uint16 data[16] // one for each tileset
 ; }
-; used by subroutine at $109257, which copies
-; data[tileset]+i to dest_addr[i] for i in [0,count)
-; dest_addr in page $00
+; Note: count=0 signals end of array
+;
+; Load method:
+; foreach entry in array
+;   for i in [0, count)
+;     data[bg1_tileset]+i -> dest[i]
+;
+; This table specifies data to be loaded into wram from $19DA to $1DFF
+tileset_map16_indices:
   db $04                                    ; $19D61A |
   dw $19DA                                  ; $19D61B |
   dw $0200, $0200, $0200, $0200             ; $19D61D |

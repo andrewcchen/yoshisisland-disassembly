@@ -1018,20 +1018,21 @@ unpack_level_header:
 ; dumb
   JSL unpack_level_header                   ; $108B5D |
 
+; === Subroutine ===
 ; build the table storing map16 indices
 ; for the current level at $7F8000-$7FFFFF
 ;
 ; arguments for subroutines:
 ; $15: object id
-; $1C: screen num / high xy
+; $1C: high xy (screen num)
 ; $1B: low xy
 ; $2A: width (only for 5 byte objects)
 ; $2E: height
-build_map16_index_table:
+build_map16_table:
   PHB                                       ; $108B61 |
   PHK                                       ; $108B62 |
   PLB                                       ; $108B63 |
-  JSL $109257                               ; $108B64 | TODO
+  JSL load_tileset_map16_indices            ; $108B64 |
   REP #$20                                  ; $108B68 |
   PHB                                       ; $108B6A |
   LDX #$70                                  ; $108B6B |
@@ -1086,7 +1087,7 @@ build_map16_index_table:
   STA $2E                                   ; $108BB6 |
   STZ $15                                   ; $108BB8 |
   SEP #$20                                  ; $108BBA |
-  LDY $99                                   ; $108BBC | saved loop index (into level object data)
+  LDY $99                                   ; $108BBC | saved loop index (index for level object data)
   LDA [!r_level_obj_ptr_dp],y               ; $108BBE |
   STA $15                                   ; $108BC0 | object id -> $15
   INY                                       ; $108BC2 |
@@ -1222,13 +1223,13 @@ build_map16_index_table:
   PHA                                       ; $108C8C |
   PHA                                       ; $108C8D |
   PLB                                       ; $108C8E |
-  LDA $81FF,x                               ; $108C8F | index into $128200 (indexing from 1)
+  LDA $81FF,x                               ; $108C8F | index into $128200 (that array starts at 1)
   PHA                                       ; $108C92 |
   LDA $81FE,x                               ; $108C93 |
   PHA                                       ; $108C96 |
   SEP #$10                                  ; $108C97 |
   RTL                                       ; $108C99 | call subroutine
-; end build_map16_index_table
+; End of function build_map16_table
 
 check_cross_section_spawn:
   LDA !r_header_bg3_tileset                 ; $108C9A |\
@@ -2048,43 +2049,44 @@ load_partial_row:
   BNE load_partial_row                      ; $109254 |/ of the column
   RTS                                       ; $109256 |
 
-; Subroutine
+; === Subroutine ===
+; See tileset_map16_indices at $19D61A
 load_tileset_map16_indices:
   LDA #$00                                  ; $109257 |
   STA $02                                   ; $109259 |
   REP #$30                                  ; $10925B |
   LDX #$0000                                ; $10925D |
 
-CODE_109260:
-  STX $03                                   ; $109260 |
-  LDA $4CD61A,x                             ; $109262 |
+.loop_entries:
+  STX $03                                   ; $109260 | $03 = loop index = offset into array
+  LDA $4CD61A,x                             ; $109262 | = $19D61A: tileset_map16_indices.count
   AND #$00FF                                ; $109266 |
-  BEQ CODE_109292                           ; $109269 |
+  BEQ .ret                                  ; $109269 | if count==0 then return
   TAY                                       ; $10926B |
-  LDA $4CD61B,x                             ; $10926C |
+  LDA $4CD61B,x                             ; $10926C | = $19D61B: tileset_map16_indices.dest
   STA $00                                   ; $109270 |
   LDA !r_header_bg1_tileset                 ; $109272 |
   ASL A                                     ; $109275 |
   ADC $03                                   ; $109276 |
   TAX                                       ; $109278 |
-  LDA $4CD61D,x                             ; $109279 |
+  LDA $4CD61D,x                             ; $109279 | = $19D61D: tileset_map16_indices.data
   TYX                                       ; $10927D |
   LDY #$0000                                ; $10927E |
 
-CODE_109281:
+.loop_copy:
   STA [$00],y                               ; $109281 |
   INC A                                     ; $109283 |
   INY                                       ; $109284 |
   INY                                       ; $109285 |
   DEX                                       ; $109286 |
-  BNE CODE_109281                           ; $109287 |
+  BNE .loop_copy                            ; $109287 |
   LDA $03                                   ; $109289 |
   CLC                                       ; $10928B |
   ADC #$0023                                ; $10928C |
   TAX                                       ; $10928F |
-  BRA CODE_109260                           ; $109290 |
+  BRA .loop_entries                         ; $109290 |
 
-CODE_109292:
+.ret:
   SEP #$30                                  ; $109292 |
   RTL                                       ; $109294 |
 ; End of function load_tileset_map16_indices

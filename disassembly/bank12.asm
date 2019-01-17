@@ -200,155 +200,180 @@ build_map16_jump_table:
   db $02, $02, $02, $02, $41, $02, $02, $FF ; $1285DC |
   db $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF ; $1285E4 |
 
+; === Subroutine ===
+; Common driver for object subroutines in build_map16_table
+;
+; Parameters:
+; $17: ???
+; $19: y marker
+; $1B: low yx
+; $1C: high yx (screen num)
+; $1F: funptr
+; $22: funptr
+; $25: funptr
+; $2A: width
+; $2E: height
+;
+; Variables:
+; $14: ???
+; $28: x index
+; $2C: y index
+; $9B: ???
+;
+; Arguments for subroutines:
+; $1D: tile table offset
+; $12: existing data at offset
+build_map16_object_driver:
 CODE_1285EC:
-  STZ $28                                   ; $1285EC |
-  STZ $2C                                   ; $1285EE |
-  STZ $9B                                   ; $1285F0 |
+  STZ $28                                   ; $1285EC | x index = 0
+  STZ $2C                                   ; $1285EE | y index = 0
+  STZ $9B                                   ; $1285F0 | ??? = 0
 
 CODE_1285F2:
   SEP #$30                                  ; $1285F2 |
-  STZ $14                                   ; $1285F4 |
-  JSR CODE_1286FD                           ; $1285F6 |
+  STZ $14                                   ; $1285F4 | ??? = 0
+  JSR sub_1286FD                            ; $1285F6 | table offset -> $1D
   REP #$20                                  ; $1285F9 |
 
 CODE_1285FB:
   SEP #$10                                  ; $1285FB |
   PHK                                       ; $1285FD |
-  PEA $862E                                 ; $1285FE |
-  LDA $2C                                   ; $128601 |
-  CMP $19                                   ; $128603 |
-  BCC CODE_128612                           ; $128605 |
-  LDX $27                                   ; $128607 |
-  PHX                                       ; $128609 |
-  PHX                                       ; $12860A |
-  PLB                                       ; $12860B |
-  LDA $25                                   ; $12860C |
-  PHA                                       ; $12860E |
-  SEP #$20                                  ; $12860F |
-  RTL                                       ; $128611 |
+  PEA $862E                                 ; $1285FE | PUSH $12862F   // return address
+  LDA $2C                                   ; $128601 |\ if y index < y marker:
+  CMP $19                                   ; $128603 | |
+  BCC CODE_128612                           ; $128605 | |
+  LDX $27                                   ; $128607 | |
+  PHX                                       ; $128609 | |
+  PHX                                       ; $12860A | |
+  PLB                                       ; $12860B | |
+  LDA $25                                   ; $12860C | |
+  PHA                                       ; $12860E | |
+  SEP #$20                                  ; $12860F | |
+  RTL                                       ; $128611 |/  JMP [$25]
 
 CODE_128612:
-  LDA $28                                   ; $128612 |
-  AND #$0001                                ; $128614 |
-  BNE CODE_128624                           ; $128617 |
-  LDX $24                                   ; $128619 |
-  PHX                                       ; $12861B |
-  PHX                                       ; $12861C |
-  PLB                                       ; $12861D |
-  LDA $22                                   ; $12861E |
-  PHA                                       ; $128620 |
-  SEP #$20                                  ; $128621 |
-  RTL                                       ; $128623 |
+  LDA $28                                   ; $128612 |\ if x index is even:
+  AND #$0001                                ; $128614 | |
+  BNE CODE_128624                           ; $128617 | |
+  LDX $24                                   ; $128619 | |
+  PHX                                       ; $12861B | |
+  PHX                                       ; $12861C | |
+  PLB                                       ; $12861D | |
+  LDA $22                                   ; $12861E | |
+  PHA                                       ; $128620 | |
+  SEP #$20                                  ; $128621 | |
+  RTL                                       ; $128623 |/  JMP [$22]
 
 CODE_128624:
-  LDX $21                                   ; $128624 |
-  PHX                                       ; $128626 |
-  PHX                                       ; $128627 |
-  PLB                                       ; $128628 |
-  LDA $1F                                   ; $128629 |
-  PHA                                       ; $12862B |
-  SEP #$20                                  ; $12862C |
-  RTL                                       ; $12862E |
+  LDX $21                                   ; $128624 |\ else: // x index is odd
+  PHX                                       ; $128626 | |
+  PHX                                       ; $128627 | |
+  PLB                                       ; $128628 | |
+  LDA $1F                                   ; $128629 | |
+  PHA                                       ; $12862B | |
+  SEP #$20                                  ; $12862C | |
+  RTL                                       ; $12862E |/  JMP [$1F]
 
+; subroutine calls return here
   PHK                                       ; $12862F |
   PLB                                       ; $128630 |
   REP #$30                                  ; $128631 |
   LDY #$0000                                ; $128633 |
-  LDA $2E                                   ; $128636 |
-  BPL CODE_128640                           ; $128638 |
-  DEC $2C                                   ; $12863A |
-  INY                                       ; $12863C |
-  INY                                       ; $12863D |
-  BRA CODE_128642                           ; $12863E |
+  LDA $2E                                   ; $128636 |\ if height < 0:
+  BPL CODE_128640                           ; $128638 | | y index -= 1
+  DEC $2C                                   ; $12863A | |
+  INY                                       ; $12863C | |
+  INY                                       ; $12863D | |
+  BRA CODE_128642                           ; $12863E |/
 
 CODE_128640:
-  INC $2C                                   ; $128640 |
+  INC $2C                                   ; $128640 |  else: y index += 1
 
 CODE_128642:
-  LDA $2C                                   ; $128642 |
-  CMP $2E                                   ; $128644 |
-  BEQ CODE_128680                           ; $128646 |
-  LDA $1D                                   ; $128648 |
-  CLC                                       ; $12864A |
-  ADC $86C9,y                               ; $12864B |
-  TAX                                       ; $12864E |
-  BIT #$FE00                                ; $12864F |
-  BEQ CODE_12865C                           ; $128652 |
-  AND #$01E0                                ; $128654 |
-  CMP $86CD,y                               ; $128657 |
-  BNE CODE_128675                           ; $12865A |
+  LDA $2C                                   ; $128642 |\ if height != y index:
+  CMP $2E                                   ; $128644 | |
+  BEQ CODE_128680                           ; $128646 | |
+  LDA $1D                                   ; $128648 | | // table offset from last iteration
+  CLC                                       ; $12864A | |
+  ADC $86C9,y                               ; $12864B | | A = offset + (height >= 0 ? 0x20 : -0x20)
+  TAX                                       ; $12864E | | X = A
+  BIT #$FE00                                ; $12864F | |\ if A & 0xFE00 == 0 or
+  BEQ CODE_12865C                           ; $128652 | | |   A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
+  AND #$01E0                                ; $128654 | | | // under these conditions (new screen?)
+  CMP $86CD,y                               ; $128657 | | | // we need to recalculate the offset
+  BNE CODE_128675                           ; $12865A | | | // otherwise inc/dec by 0x20 (a row) is good enough
 
 CODE_12865C:
-  TXA                                       ; $12865C |
-  AND #$01FF                                ; $12865D |
-  STA $00                                   ; $128660 |
-  SEP #$20                                  ; $128662 |
-  LDA $14                                   ; $128664 |
-  CLC                                       ; $128666 |
-  ADC $86D1,y                               ; $128667 |
-  STA $14                                   ; $12866A |
-  CLC                                       ; $12866C |
-  ADC $1C                                   ; $12866D |
-  TAX                                       ; $12866F |
-  SEP #$10                                  ; $128670 |
-  JSR get_map16_index_table_offset          ; $128672 |
+  TXA                                       ; $12865C | | | TODO
+  AND #$01FF                                ; $12865D | | |
+  STA $00                                   ; $128660 | | |
+  SEP #$20                                  ; $128662 | | |
+  LDA $14                                   ; $128664 | | |
+  CLC                                       ; $128666 | | |
+  ADC $86D1,y                               ; $128667 | | |
+  STA $14                                   ; $12866A | | |
+  CLC                                       ; $12866C | | |
+  ADC $1C                                   ; $12866D | | |
+  TAX                                       ; $12866F | | |
+  SEP #$10                                  ; $128670 | | |
+  JSR get_map16_index_table_offset          ; $128672 | |/
 
 CODE_128675:
-  STX $1D                                   ; $128675 |
-  LDA $7F8000,x                             ; $128677 |
-  STA $12                                   ; $12867B |
-  JMP CODE_1285FB                           ; $12867D |
+  STX $1D                                   ; $128675 | | offset = X
+  LDA $7F8000,x                             ; $128677 | |
+  STA $12                                   ; $12867B | | $12 = table[offset]
+  JMP CODE_1285FB                           ; $12867D |/  do call subroutine
 
 CODE_128680:
-  LDA $1B                                   ; $128680 |
-  AND #$F0F0                                ; $128682 |
-  STA $00                                   ; $128685 |
-  STZ $2C                                   ; $128687 |
-  LDA $2A                                   ; $128689 |
-  BPL CODE_128697                           ; $12868B |
-  DEC $28                                   ; $12868D |
-  LDA $1B                                   ; $12868F |
-  AND #$0F0F                                ; $128691 |
-  DEC A                                     ; $128694 |
-  BRA CODE_1286A2                           ; $128695 |
+  LDA $1B                                   ; $128680 |\ else: // height == y index
+  AND #$F0F0                                ; $128682 | |
+  STA $00                                   ; $128685 | | $00 = obj y (in format Y0y0)
+  STZ $2C                                   ; $128687 | | y index = 0
+  LDA $2A                                   ; $128689 | |\ if obj width < 0:
+  BPL CODE_128697                           ; $12868B | | |
+  DEC $28                                   ; $12868D | | | x index -= 1
+  LDA $1B                                   ; $12868F | | | // Note: x here is actually index x
+  AND #$0F0F                                ; $128691 | | | //       since the variable is updated in the loop
+  DEC A                                     ; $128694 | | | A = -1 + x (in format 0X0x)
+  BRA CODE_1286A2                           ; $128695 | |/
 
 CODE_128697:
-  INC $28                                   ; $128697 |
-  LDA $1B                                   ; $128699 |
-  AND #$0F0F                                ; $12869B |
-  ORA #$00F0                                ; $12869E |
-  INC A                                     ; $1286A1 |
+  INC $28                                   ; $128697 | |\ else:
+  LDA $1B                                   ; $128699 | | | x index += 1
+  AND #$0F0F                                ; $12869B | | |
+  ORA #$00F0                                ; $12869E | | |
+  INC A                                     ; $1286A1 | |/  A = 1 + x (in format 0x0x)
 
 CODE_1286A2:
-  AND #$0F0F                                ; $1286A2 |
-  ORA $00                                   ; $1286A5 |
-  STA $1B                                   ; $1286A7 |
-  LDA $28                                   ; $1286A9 |
-  CMP $2A                                   ; $1286AB |
-  BEQ CODE_1286C6                           ; $1286AD |
-  LDA $9B                                   ; $1286AF |
-  BEQ CODE_1286C3                           ; $1286B1 |
-  JSR CODE_1286D5                           ; $1286B3 |
-  LDA $9B                                   ; $1286B6 |
-  BMI CODE_1286C3                           ; $1286B8 |
-  LDA $2E                                   ; $1286BA |
-  CLC                                       ; $1286BC |
-  ADC $17                                   ; $1286BD |
-  STA $2E                                   ; $1286BF |
-  BEQ CODE_1286C6                           ; $1286C1 |
+  AND #$0F0F                                ; $1286A2 | |
+  ORA $00                                   ; $1286A5 | | // basically we update yx with x inc/dec by 1
+  STA $1B                                   ; $1286A7 | | yx = A | $00
+  LDA $28                                   ; $1286A9 | |
+  CMP $2A                                   ; $1286AB | |
+  BEQ CODE_1286C6                           ; $1286AD | | if x index == width: return
+  LDA $9B                                   ; $1286AF | | TODO
+  BEQ CODE_1286C3                           ; $1286B1 | |
+  JSR CODE_1286D5                           ; $1286B3 | |
+  LDA $9B                                   ; $1286B6 | |
+  BMI CODE_1286C3                           ; $1286B8 | |
+  LDA $2E                                   ; $1286BA | |
+  CLC                                       ; $1286BC | |
+  ADC $17                                   ; $1286BD | |
+  STA $2E                                   ; $1286BF | |
+  BEQ CODE_1286C6                           ; $1286C1 | |
 
 CODE_1286C3:
-  JMP CODE_1285F2                           ; $1286C3 |
+  JMP CODE_1285F2                           ; $1286C3 |/  do call subroutine
 
 CODE_1286C6:
   SEP #$30                                  ; $1286C6 |
   RTS                                       ; $1286C8 |
 
   dw $0020, $FFE0                           ; $1286C9 |
-
   dw $0000, $01E0                           ; $1286CD |
-
   dw $0010, $00F0                           ; $1286D1 |
+; End of function build_map16_object_driver
+
 
 CODE_1286D5:
   LDA $17                                   ; $1286D5 |
@@ -373,14 +398,23 @@ CODE_1286D5:
   STA $1B                                   ; $1286FA |
   RTS                                       ; $1286FC |
 
+; === Subroutine ===
+; Parameters:
+; $1B: high xy (screen num)
+; $1C: low xy
+;
+; Return:
+; $1D: map16 index table offset
+; $12: data at that location
+sub_1286FD:
 CODE_1286FD:
   REP #$20                                  ; $1286FD |
-  LDA $1B                                   ; $1286FF |
+  LDA $1B                                   ; $1286FF | $1B = low xy
   AND #$00FF                                ; $128701 |
   ASL A                                     ; $128704 |
   STA $00                                   ; $128705 |
   SEP #$20                                  ; $128707 |
-  LDX $1C                                   ; $128709 |
+  LDX $1C                                   ; $128709 | $1C = high xy
   JSR get_map16_index_table_offset          ; $12870B |
   STX $1D                                   ; $12870E |
   LDA $7F8000,x                             ; $128710 |
@@ -531,28 +565,35 @@ CODE_1286FD:
   TAX                                       ; $128822 |
   RTL                                       ; $128823 |
 
-; if screen num not mapped in s_screen_num_to_id
-; then create new id mapping?
-; id 0 is not used
-; parameters:
-; X: screen num
-; $00: object xy
-CODE_128824:
+; === Subroutine ===
+; Since the map16 index table is indexed by screen id (not screen num!)
+; this function first maps screen num to screen id,
+; creating a new mapping if necessary in table !s_screen_num_to_id
+;
+; Note: screen id 0 is not used
+;
+; Parameters:
+; X:   high xy (screen num)
+; $00: (low xy) * 2
+;
+; Return:
+; X: offset (from $7F8000)
 get_map16_index_table_offset:
+CODE_128824:
   CPX #$80                                  ; $128824 |
-  BCS CODE_12883A                           ; $128826 |
+  BCS CODE_12883A                           ; $128826 | if (high xy > 0x80) bail out
   LDA !s_screen_num_to_id,x                 ; $128828 |
   AND #$3F                                  ; $12882B |
-  BNE CODE_12886A                           ; $12882D |
-  INC $0D4D                                 ; $12882F |
-  LDA $0D4D                                 ; $128832 |
+  BNE .finish_up                            ; $12882D | found screen num to id mapping
+  INC $0D4D                                 ; $12882F | otherwise create a new mapping
+  LDA $0D4D                                 ; $128832 | TODO $0D4D?
   AND #$3F                                  ; $128835 |
   TAY                                       ; $128837 |
-  BNE CODE_128850                           ; $128838 |
+  BNE CODE_128850                           ; $128838 | if (new id != 0) we are good, else bail out
 
 CODE_12883A:
-  REP #$30                                  ; $12883A |
-  JSL $109A85                               ; $12883C |
+  REP #$30                                  ; $12883A | if high xy > 0x80
+  JSL $109A85                               ; $12883C | TODO invalid xy???
   SEP #$10                                  ; $128840 |
   LDA #$01F1                                ; $128842 |\ change stack pointer to #$01F1
   TCS                                       ; $128845 |/
@@ -570,7 +611,7 @@ CODE_128850:
   AND #$3F                                  ; $128857 |
   TAY                                       ; $128859 |
   CMP $0D4D                                 ; $12885A |
-  BEQ CODE_128874                           ; $12885D |
+  BEQ .ret                                  ; $12885D |
   BRA CODE_128850                           ; $12885F |
 
 CODE_128861:
@@ -579,16 +620,17 @@ CODE_128861:
   STA !s_screen_num_to_id,x                 ; $128864 |
   STA $0D4E,y                               ; $128867 |
 
-CODE_12886A:
-  REP #$30                                  ; $12886A |
-  AND #$00FF                                ; $12886C |
+.finish_up:
+  REP #$30                                  ; $12886A | we found a screen num to id mapping
+  AND #$00FF                                ; $12886C | so just calculate the table offset and return
   XBA                                       ; $12886F |
   ASL A                                     ; $128870 |
   ADC $00                                   ; $128871 |
   TAX                                       ; $128873 |
 
-CODE_128874:
+.ret:
   RTS                                       ; $128874 |
+; End of function get_map16_index_table_offset
 
   PHP                                       ; $128875 |
   SEP #$20                                  ; $128876 |
@@ -602,7 +644,8 @@ CODE_128874:
   db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 |
   db $03, $02                               ; $12888F |
 
-; ext obj 00-09
+; === Subroutine ===
+; build_map16 ext obj 00-09
 CODE_128891:
   REP #$20                                  ; $128891 |
   LDY $15                                   ; $128893 |
@@ -3931,14 +3974,14 @@ CODE_12A384:
   LDA #$FD84                                ; $12A3D5 |
   JMP CODE_12A3DB                           ; $12A3D8 |
 
-; common code for many build_map16_table subroutines
-; parameters
-; X: ???
-; A: some address??? DB=12?
-CODE_12A3DB:
+; Common code for many build_map16 subroutines
+; Uses same function for $1F, $22, $25
+; X: function bank
+; A: function address
+build_map16_object_com1:
   STZ $17                                   ; $12A3DB |
 ; another entry point
-CODE_12A3DD:
+build_map16_object_com2:
   STX $24                                   ; $12A3DD |
   STX $21                                   ; $12A3DF |
   STX $27                                   ; $12A3E1 |
@@ -3947,8 +3990,8 @@ CODE_12A3DD:
   STA $1F                                   ; $12A3E7 |
   STA $25                                   ; $12A3E9 |
   LDA #$7FFF                                ; $12A3EB |
-  STA $19                                   ; $12A3EE |
-  JSR CODE_1285EC                           ; $12A3F0 |
+  STA $19                                   ; $12A3EE | y marker unused
+  JSR build_map16_object_driver             ; $12A3F0 |
   SEP #$30                                  ; $12A3F3 |
   RTL                                       ; $12A3F5 |
 

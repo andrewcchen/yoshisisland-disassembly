@@ -18,14 +18,14 @@ for filename in sys.argv[1:]:
             l = lines[i]
             com_pos = l.find(';')
             if com_pos > comment_column:
-                rm_pos = com_pos-1
-                while rm_pos > comment_column and l[rm_pos] == ' ':
+                rm_pos = com_pos
+                while rm_pos > comment_column and l[rm_pos-1] == ' ':
                     rm_pos -= 1
                 lines[i] = l[0:rm_pos] + l[com_pos:]
             elif com_pos > 0:
                 cnt = comment_column - com_pos
                 lines[i] = l[0:com_pos] + ' '*cnt + l[com_pos:]
-    
+
         f.seek(0)
         f.write(''.join(lines))
         f.truncate()
