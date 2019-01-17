@@ -399,6 +399,7 @@ CODE_1286D5:
   RTS                                       ; $1286FC |
 
 ; === Subroutine ===
+; TODO
 ; Parameters:
 ; $1B: high xy (screen num)
 ; $1C: low xy
@@ -584,7 +585,7 @@ CODE_128824:
   BCS CODE_12883A                           ; $128826 | if (high xy > 0x80) bail out
   LDA !s_screen_num_to_id,x                 ; $128828 |
   AND #$3F                                  ; $12882B |
-  BNE .finish_up                            ; $12882D | found screen num to id mapping
+  BNE CODE_12886A                           ; $12882D | found screen num to id mapping
   INC $0D4D                                 ; $12882F | otherwise create a new mapping
   LDA $0D4D                                 ; $128832 | TODO $0D4D?
   AND #$3F                                  ; $128835 |
@@ -611,7 +612,7 @@ CODE_128850:
   AND #$3F                                  ; $128857 |
   TAY                                       ; $128859 |
   CMP $0D4D                                 ; $12885A |
-  BEQ .ret                                  ; $12885D |
+  BEQ CODE_128874                           ; $12885D |
   BRA CODE_128850                           ; $12885F |
 
 CODE_128861:
@@ -620,6 +621,7 @@ CODE_128861:
   STA !s_screen_num_to_id,x                 ; $128864 |
   STA $0D4E,y                               ; $128867 |
 
+CODE_12886A:
 .finish_up:
   REP #$30                                  ; $12886A | we found a screen num to id mapping
   AND #$00FF                                ; $12886C | so just calculate the table offset and return
@@ -628,6 +630,7 @@ CODE_128861:
   ADC $00                                   ; $128871 |
   TAX                                       ; $128873 |
 
+CODE_128874:
 .ret:
   RTS                                       ; $128874 |
 ; End of function get_map16_index_table_offset
@@ -641,197 +644,280 @@ CODE_128861:
   PLP                                       ; $128885 |
   RTL                                       ; $128886 |
 
+; === Subroutine ===
+; build_map16 ext obj 00-09
+
   db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 |
   db $03, $02                               ; $12888F |
 
-; === Subroutine ===
-; build_map16 ext obj 00-09
-CODE_128891:
+sub_128891:
   REP #$20                                  ; $128891 |
   LDY $15                                   ; $128893 |
   LDA $8887,y                               ; $128895 |
   AND #$00FF                                ; $128898 |
-  STA $2A                                   ; $12889B |
+  STA $2A                                   ; $12889B | lookup width
   LDA #$0003                                ; $12889D |
-  STA $2E                                   ; $1288A0 |
+  STA $2E                                   ; $1288A0 | height = 3
   TYA                                       ; $1288A2 |
   ASL A                                     ; $1288A3 |
   STA $15                                   ; $1288A4 |
   LDX #$12                                  ; $1288A6 |
-  LDA #$A489                                ; $1288A8 |
-  JMP CODE_12A3DB                           ; $1288AB |
+  LDA #$A489                                ; $1288A8 | function = $12A48A
+  JMP build_map16_object_com1               ; $1288AB |
 
+; === Subroutine ===
+; build_map16 ext obj 0A-0B
 
+sub_1288AE:
   REP #$20                                  ; $1288AE |
-  INC $2A                                   ; $1288B0 |
-  INC $2E                                   ; $1288B2 |
+  INC $2A                                   ; $1288B0 | width = 2
+  INC $2E                                   ; $1288B2 | height = 2
   LDA $15                                   ; $1288B4 |
   AND #$0001                                ; $1288B6 |
   ASL A                                     ; $1288B9 |
-  STA $15                                   ; $1288BA |
+  STA $15                                   ; $1288BA | id = (id%2)*2 // // 0 if 0A, 2 if 0B
   LDX #$12                                  ; $1288BC |
-  LDA #$A4C8                                ; $1288BE |
-  JMP CODE_12A3DB                           ; $1288C1 |
+  LDA #$A4C8                                ; $1288BE | function = $12A4C9
+  JMP build_map16_object_com1               ; $1288C1 |
 
+; === Subroutine ===
+; build_map16 ext obj 0C
 
+sub_1288C4:
   REP #$20                                  ; $1288C4 |
-  INC $2A                                   ; $1288C6 |
+  INC $2A                                   ; $1288C6 | width = 2
   LDA #$0004                                ; $1288C8 |
-  STA $2E                                   ; $1288CB |
+  STA $2E                                   ; $1288CB | height = 4
   LDX #$12                                  ; $1288CD |
-  LDA #$A4EB                                ; $1288CF |
-  JMP CODE_12A3DB                           ; $1288D2 |
+  LDA #$A4EB                                ; $1288CF | function = $12A4EC
+  JMP build_map16_object_com1               ; $1288D2 |
 
+; === Subroutine ===
+; build_map16 ext obj 0D-0E
 
+sub_1288D5:
   REP #$20                                  ; $1288D5 |
   LDA $15                                   ; $1288D7 |
   AND #$0002                                ; $1288D9 |
-  STA $15                                   ; $1288DC |
+  STA $15                                   ; $1288DC | id = id&2 // 0 if 0D, 2 if 0E
   LDA #$0008                                ; $1288DE |
-  STA $2A                                   ; $1288E1 |
+  STA $2A                                   ; $1288E1 | width = 8
   LDA #$0010                                ; $1288E3 |
-  STA $2E                                   ; $1288E6 |
+  STA $2E                                   ; $1288E6 | height = 16
   LDX #$12                                  ; $1288E8 |
-  LDA #$A60E                                ; $1288EA |
-  JMP CODE_12A3DB                           ; $1288ED |
-  JSR CODE_1286FD                           ; $1288F0 |
+  LDA #$A60E                                ; $1288EA | function = $12A60F
+  JMP build_map16_object_com1               ; $1288ED |
+
+; === Subroutine ===
+; build_map16 ext obj 0F
+
+  JSR CODE_1286FD                           ; $1288F0 | TODO
   REP #$30                                  ; $1288F3 |
   JSL $12A64B                               ; $1288F5 |
   SEP #$30                                  ; $1288F9 |
   RTL                                       ; $1288FB |
 
+; === Subroutine ===
+; build_map16 ext obj 10
+
+sub_1288FC:
   REP #$20                                  ; $1288FC |
   LDA #$0010                                ; $1288FE |
-  STA $2A                                   ; $128901 |
+  STA $2A                                   ; $128901 | width = 16
   ASL A                                     ; $128903 |
-  STA $2E                                   ; $128904 |
+  STA $2E                                   ; $128904 | height = 32
   LDX #$12                                  ; $128906 |
-  LDA #$A664                                ; $128908 |
-  JMP CODE_12A3DB                           ; $12890B |
+  LDA #$A664                                ; $128908 | function = $12A665
+  JMP build_map16_object_com1               ; $12890B |
+
+; === Subroutine ===
+; build_map16 ext obj 11
+
+sub_12890E:
   REP #$20                                  ; $12890E |
   LDA #$0001                                ; $128910 |
-  STA $2E                                   ; $128913 |
+  STA $2E                                   ; $128913 | height = 1
   INC A                                     ; $128915 |
-  STA $2A                                   ; $128916 |
+  STA $2A                                   ; $128916 | width = 2
   LDX #$12                                  ; $128918 |
-  LDA #$A68A                                ; $12891A |
-  JMP CODE_12A3DB                           ; $12891D |
+  LDA #$A68A                                ; $12891A | function = $12A68B
+  JMP build_map16_object_com1               ; $12891D |
 
-  dw $A6A5                                  ; $128920 |
-  dw $A6C1                                  ; $128922 |
+; === Subroutine ===
+; build_map16 ext obj 12-13
 
+  dw $A6A5, $A6C1                           ; $128920 |
+
+sub_128924:
   REP #$20                                  ; $128924 |
   LDA #$0001                                ; $128926 |
-  STA $2E                                   ; $128929 |
+  STA $2E                                   ; $128929 | height = 1
   LDA #$0005                                ; $12892B |
-  STA $2A                                   ; $12892E |
+  STA $2A                                   ; $12892E | width = 5
   LDA $15                                   ; $128930 |
   AND #$0001                                ; $128932 |
   ASL A                                     ; $128935 |
   TAY                                       ; $128936 |
-  LDA $8920,y                               ; $128937 |
+  LDA $8920,y                               ; $128937 | lookup function
   LDX #$12                                  ; $12893A |
-  JMP CODE_12A3DB                           ; $12893C |
+  JMP build_map16_object_com1               ; $12893C |
 
-  dw $A6E7                                  ; $12893F |
-  dw $A717                                  ; $128941 |
+; === Subroutine ===
+; build_map16 ext obj 14-15
 
+  dw $A6E7, $A717                           ; $12893F |
   dw $0001, $FFFF                           ; $128943 |
 
+sub_128947:
   REP #$20                                  ; $128947 |
   LDA #$0002                                ; $128949 |
-  STA $2E                                   ; $12894C |
+  STA $2E                                   ; $12894C | height = 2
   LDA #$0005                                ; $12894E |
-  STA $2A                                   ; $128951 |
+  STA $2A                                   ; $128951 | width = 5
   LDA $15                                   ; $128953 |
   AND #$0001                                ; $128955 |
   ASL A                                     ; $128958 |
   TAY                                       ; $128959 |
   LDA $8943,y                               ; $12895A |
-  STA $17                                   ; $12895D |
+  STA $17                                   ; $12895D | lookup $17 TODO
   LDA $893F,y                               ; $12895F |
-  LDX #$12                                  ; $128962 |
-  JMP CODE_12A3DD                           ; $128964 |
-  JSR CODE_1286FD                           ; $128967 |
+  LDX #$12                                  ; $128962 | lookup function
+  JMP build_map16_object_com2               ; $128964 |
+
+
+; === Subroutine ===
+; build_map16 ext obj 16
+
+sub_128967:
+  JSR CODE_1286FD                           ; $128967 | TODO
   REP #$30                                  ; $12896A |
   JSL $12A734                               ; $12896C |
   SEP #$30                                  ; $128970 |
   RTL                                       ; $128972 |
 
-  JSR CODE_1286FD                           ; $128973 |
+; === Subroutine ===
+; build_map16 ext obj 17
+
+sub_128973:
+  JSR CODE_1286FD                           ; $128973 | TODO
   REP #$30                                  ; $128976 |
   JSL $12A749                               ; $128978 |
   SEP #$30                                  ; $12897C |
   RTL                                       ; $12897E |
 
+; === Subroutine ===
+; build_map16 ext obj 18
+
   REP #$20                                  ; $12897F |
   LDA #$0010                                ; $128981 |
-  STA $2E                                   ; $128984 |
-  STA $2A                                   ; $128986 |
+  STA $2E                                   ; $128984 | height = 16
+  STA $2A                                   ; $128986 | width = 16
   LDX #$12                                  ; $128988 |
   LDA #$A858                                ; $12898A |
-  JMP CODE_12A3DB                           ; $12898D |
+  JMP build_map16_object_com1               ; $12898D |
+
+; === Subroutine ===
+; build_map16 ext obj 19-1A
+
+; 19 entry point
+sub_128990:
   REP #$20                                  ; $128990 |
   LDA #$0018                                ; $128992 |
-  STA $2A                                   ; $128995 |
+  STA $2A                                   ; $128995 | width = 24
   LDA #$0003                                ; $128997 |
-  STA $2E                                   ; $12899A |
-  STZ $15                                   ; $12899C |
+  STA $2E                                   ; $12899A | height = 3
+  STZ $15                                   ; $12899C | id = 0
   BRA CODE_1289B1                           ; $12899E |
+
+; 1A entry point
+sub_1289A0:
   REP #$20                                  ; $1289A0 |
   LDA #$0020                                ; $1289A2 |
-  STA $2A                                   ; $1289A5 |
+  STA $2A                                   ; $1289A5 | width = 32
   LDA #$000C                                ; $1289A7 |
-  STA $2E                                   ; $1289AA |
+  STA $2E                                   ; $1289AA | height = 12
   LDA #$0001                                ; $1289AC |
-  STA $15                                   ; $1289AF |
+  STA $15                                   ; $1289AF | id = 1
 
 CODE_1289B1:
   LDX #$12                                  ; $1289B1 |
-  LDA #$AA76                                ; $1289B3 |
-  JMP CODE_12A3DB                           ; $1289B6 |
+  LDA #$AA76                                ; $1289B3 | function = $12AA77
+  JMP build_map16_object_com1               ; $1289B6 |
+
+; === Subroutine ===
+; build_map16 ext obj 1B-1D
+
+; 1B entry point
+sub_1289B9:
   REP #$20                                  ; $1289B9 |
-  LDA #$0000                                ; $1289BB |
+  LDA #$0000                                ; $1289BB | id = 0
   BRA CODE_1289CC                           ; $1289BE |
+
+; 1C entry point
+sub_1289C0:
   REP #$20                                  ; $1289C0 |
-  LDA #$0002                                ; $1289C2 |
+  LDA #$0002                                ; $1289C2 | id = 2
   BRA CODE_1289CC                           ; $1289C5 |
+
+; 1D entry point
+sub_1289C7:
   REP #$20                                  ; $1289C7 |
-  LDA #$0004                                ; $1289C9 |
+  LDA #$0004                                ; $1289C9 | id = 4
 
 CODE_1289CC:
   STA $15                                   ; $1289CC |
   LDA #$0002                                ; $1289CE |
-  STA $2E                                   ; $1289D1 |
-  STA $2A                                   ; $1289D3 |
+  STA $2E                                   ; $1289D1 | height = 2
+  STA $2A                                   ; $1289D3 | width = 2
   LDX #$12                                  ; $1289D5 |
-  LDA #$AAE4                                ; $1289D7 |
-  JMP CODE_12A3DB                           ; $1289DA |
+  LDA #$AAE4                                ; $1289D7 | function = $12AAE5
+  JMP build_map16_object_com1               ; $1289DA |
+
+; === Subroutine ===
+; build_map16 ext obj 1E
+
+sub_1289DD:
   REP #$20                                  ; $1289DD |
   LDA #$0008                                ; $1289DF |
-  STA $2A                                   ; $1289E2 |
-  LSR A                                     ; $1289E4 |
+  STA $2A                                   ; $1289E2 | width = 8
+  LSR A                                     ; $1289E4 | height = 4
   STA $2E                                   ; $1289E5 |
   LDX #$12                                  ; $1289E7 |
-  LDA #$AB01                                ; $1289E9 |
-  JMP CODE_12A3DB                           ; $1289EC |
+  LDA #$AB01                                ; $1289E9 | function = $12AB02
+  JMP build_map16_object_com1               ; $1289EC |
+
+  
+; === Subroutine ===
+; build_map16 ext obj 1F
+
+sub_1289EF:
   REP #$20                                  ; $1289EF |
   LDA #$0004                                ; $1289F1 |
-  STA $2A                                   ; $1289F4 |
-  STA $2E                                   ; $1289F6 |
+  STA $2A                                   ; $1289F4 | width = 4
+  STA $2E                                   ; $1289F6 | height = 4
   LDX #$12                                  ; $1289F8 |
-  LDA #$AB38                                ; $1289FA |
-  JMP CODE_12A3DB                           ; $1289FD |
+  LDA #$AB38                                ; $1289FA | function = $12AB39
+  JMP build_map16_object_com1               ; $1289FD |
+
+; === Subroutine ===
+; build_map16 ext obj 20-2F
+; null objects, basically do nothing useful
+
+sub_128A00:
   JSR CODE_1286FD                           ; $128A00 |
   REP #$30                                  ; $128A03 |
   LDA $15                                   ; $128A05 |
   SEC                                       ; $128A07 |
   SBC #$0008                                ; $128A08 |
   STA $15                                   ; $128A0B |
-  JSL $12AB55                               ; $128A0D |
+  JSL $12AB55                               ; $128A0D | nullsub
   SEP #$30                                  ; $128A11 |
   RTL                                       ; $128A13 |
 
+; === Subroutine ===
+; build_map16 ext obj 30
+
+sub_128A14:
   REP #$20                                  ; $128A14 |
   LDA $1B                                   ; $128A16 |
   AND #$0F0F                                ; $128A18 |
@@ -841,37 +927,53 @@ CODE_1289CC:
   LDA $1B                                   ; $128A21 |
   AND #$F0F0                                ; $128A23 |
   ORA $00                                   ; $128A26 |
-  STA $1B                                   ; $128A28 |
+  STA $1B                                   ; $128A28 | yx updated with x -= 1
   LDA #$0004                                ; $128A2A |
-  STA $2A                                   ; $128A2D |
+  STA $2A                                   ; $128A2D | width = 4
   LDA #$0002                                ; $128A2F |
-  STA $2E                                   ; $128A32 |
+  STA $2E                                   ; $128A32 | height = 2
   LDX #$12                                  ; $128A34 |
-  LDA #$AB63                                ; $128A36 |
-  JMP CODE_12A3DB                           ; $128A39 |
+  LDA #$AB63                                ; $128A36 | function = $12AB64
+  JMP build_map16_object_com1               ; $128A39 |
+
+; === Subroutine ===
+; build_map16 ext obj 31
+
+sub_128A3C:
   REP #$20                                  ; $128A3C |
   LDA #$0006                                ; $128A3E |
-  STA $2A                                   ; $128A41 |
+  STA $2A                                   ; $128A41 | width = 6
   INC A                                     ; $128A43 |
-  STA $2E                                   ; $128A44 |
+  STA $2E                                   ; $128A44 | height = 7
   LDX #$12                                  ; $128A46 |
-  LDA #$AB9C                                ; $128A48 |
-  JMP CODE_12A3DB                           ; $128A4B |
+  LDA #$AB9C                                ; $128A48 | function = $12AB9D
+  JMP build_map16_object_com1               ; $128A4B |
+
+; === Subroutine ===
+; build_map16 ext obj 32-45
+
+sub_128A4E:
   JSR CODE_1286FD                           ; $128A4E |
   REP #$30                                  ; $128A51 |
   LDA $15                                   ; $128A53 |
   SEC                                       ; $128A55 |
   SBC #$0032                                ; $128A56 |
-  STA $15                                   ; $128A59 |
-  JSL $12ABE1                               ; $128A5B |
+  STA $15                                   ; $128A59 | id -= 0x32
+  JSL $12ABE1                               ; $128A5B | TODO
   SEP #$30                                  ; $128A5F |
   RTL                                       ; $128A61 |
 
+; === Subroutine ===
+; build_map16 ext obj 46
+
   JSR CODE_1286FD                           ; $128A62 |
   REP #$30                                  ; $128A65 |
-  JSL $12ABFF                               ; $128A67 |
+  JSL $12ABFF                               ; $128A67 | TODO
   SEP #$30                                  ; $128A6B |
   RTL                                       ; $128A6D |
+
+; === Subroutine ===
+; build_map16 ext obj 47
 
   REP #$20                                  ; $128A6E |
   LDA $1B                                   ; $128A70 |
@@ -883,13 +985,17 @@ CODE_1289CC:
   SBC #$0030                                ; $128A7D |
   AND #$F0F0                                ; $128A80 |
   ORA $00                                   ; $128A83 |
-  STA $1B                                   ; $128A85 |
+  STA $1B                                   ; $128A85 | yx updated with y -= 3
   LDA #$0004                                ; $128A87 |
-  STA $2A                                   ; $128A8A |
-  STA $2E                                   ; $128A8C |
+  STA $2A                                   ; $128A8A | width = 4
+  STA $2E                                   ; $128A8C | height = 4
   LDX #$12                                  ; $128A8E |
-  LDA #$AC16                                ; $128A90 |
-  JMP CODE_12A3DB                           ; $128A93 |
+  LDA #$AC16                                ; $128A90 | function = $12AC17
+  JMP build_map16_object_com1               ; $128A93 |
+
+; === Subroutine ===
+; build_map16 ext obj 48
+
   REP #$20                                  ; $128A96 |
   LDA $1B                                   ; $128A98 |
   AND #$0F0F                                ; $128A9A |
@@ -900,14 +1006,18 @@ CODE_1289CC:
   SBC #$1030                                ; $128AA5 |
   AND #$F0F0                                ; $128AA8 |
   ORA $00                                   ; $128AAB |
-  STA $1B                                   ; $128AAD |
+  STA $1B                                   ; $128AAD | yx updated with y -= 19
   LDA #$0004                                ; $128AAF |
-  STA $2A                                   ; $128AB2 |
+  STA $2A                                   ; $128AB2 | width = 4
   LDA #$0014                                ; $128AB4 |
-  STA $2E                                   ; $128AB7 |
+  STA $2E                                   ; $128AB7 | height = 20
   LDX #$12                                  ; $128AB9 |
-  LDA #$AC58                                ; $128ABB |
-  JMP CODE_12A3DB                           ; $128ABE |
+  LDA #$AC58                                ; $128ABB | function = $12AC59
+  JMP build_map16_object_com1               ; $128ABE |
+
+; === Subroutine ===
+; build_map16 ext obj 49
+
   REP #$20                                  ; $128AC1 |
   LDA $1B                                   ; $128AC3 |
   AND #$0F0F                                ; $128AC5 |
@@ -917,69 +1027,100 @@ CODE_1289CC:
   LDA $1B                                   ; $128ACE |
   AND #$F0F0                                ; $128AD0 |
   ORA $00                                   ; $128AD3 |
-  STA $1B                                   ; $128AD5 |
+  STA $1B                                   ; $128AD5 | yx updated with x -= 1
   LDA #$0003                                ; $128AD7 |
-  STA $2A                                   ; $128ADA |
+  STA $2A                                   ; $128ADA | width = 3
   LDA #$0001                                ; $128ADC |
-  STA $2E                                   ; $128ADF |
+  STA $2E                                   ; $128ADF | height = 1
   LDX #$12                                  ; $128AE1 |
-  LDA #$ACBA                                ; $128AE3 |
-  JMP CODE_12A3DB                           ; $128AE6 |
+  LDA #$ACBA                                ; $128AE3 | function = $12ACBB
+  JMP build_map16_object_com1               ; $128AE6 |
+
+; === Subroutine ===
+; build_map16 ext obj 4A
+
   JSR CODE_1286FD                           ; $128AE9 |
   REP #$30                                  ; $128AEC |
-  JSL $12ACD3                               ; $128AEE |
+  JSL $12ACD3                               ; $128AEE | TODO
   SEP #$30                                  ; $128AF2 |
   RTL                                       ; $128AF4 |
 
+; === Subroutine ===
+; build_map16 ext obj 4B
+
   JSR CODE_1286FD                           ; $128AF5 |
   REP #$30                                  ; $128AF8 |
-  JSL $12AD00                               ; $128AFA |
+  JSL $12AD00                               ; $128AFA | TODO
   SEP #$30                                  ; $128AFE |
   RTL                                       ; $128B00 |
 
+; === Subroutine ===
+; build_map16 ext obj 4C
+
   JSR CODE_1286FD                           ; $128B01 |
   REP #$30                                  ; $128B04 |
-  JSL $12AD2D                               ; $128B06 |
+  JSL $12AD2D                               ; $128B06 | TODO
   SEP #$30                                  ; $128B0A |
   RTL                                       ; $128B0C |
 
+; === Subroutine ===
+; build_map16 ext obj 4D
+
   REP #$20                                  ; $128B0D |
   LDA #$0002                                ; $128B0F |
-  STA $2A                                   ; $128B12 |
-  STA $2E                                   ; $128B14 |
+  STA $2A                                   ; $128B12 | width = 2
+  STA $2E                                   ; $128B14 | height = 2
   LDX #$12                                  ; $128B16 |
-  LDA #$AD3E                                ; $128B18 |
-  JMP CODE_12A3DB                           ; $128B1B |
+  LDA #$AD3E                                ; $128B18 | function = $12AD3F
+  JMP build_map16_object_com1               ; $128B1B |
+
+; === Subroutine ===
+; build_map16 ext obj 4E
+
   REP #$20                                  ; $128B1E |
   LDA #$0001                                ; $128B20 |
-  STA $2A                                   ; $128B23 |
+  STA $2A                                   ; $128B23 | width = 1
   LDA #$0002                                ; $128B25 |
-  STA $2E                                   ; $128B28 |
+  STA $2E                                   ; $128B28 | height = 2
   LDX #$12                                  ; $128B2A |
-  LDA #$AD5C                                ; $128B2C |
-  JMP CODE_12A3DB                           ; $128B2F |
+  LDA #$AD5C                                ; $128B2C | function = $12AD5D
+  JMP build_map16_object_com1               ; $128B2F |
+
+; === Subroutine ===
+; build_map16 ext obj 4F
+
   JSR CODE_1286FD                           ; $128B32 |
   REP #$30                                  ; $128B35 |
-  JSL $12AD6F                               ; $128B37 |
+  JSL $12AD6F                               ; $128B37 | TODO
   SEP #$30                                  ; $128B3B |
   RTL                                       ; $128B3D |
+
+; === Subroutine ===
+; build_map16 ext obj 50,A8
 
   REP #$20                                  ; $128B3E |
   LDA $15                                   ; $128B40 |
   AND #$0008                                ; $128B42 |
   ASL A                                     ; $128B45 |
-  STA $15                                   ; $128B46 |
+  STA $15                                   ; $128B46 | id = (id&8)*2 // 0 if 50, 0x10 if A8
   LDA #$0002                                ; $128B48 |
-  STA $2A                                   ; $128B4B |
-  STA $2E                                   ; $128B4D |
+  STA $2A                                   ; $128B4B | width = 2
+  STA $2E                                   ; $128B4D | height = 2
   LDX #$12                                  ; $128B4F |
-  LDA #$ADA8                                ; $128B51 |
-  JMP CODE_12A3DB                           ; $128B54 |
+  LDA #$ADA8                                ; $128B51 | function = $12ADA9
+  JMP build_map16_object_com1               ; $128B54 |
+
+; === Subroutine ===
+; build_map16 ext obj 51
+
   JSR CODE_1286FD                           ; $128B57 |
   REP #$30                                  ; $128B5A |
-  JSL $12AE22                               ; $128B5C |
+  JSL $12AE22                               ; $128B5C | TODO
   SEP #$30                                  ; $128B60 |
   RTL                                       ; $128B62 |
+
+; === Subroutine ===
+; build_map16 ext obj 52
 
   REP #$20                                  ; $128B63 |
   LDA $1B                                   ; $128B65 |
@@ -990,14 +1131,18 @@ CODE_1289CC:
   LDA $1B                                   ; $128B70 |
   AND #$F0F0                                ; $128B72 |
   ORA $00                                   ; $128B75 |
-  STA $1B                                   ; $128B77 |
+  STA $1B                                   ; $128B77 | yx updated with x -= 1
   LDA #$0005                                ; $128B79 |
-  STA $2A                                   ; $128B7C |
+  STA $2A                                   ; $128B7C | width = 5
   LDA #$0002                                ; $128B7E |
-  STA $2E                                   ; $128B81 |
+  STA $2E                                   ; $128B81 | height = 2
   LDX #$12                                  ; $128B83 |
-  LDA #$AE3B                                ; $128B85 |
-  JMP CODE_12A3DB                           ; $128B88 |
+  LDA #$AE3B                                ; $128B85 | function = $12AE3C
+  JMP build_map16_object_com1               ; $128B88 |
+
+; === Subroutine ===
+; build_map16 ext obj 53
+
   REP #$20                                  ; $128B8B |
   LDA $1B                                   ; $128B8D |
   AND #$0F0F                                ; $128B8F |
@@ -1007,107 +1152,145 @@ CODE_1289CC:
   LDA $1B                                   ; $128B98 |
   AND #$F0F0                                ; $128B9A |
   ORA $00                                   ; $128B9D |
-  STA $1B                                   ; $128B9F |
+  STA $1B                                   ; $128B9F | yx updated with x -= 1
   LDA #$0005                                ; $128BA1 |
-  STA $2A                                   ; $128BA4 |
+  STA $2A                                   ; $128BA4 | width = 5
   LDA #$0003                                ; $128BA6 |
-  STA $2E                                   ; $128BA9 |
+  STA $2E                                   ; $128BA9 | height = 3
   LDX #$12                                  ; $128BAB |
-  LDA #$AE87                                ; $128BAD |
-  JMP CODE_12A3DB                           ; $128BB0 |
+  LDA #$AE87                                ; $128BAD | function = $12AE88
+  JMP build_map16_object_com1               ; $128BB0 |
+
+; === Subroutine ===
+; build_map16 ext obj 54-55
+
   REP #$20                                  ; $128BB3 |
   LDA $15                                   ; $128BB5 |
   AND #$0001                                ; $128BB7 |
   ASL A                                     ; $128BBA |
-  STA $15                                   ; $128BBB |
+  STA $15                                   ; $128BBB | id = (id&1)*2 // 0 if 54, 2 if 55
   LDA #$0003                                ; $128BBD |
-  STA $2A                                   ; $128BC0 |
-  STA $2E                                   ; $128BC2 |
+  STA $2A                                   ; $128BC0 | width = 3
+  STA $2E                                   ; $128BC2 | height = 3
   LDX #$12                                  ; $128BC4 |
-  LDA #$AEF5                                ; $128BC6 |
-  JMP CODE_12A3DB                           ; $128BC9 |
+  LDA #$AEF5                                ; $128BC6 | function = $12AEF6
+  JMP build_map16_object_com1               ; $128BC9 |
+
+; === Subroutine ===
+; build_map16 ext obj 56-57
+
   REP #$20                                  ; $128BCC |
   LDA $15                                   ; $128BCE |
   AND #$0001                                ; $128BD0 |
   ASL A                                     ; $128BD3 |
-  STA $15                                   ; $128BD4 |
+  STA $15                                   ; $128BD4 | id = (id&1)*2 // 0 if 56, 2 if 57
   LDA #$0005                                ; $128BD6 |
-  STA $2A                                   ; $128BD9 |
+  STA $2A                                   ; $128BD9 | width = 5
   LDA #$0003                                ; $128BDB |
-  STA $2E                                   ; $128BDE |
+  STA $2E                                   ; $128BDE | height = 3
   LDX #$12                                  ; $128BE0 |
-  LDA #$AF47                                ; $128BE2 |
-  JMP CODE_12A3DB                           ; $128BE5 |
+  LDA #$AF47                                ; $128BE2 | function = $12AF48
+  JMP build_map16_object_com1               ; $128BE5 |
+
+; === Subroutine ===
+; build_map16 ext obj 58-5A
+
   REP #$20                                  ; $128BE8 |
   LDA $15                                   ; $128BEA |
   AND #$0003                                ; $128BEC |
   ASL A                                     ; $128BEF |
-  STA $15                                   ; $128BF0 |
+  STA $15                                   ; $128BF0 | id = (id&3)*2 // 0 if 58, 2 if 59, 4 if 5A
   LDA #$0003                                ; $128BF2 |
-  STA $2A                                   ; $128BF5 |
+  STA $2A                                   ; $128BF5 | width = 3
   LDA #$0002                                ; $128BF7 |
-  STA $2E                                   ; $128BFA |
+  STA $2E                                   ; $128BFA | height = 2
   LDX #$12                                  ; $128BFC |
-  LDA #$AF83                                ; $128BFE |
-  JMP CODE_12A3DB                           ; $128C01 |
+  LDA #$AF83                                ; $128BFE | function = $12AF84
+  JMP build_map16_object_com1               ; $128C01 |
+
+; === Subroutine ===
+; build_map16 ext obj 5B-5D
+
   REP #$20                                  ; $128C04 |
   LDA $15                                   ; $128C06 |
   INC A                                     ; $128C08 |
   AND #$0003                                ; $128C09 |
   ASL A                                     ; $128C0C |
-  STA $15                                   ; $128C0D |
+  STA $15                                   ; $128C0D | id = ((id+1)&3)*2 // 0 if 5B, 2 if 5C, 4 if 5D
   LDA #$0003                                ; $128C0F |
-  STA $2A                                   ; $128C12 |
+  STA $2A                                   ; $128C12 | width = 3
   LDA #$0002                                ; $128C14 |
-  STA $2E                                   ; $128C17 |
+  STA $2E                                   ; $128C17 | height = 2
   LDX #$12                                  ; $128C19 |
-  LDA #$AFBE                                ; $128C1B |
-  JMP CODE_12A3DB                           ; $128C1E |
+  LDA #$AFBE                                ; $128C1B | function = $12AFBF
+  JMP build_map16_object_com1               ; $128C1E |
+
+; === Subroutine ===
+; build_map16 ext obj 5E
+
   JSR CODE_1286FD                           ; $128C21 |
   REP #$30                                  ; $128C24 |
-  JSL $12B001                               ; $128C26 |
+  JSL $12B001                               ; $128C26 | TODO
   SEP #$30                                  ; $128C2A |
   RTL                                       ; $128C2C |
 
+; === Subroutine ===
+; build_map16 ext obj 5F-66
+
+; 5F entry point
   REP #$10                                  ; $128C2D |
-  LDA #$00                                  ; $128C2F |
-  LDX #$0004                                ; $128C31 |
-  LDY #$0002                                ; $128C34 |
+  LDA #$00                                  ; $128C2F | id = 0
+  LDX #$0004                                ; $128C31 | width = 4
+  LDY #$0002                                ; $128C34 | height = 2
   BRA CODE_128C7D                           ; $128C37 |
+
+; 60 entry point
   REP #$10                                  ; $128C39 |
-  LDA #$02                                  ; $128C3B |
-  LDX #$0005                                ; $128C3D |
-  LDY #$0003                                ; $128C40 |
+  LDA #$02                                  ; $128C3B | id = 2
+  LDX #$0005                                ; $128C3D | width = 5
+  LDY #$0003                                ; $128C40 | height = 3
   BRA CODE_128C7D                           ; $128C43 |
+
+; 61 entry point
   REP #$10                                  ; $128C45 |
-  LDA #$04                                  ; $128C47 |
-  BRA CODE_128C4F                           ; $128C49 |
-  REP #$10                                  ; $128C4B |
-  LDA #$06                                  ; $128C4D |
+  LDA #$04                                  ; $128C47 | id = 4
+  BRA CODE_128C4F                           ; $128C49 | width = 3, height = 2
+
+; 62 entry point
+  REP #$10                                  ; $128C4B | id = 6
+  LDA #$06                                  ; $128C4D | width = 3, height = 2
 
 CODE_128C4F:
   LDX #$0003                                ; $128C4F |
   LDY #$0002                                ; $128C52 |
   BRA CODE_128C7D                           ; $128C55 |
+
+; 63 entry point
   REP #$10                                  ; $128C57 |
-  LDA #$08                                  ; $128C59 |
-  BRA CODE_128C61                           ; $128C5B |
-  REP #$10                                  ; $128C5D |
-  LDA #$0A                                  ; $128C5F |
+  LDA #$08                                  ; $128C59 | id = 8
+  BRA CODE_128C61                           ; $128C5B | width = 5, height = 4
+
+; 64 entry point
+  REP #$10                                  ; $128C5D | id = 10
+  LDA #$0A                                  ; $128C5F | width = 5, height = 4
 
 CODE_128C61:
   LDX #$0005                                ; $128C61 |
   LDY #$0004                                ; $128C64 |
   BRA CODE_128C7D                           ; $128C67 |
+
+; 65 entry point
   REP #$10                                  ; $128C69 |
-  LDA #$0C                                  ; $128C6B |
-  LDX #$0004                                ; $128C6D |
-  LDY #$0003                                ; $128C70 |
+  LDA #$0C                                  ; $128C6B | id = 12
+  LDX #$0004                                ; $128C6D | width = 4
+  LDY #$0003                                ; $128C70 | height = 3
   BRA CODE_128C7D                           ; $128C73 |
+
+; 66 entry point
   REP #$10                                  ; $128C75 |
-  LDA #$0E                                  ; $128C77 |
-  LDX #$0002                                ; $128C79 |
-  TXY                                       ; $128C7C |
+  LDA #$0E                                  ; $128C77 | id = 14
+  LDX #$0002                                ; $128C79 | width = 2
+  TXY                                       ; $128C7C | height = 2
 
 CODE_128C7D:
   STA $15                                   ; $128C7D |
@@ -1116,34 +1299,49 @@ CODE_128C7D:
   STY $2E                                   ; $128C83 |
   SEP #$10                                  ; $128C85 |
   LDX #$12                                  ; $128C87 |
-  LDA #$B100                                ; $128C89 |
-  JMP CODE_12A3DB                           ; $128C8C |
+  LDA #$B100                                ; $128C89 | function = $12B101
+  JMP build_map16_object_com1               ; $128C8C |
+
+; === Subroutine ===
+; build_map16 ext obj 67
+
   JSR CODE_1286FD                           ; $128C8F |
   REP #$30                                  ; $128C92 |
-  JSL $12B14A                               ; $128C94 |
+  JSL $12B14A                               ; $128C94 | TODO
   SEP #$30                                  ; $128C98 |
   RTL                                       ; $128C9A |
 
+; === Subroutine ===
+; build_map16 ext obj 68-69
+
   JSR CODE_1286FD                           ; $128C9B |
   REP #$30                                  ; $128C9E |
-  JSL $12B179                               ; $128CA0 |
+  JSL $12B179                               ; $128CA0 | TODO
   SEP #$30                                  ; $128CA4 |
   RTL                                       ; $128CA6 |
 
+; === Subroutine ===
+; build_map16 ext obj 6A-6C
+
+; 6A entry point
   REP #$10                                  ; $128CA7 |
-  STZ $15                                   ; $128CA9 |
-  LDX #$0003                                ; $128CAB |
-  LDY #$0002                                ; $128CAE |
+  STZ $15                                   ; $128CA9 | id = 0
+  LDX #$0003                                ; $128CAB | width = 3
+  LDY #$0002                                ; $128CAE | height = 2
   BRA CODE_128CCC                           ; $128CB1 |
+
+; 6B entry point
   REP #$10                                  ; $128CB3 |
   LDX #$0002                                ; $128CB5 |
-  STX $15                                   ; $128CB8 |
-  LDX #$0004                                ; $128CBA |
-  BRA CODE_128CC9                           ; $128CBD |
+  STX $15                                   ; $128CB8 | id = 2
+  LDX #$0004                                ; $128CBA | width = 4
+  BRA CODE_128CC9                           ; $128CBD | height = 3
+
+; 6C entry point
   REP #$10                                  ; $128CBF |
-  LDX #$0004                                ; $128CC1 |
-  STX $15                                   ; $128CC4 |
-  LDX #$0005                                ; $128CC6 |
+  LDX #$0004                                ; $128CC1 | id = 2
+  STX $15                                   ; $128CC4 | width = 5
+  LDX #$0005                                ; $128CC6 | height = 3
 
 CODE_128CC9:
   LDY #$0003                                ; $128CC9 |
@@ -1154,40 +1352,37 @@ CODE_128CCC:
   REP #$20                                  ; $128CD0 |
   SEP #$10                                  ; $128CD2 |
   LDX #$12                                  ; $128CD4 |
-  LDA #$B193                                ; $128CD6 |
-  JMP CODE_12A3DB                           ; $128CD9 |
+  LDA #$B193                                ; $128CD6 | function = $12B193
+  JMP build_map16_object_com1               ; $128CD9 |
+
+; === Subroutine ===
+; build_map16 ext obj 6D-70
+
   REP #$20                                  ; $128CDC |
   LDA $15                                   ; $128CDE |
   DEC A                                     ; $128CE0 |
   AND #$0003                                ; $128CE1 |
   ASL A                                     ; $128CE4 |
-  STA $15                                   ; $128CE5 |
+  STA $15                                   ; $128CE5 | id = ((id-1)&3)*2 // 0,2,4,6 for 6D,6E,6F,70
   LDA #$0002                                ; $128CE7 |
-  STA $2A                                   ; $128CEA |
-  STA $2E                                   ; $128CEC |
+  STA $2A                                   ; $128CEA | width = 2
+  STA $2E                                   ; $128CEC | height = 2
   LDX #$12                                  ; $128CEE |
-  LDA #$B219                                ; $128CF0 |
-  JMP CODE_12A3DB                           ; $128CF3 |
+  LDA #$B219                                ; $128CF0 | function = $12B21A
+  JMP build_map16_object_com1               ; $128CF3 |
 
-  db $06, $06, $01, $01, $02, $02, $02, $02 ; $128CF6 |
+; === Subroutine ===
+; build_map16 ext obj 71-7D
+
+  db $06, $06, $01, $01, $02, $02, $02, $02 ; $128CF6 | widths
   db $04, $04, $06, $06, $02                ; $128CFE |
 
-  db $01, $01, $06, $06, $04, $04, $06, $06 ; $128D03 |
+  db $01, $01, $06, $06, $04, $04, $06, $06 ; $128D03 | heights
   db $02, $02, $02, $02, $01                ; $128D0B |
 
-  dw $B23B                                  ; $128D10 |
-  dw $B259                                  ; $128D12 |
-  dw $B270                                  ; $128D14 |
-  dw $B287                                  ; $128D16 |
-  dw $B2A2                                  ; $128D18 |
-  dw $B2CA                                  ; $128D1A |
-  dw $B2F7                                  ; $128D1C |
-  dw $B325                                  ; $128D1E |
-  dw $B348                                  ; $128D20 |
-  dw $B369                                  ; $128D22 |
-  dw $B392                                  ; $128D24 |
-  dw $B3BB                                  ; $128D26 |
-  dw $B3D0                                  ; $128D28 |
+  dw $B23B, $B259, $B270, $B287, $B2A2      ; $128D10 | function addresses
+  dw $B2CA, $B2F7, $B325, $B348, $B369      ; $128D1A |
+  dw $B392, $B3BB, $B3D0                    ; $128D24 |
 
   REP #$20                                  ; $128D2A |
   LDA $15                                   ; $128D2C |
@@ -1197,21 +1392,26 @@ CODE_128CCC:
   TAX                                       ; $128D33 |
   LDA $8CF5,y                               ; $128D34 |
   AND #$00FF                                ; $128D37 |
-  STA $2A                                   ; $128D3A |
+  STA $2A                                   ; $128D3A | lookup width
   LDA $8D02,y                               ; $128D3C |
   AND #$00FF                                ; $128D3F |
-  STA $2E                                   ; $128D42 |
-  LDA $8D0E,x                               ; $128D44 |
+  STA $2E                                   ; $128D42 | lookup height
+  LDA $8D0E,x                               ; $128D44 | lookup function
   LDX #$12                                  ; $128D47 |
-  JMP CODE_12A3DB                           ; $128D49 |
-  REP #$20                                  ; $128D4C |
+  JMP build_map16_object_com1               ; $128D49 |
+
+; === Subroutine ===
+; build_map16 ext obj 7E-7F
+
+  REP #$20                                  ; $128D4C | implicit width = 1, height = 1
   LDA $15                                   ; $128D4E |
   AND #$0001                                ; $128D50 |
   ASL A                                     ; $128D53 |
-  STA $15                                   ; $128D54 |
+  STA $15                                   ; $128D54 | id = (id&1)*2
   LDX #$12                                  ; $128D56 |
-  LDA #$B3E0                                ; $128D58 |
-  JMP CODE_12A3DB                           ; $128D5B |
+  LDA #$B3E0                                ; $128D58 | function = $12B3E1
+  JMP build_map16_object_com1               ; $128D5B |
+
   JSR CODE_1286FD                           ; $128D5E |
   REP #$30                                  ; $128D61 |
   JSL $12B3F1                               ; $128D63 |
@@ -1223,7 +1423,8 @@ CODE_128CCC:
   STA $2A                                   ; $128D6F |
   LDX #$12                                  ; $128D71 |
   LDA #$B3FA                                ; $128D73 |
-  JMP CODE_12A3DB                           ; $128D76 |
+  JMP build_map16_object_com1               ; $128D76 |
+
   REP #$20                                  ; $128D79 |
   LDA $1B                                   ; $128D7B |
   AND #$0F0F                                ; $128D7D |
@@ -1241,7 +1442,7 @@ CODE_128CCC:
   STA $2E                                   ; $128D9A |
   LDX #$12                                  ; $128D9C |
   LDA #$B45B                                ; $128D9E |
-  JMP CODE_12A3DB                           ; $128DA1 |
+  JMP build_map16_object_com1               ; $128DA1 |
 
   dw $0090, $0050, $0030, $0030             ; $128DA4 |
   dw $0030                                  ; $128DAC |
@@ -1276,14 +1477,15 @@ CODE_128CCC:
   STZ $00A1                                 ; $128DEF |
   LDX #$12                                  ; $128DF2 |
   LDA #$B932                                ; $128DF4 |
-  JMP CODE_12A3DB                           ; $128DF7 |
+  JMP build_map16_object_com1               ; $128DF7 |
+
   REP #$20                                  ; $128DFA |
   LDA #$0004                                ; $128DFC |
   STA $2A                                   ; $128DFF |
   STA $2E                                   ; $128E01 |
   LDX #$12                                  ; $128E03 |
   LDA #$B97A                                ; $128E05 |
-  JMP CODE_12A3DB                           ; $128E08 |
+  JMP build_map16_object_com1               ; $128E08 |
 
   dw $0002, $0002, $0001, $0001             ; $128E0B |
 
@@ -1312,7 +1514,8 @@ CODE_128CCC:
   STA $15                                   ; $128E40 |
   LDX #$12                                  ; $128E42 |
   LDA $8E1B,y                               ; $128E44 |
-  JMP CODE_12A3DB                           ; $128E47 |
+  JMP build_map16_object_com1               ; $128E47 |
+
   JSR CODE_1286FD                           ; $128E4A |
   REP #$30                                  ; $128E4D |
   JSL $12BB63                               ; $128E4F |
@@ -1342,7 +1545,8 @@ CODE_128CCC:
   STA $2E                                   ; $128E7C |
   LDX #$12                                  ; $128E7E |
   LDA #$BC29                                ; $128E80 |
-  JMP CODE_12A3DB                           ; $128E83 |
+  JMP build_map16_object_com1               ; $128E83 |
+
   REP #$20                                  ; $128E86 |
   LDA $15                                   ; $128E88 |
   INC A                                     ; $128E8A |
@@ -1355,7 +1559,8 @@ CODE_128CCC:
   STA $2E                                   ; $128E97 |
   LDX #$12                                  ; $128E99 |
   LDA #$BD54                                ; $128E9B |
-  JMP CODE_12A3DB                           ; $128E9E |
+  JMP build_map16_object_com1               ; $128E9E |
+
   JSR CODE_1286FD                           ; $128EA1 |
   REP #$30                                  ; $128EA4 |
   LDA $15                                   ; $128EA6 |
@@ -1410,14 +1615,15 @@ CODE_128CCC:
   STA $2E                                   ; $128F0F |
   LDX #$12                                  ; $128F11 |
   LDA $8EDB,y                               ; $128F13 |
-  JMP CODE_12A3DB                           ; $128F16 |
+  JMP build_map16_object_com1               ; $128F16 |
+
   REP #$20                                  ; $128F19 |
   LDA #$0002                                ; $128F1B |
   STA $2A                                   ; $128F1E |
   STA $2E                                   ; $128F20 |
   LDX #$12                                  ; $128F22 |
   LDA #$BF4A                                ; $128F24 |
-  JMP CODE_12A3DB                           ; $128F27 |
+  JMP build_map16_object_com1               ; $128F27 |
 
   dw $0001, $0002                           ; $128F2A |
 
@@ -1452,7 +1658,8 @@ CODE_128CCC:
   STA $2E                                   ; $128F6E |
   LDX #$12                                  ; $128F70 |
   LDA #$BFF3                                ; $128F72 |
-  JMP CODE_12A3DB                           ; $128F75 |
+  JMP build_map16_object_com1               ; $128F75 |
+
   JSR CODE_1286FD                           ; $128F78 |
   REP #$30                                  ; $128F7B |
   JSL $12C063                               ; $128F7D |
@@ -1472,7 +1679,7 @@ CODE_128CCC:
   STA $2E                                   ; $128F9B |
   LDX #$12                                  ; $128F9D |
   LDA #$C043                                ; $128F9F |
-  JMP CODE_12A3DB                           ; $128FA2 |
+  JMP build_map16_object_com1               ; $128FA2 |
 
   dw $0000, $000E, $001C, $002A             ; $128FA5 |
 
@@ -1497,7 +1704,8 @@ CODE_128CCC:
   STA $2E                                   ; $128FDA |
   LDX #$12                                  ; $128FDC |
   LDA #$C0B0                                ; $128FDE |
-  JMP CODE_12A3DB                           ; $128FE1 |
+  JMP build_map16_object_com1               ; $128FE1 |
+
   JSR CODE_1286FD                           ; $128FE4 |
   REP #$30                                  ; $128FE7 |
   JSL $12C0CF                               ; $128FE9 |
@@ -1516,7 +1724,8 @@ CODE_128CCC:
   STA $15                                   ; $129007 |
   LDX #$12                                  ; $129009 |
   LDA #$C107                                ; $12900B |
-  JMP CODE_12A3DB                           ; $12900E |
+  JMP build_map16_object_com1               ; $12900E |
+
   REP #$20                                  ; $129011 |
   LDA #$0003                                ; $129013 |
   STA $2A                                   ; $129016 |
@@ -1532,7 +1741,7 @@ CODE_128CCC:
   STA $15                                   ; $12902C |
   LDX #$12                                  ; $12902E |
   LDA #$C190                                ; $129030 |
-  JMP CODE_12A3DB                           ; $129033 |
+  JMP build_map16_object_com1               ; $129033 |
 
   dw $0004, $0005                           ; $129036 |
 
@@ -1550,7 +1759,7 @@ CODE_128CCC:
   STA $2E                                   ; $129051 |
   LDX #$12                                  ; $129053 |
   LDA #$C243                                ; $129055 |
-  JMP CODE_12A3DB                           ; $129058 |
+  JMP build_map16_object_com1               ; $129058 |
 
   dw $0002, $0003, $0004, $0004             ; $12905B |
   dw $0003, $0002                           ; $129063 |
@@ -1573,14 +1782,16 @@ CODE_129084:
   STA $A1                                   ; $129084 |
   LDX #$12                                  ; $129086 |
   LDA #$C29B                                ; $129088 |
-  JMP CODE_12A3DB                           ; $12908B |
+  JMP build_map16_object_com1               ; $12908B |
+
   REP #$20                                  ; $12908E |
   LDA #$0002                                ; $129090 |
   STA $2A                                   ; $129093 |
   STA $2E                                   ; $129095 |
   LDX #$12                                  ; $129097 |
   LDA #$C2C9                                ; $129099 |
-  JMP CODE_12A3DB                           ; $12909C |
+  JMP build_map16_object_com1               ; $12909C |
+
   REP #$20                                  ; $12909F |
   LDA #$0002                                ; $1290A1 |
   STA $2A                                   ; $1290A4 |
@@ -1588,7 +1799,8 @@ CODE_129084:
   STA $2E                                   ; $1290A7 |
   LDX #$12                                  ; $1290A9 |
   LDA #$C301                                ; $1290AB |
-  JMP CODE_12A3DB                           ; $1290AE |
+  JMP build_map16_object_com1               ; $1290AE |
+
   REP #$20                                  ; $1290B1 |
   LDA #$0004                                ; $1290B3 |
   STA $2A                                   ; $1290B6 |
@@ -1602,7 +1814,8 @@ CODE_129084:
   STA $15                                   ; $1290C3 |
   LDX #$12                                  ; $1290C5 |
   LDA #$C374                                ; $1290C7 |
-  JMP CODE_12A3DB                           ; $1290CA |
+  JMP build_map16_object_com1               ; $1290CA |
+
   JSR CODE_1286FD                           ; $1290CD |
   REP #$30                                  ; $1290D0 |
   JSL $12C38E                               ; $1290D2 |
@@ -1628,7 +1841,8 @@ CODE_129084:
   STA $2E                                   ; $129101 |
   LDX #$12                                  ; $129103 |
   LDA #$C3D2                                ; $129105 |
-  JMP CODE_12A3DB                           ; $129108 |
+  JMP build_map16_object_com1               ; $129108 |
+
   JSR CODE_1286FD                           ; $12910B |
   REP #$30                                  ; $12910E |
   LDA $15                                   ; $129110 |
@@ -1660,14 +1874,16 @@ CODE_129084:
   STA $2E                                   ; $129151 |
   LDX #$12                                  ; $129153 |
   LDA #$C68F                                ; $129155 |
-  JMP CODE_12A3DB                           ; $129158 |
+  JMP build_map16_object_com1               ; $129158 |
+
   REP #$20                                  ; $12915B |
   LDA #$0002                                ; $12915D |
   STA $2A                                   ; $129160 |
   STA $2E                                   ; $129162 |
   LDX #$12                                  ; $129164 |
   LDA #$C6E9                                ; $129166 |
-  JMP CODE_12A3DB                           ; $129169 |
+  JMP build_map16_object_com1               ; $129169 |
+
   LDX $001C                                 ; $12916C |
   LDY $001B                                 ; $12916F |
   LDA !s_screen_num_to_id,x                 ; $129172 |
@@ -1846,7 +2062,8 @@ CODE_129280:
 CODE_1292D5:
   LDX #$13                                  ; $1292D5 |
   LDA #$830E                                ; $1292D7 |
-  JMP CODE_12A3DD                           ; $1292DA |
+  JMP build_map16_object_com2               ; $1292DA |
+
   LDA #$13                                  ; $1292DD |
   STA $24                                   ; $1292DF |
   STA $21                                   ; $1292E1 |
@@ -1909,11 +2126,13 @@ CODE_12933A:
   REP #$20                                  ; $129354 |
   LDX #$13                                  ; $129356 |
   LDA #$842F                                ; $129358 |
-  JMP CODE_12A3DB                           ; $12935B |
+  JMP build_map16_object_com1               ; $12935B |
+
   REP #$20                                  ; $12935E |
   LDX #$13                                  ; $129360 |
   LDA #$8477                                ; $129362 |
-  JMP CODE_12A3DB                           ; $129365 |
+  JMP build_map16_object_com1               ; $129365 |
+
   REP #$20                                  ; $129368 |
   LDA #$0002                                ; $12936A |
   STA $2E                                   ; $12936D |
@@ -1921,7 +2140,8 @@ CODE_12933A:
   STA $17                                   ; $129372 |
   LDX #$13                                  ; $129374 |
   LDA #$84E0                                ; $129376 |
-  JMP CODE_12A3DD                           ; $129379 |
+  JMP build_map16_object_com2               ; $129379 |
+
   REP #$20                                  ; $12937C |
   LDA $15                                   ; $12937E |
   AND #$0002                                ; $129380 |
@@ -1932,7 +2152,7 @@ CODE_12933A:
   STA $17                                   ; $12938C |
   LDX #$13                                  ; $12938E |
   LDA #$854C                                ; $129390 |
-  JMP CODE_12A3DD                           ; $129393 |
+  JMP build_map16_object_com2               ; $129393 |
 
   dw $0002, $0003                           ; $129396 |
 
@@ -1941,21 +2161,25 @@ CODE_12933A:
   REP #$20                                  ; $12939E |
   LDX #$13                                  ; $1293A0 |
   LDA #$85D2                                ; $1293A2 |
-  JMP CODE_12A3DB                           ; $1293A5 |
+  JMP build_map16_object_com1               ; $1293A5 |
+
   REP #$20                                  ; $1293A8 |
   LDX #$13                                  ; $1293AA |
   LDA #$8604                                ; $1293AC |
-  JMP CODE_12A3DB                           ; $1293AF |
+  JMP build_map16_object_com1               ; $1293AF |
+
   REP #$20                                  ; $1293B2 |
   LDA #$0002                                ; $1293B4 |
   STA $2E                                   ; $1293B7 |
   LDX #$13                                  ; $1293B9 |
   LDA #$8CB5                                ; $1293BB |
-  JMP CODE_12A3DB                           ; $1293BE |
+  JMP build_map16_object_com1               ; $1293BE |
+
   REP #$20                                  ; $1293C1 |
   LDX #$13                                  ; $1293C3 |
   LDA #$8CDA                                ; $1293C5 |
-  JMP CODE_12A3DB                           ; $1293C8 |
+  JMP build_map16_object_com1               ; $1293C8 |
+
   REP #$20                                  ; $1293CB |
   LDA $1B                                   ; $1293CD |
   AND #$F0F0                                ; $1293CF |
@@ -1970,7 +2194,8 @@ CODE_12933A:
   INC $2E                                   ; $1293E4 |
   LDX #$13                                  ; $1293E6 |
   LDA #$8CEC                                ; $1293E8 |
-  JMP CODE_12A3DB                           ; $1293EB |
+  JMP build_map16_object_com1               ; $1293EB |
+
   REP #$20                                  ; $1293EE |
   LDA $15                                   ; $1293F0 |
   AND #$0001                                ; $1293F2 |
@@ -1979,7 +2204,7 @@ CODE_12933A:
   TAX                                       ; $1293F7 |
   LDA $9403,x                               ; $1293F8 |
   LDX $9401,y                               ; $1293FB |
-  JMP CODE_12A3DB                           ; $1293FE |
+  JMP build_map16_object_com1               ; $1293FE |
 
   dw $1313, $8DEA, $8E51                    ; $129401 |
 
@@ -1991,7 +2216,7 @@ CODE_12933A:
   TAX                                       ; $129410 |
   LDA $941C,x                               ; $129411 |
   LDX $941A,y                               ; $129414 |
-  JMP CODE_12A3DB                           ; $129417 |
+  JMP build_map16_object_com1               ; $129417 |
 
   dw $1313, $8EB7, $8EEE                    ; $12941A |
 
@@ -2000,7 +2225,8 @@ CODE_12933A:
   STA $2A                                   ; $129425 |
   LDX #$13                                  ; $129427 |
   LDA #$8F43                                ; $129429 |
-  JMP CODE_12A3DB                           ; $12942C |
+  JMP build_map16_object_com1               ; $12942C |
+
   REP #$20                                  ; $12942F |
   LDA $15                                   ; $129431 |
   AND #$0001                                ; $129433 |
@@ -2009,7 +2235,7 @@ CODE_12933A:
   TAX                                       ; $129438 |
   LDA $9444,x                               ; $129439 |
   LDX $9442,y                               ; $12943C |
-  JMP CODE_12A3DB                           ; $12943F |
+  JMP build_map16_object_com1               ; $12943F |
 
   dw $1313, $8F76, $8F76                    ; $129442 |
 
@@ -2107,21 +2333,21 @@ CODE_1294BD:
   STZ $A1                                   ; $1294EC |
   LDX #$13                                  ; $1294EE |
   LDA #$9000                                ; $1294F0 |
-  JMP CODE_12A3DB                           ; $1294F3 |
+  JMP build_map16_object_com1               ; $1294F3 |
   REP #$20                                  ; $1294F6 |
   INC $2A                                   ; $1294F8 |
   LDX #$13                                  ; $1294FA |
   LDA #$9164                                ; $1294FC |
-  JMP CODE_12A3DB                           ; $1294FF |
+  JMP build_map16_object_com1               ; $1294FF |
   REP #$20                                  ; $129502 |
   INC $2A                                   ; $129504 |
   LDX #$13                                  ; $129506 |
   LDA #$91B3                                ; $129508 |
-  JMP CODE_12A3DB                           ; $12950B |
+  JMP build_map16_object_com1               ; $12950B |
   REP #$20                                  ; $12950E |
   LDX #$13                                  ; $129510 |
   LDA #$9227                                ; $129512 |
-  JMP CODE_12A3DB                           ; $129515 |
+  JMP build_map16_object_com1               ; $129515 |
 
   dw $925B                                  ; $129518 |
   dw $925B                                  ; $12951A |
@@ -2133,7 +2359,7 @@ CODE_1294BD:
   STA $15                                   ; $129524 |
   LDX #$13                                  ; $129526 |
   LDA $9518,y                               ; $129528 |
-  JMP CODE_12A3DB                           ; $12952B |
+  JMP build_map16_object_com1               ; $12952B |
 
   dw $9351                                  ; $12952E |
   dw $93E9                                  ; $129530 |
@@ -2149,7 +2375,7 @@ CODE_1294BD:
   STA $17                                   ; $129541 |
   LDX #$13                                  ; $129543 |
   LDA $952E,y                               ; $129545 |
-  JMP CODE_12A3DD                           ; $129548 |
+  JMP build_map16_object_com2               ; $129548 |
 
   dw $94CF                                  ; $12954B |
   dw $94CF                                  ; $12954D |
@@ -2165,16 +2391,16 @@ CODE_1294BD:
   STA $17                                   ; $12955F |
   LDX #$13                                  ; $129561 |
   LDA $954B,y                               ; $129563 |
-  JMP CODE_12A3DD                           ; $129566 |
+  JMP build_map16_object_com2               ; $129566 |
   REP #$20                                  ; $129569 |
   LDX #$13                                  ; $12956B |
   LDA #$951A                                ; $12956D |
-  JMP CODE_12A3DB                           ; $129570 |
+  JMP build_map16_object_com1               ; $129570 |
   REP #$20                                  ; $129573 |
   INC $2A                                   ; $129575 |
   LDX #$13                                  ; $129577 |
   LDA #$9548                                ; $129579 |
-  JMP CODE_12A3DB                           ; $12957C |
+  JMP build_map16_object_com1               ; $12957C |
 
   dw $958B                                  ; $12957F |
   dw $95FD                                  ; $129581 |
@@ -2188,11 +2414,11 @@ CODE_1294BD:
   TAY                                       ; $129593 |
   LDX #$13                                  ; $129594 |
   LDA $957F,y                               ; $129596 |
-  JMP CODE_12A3DB                           ; $129599 |
+  JMP build_map16_object_com1               ; $129599 |
   REP #$20                                  ; $12959C |
   LDX #$13                                  ; $12959E |
   LDA #$965D                                ; $1295A0 |
-  JMP CODE_12A3DB                           ; $1295A3 |
+  JMP build_map16_object_com1               ; $1295A3 |
 
   dw $96B1                                  ; $1295A6 |
   dw $9768                                  ; $1295A8 |
@@ -2212,7 +2438,7 @@ CODE_1295BC:
   TAY                                       ; $1295C2 |
   LDX #$13                                  ; $1295C3 |
   LDA $95A6,y                               ; $1295C5 |
-  JMP CODE_12A3DB                           ; $1295C8 |
+  JMP build_map16_object_com1               ; $1295C8 |
 
   dw $97EA                                  ; $1295CB |
   dw $98F2                                  ; $1295CD |
@@ -2224,35 +2450,35 @@ CODE_1295BC:
   TAY                                       ; $1295D7 |
   LDX #$13                                  ; $1295D8 |
   LDA $95CB,y                               ; $1295DA |
-  JMP CODE_12A3DB                           ; $1295DD |
+  JMP build_map16_object_com1               ; $1295DD |
   REP #$20                                  ; $1295E0 |
   INC $2E                                   ; $1295E2 |
   STZ $A1                                   ; $1295E4 |
   LDX #$13                                  ; $1295E6 |
   LDA #$9989                                ; $1295E8 |
-  JMP CODE_12A3DB                           ; $1295EB |
+  JMP build_map16_object_com1               ; $1295EB |
   REP #$20                                  ; $1295EE |
   STZ $15                                   ; $1295F0 |
   LDX #$13                                  ; $1295F2 |
   LDA #$99F8                                ; $1295F4 |
-  JMP CODE_12A3DB                           ; $1295F7 |
+  JMP build_map16_object_com1               ; $1295F7 |
   REP #$20                                  ; $1295FA |
   LDA #$000B                                ; $1295FC |
   STA $A1                                   ; $1295FF |
   LDX #$13                                  ; $129601 |
   LDA #$9768                                ; $129603 |
-  JMP CODE_12A3DB                           ; $129606 |
+  JMP build_map16_object_com1               ; $129606 |
   REP #$20                                  ; $129609 |
   LDX #$13                                  ; $12960B |
   LDA #$9A88                                ; $12960D |
-  JMP CODE_12A3DB                           ; $129610 |
+  JMP build_map16_object_com1               ; $129610 |
   REP #$20                                  ; $129613 |
   JSL $128875                               ; $129615 |
   AND #$0002                                ; $129619 |
   STA $15                                   ; $12961C |
   LDX #$13                                  ; $12961E |
   LDA #$9B14                                ; $129620 |
-  JMP CODE_12A3DB                           ; $129623 |
+  JMP build_map16_object_com1               ; $129623 |
   REP #$20                                  ; $129626 |
   LDA $2A                                   ; $129628 |
   INC A                                     ; $12962A |
@@ -2264,11 +2490,11 @@ CODE_1295BC:
   STA $2E                                   ; $129636 |
   LDX #$13                                  ; $129638 |
   LDA #$9F82                                ; $12963A |
-  JMP CODE_12A3DB                           ; $12963D |
+  JMP build_map16_object_com1               ; $12963D |
   REP #$20                                  ; $129640 |
   LDX #$13                                  ; $129642 |
   LDA #$9FA9                                ; $129644 |
-  JMP CODE_12A3DD                           ; $129647 |
+  JMP build_map16_object_com2               ; $129647 |
   REP #$20                                  ; $12964A |
   LDA $2A                                   ; $12964C |
   ASL A                                     ; $12964E |
@@ -2286,7 +2512,7 @@ CODE_12965D:
   STA $2E                                   ; $12965D |
   LDX #$13                                  ; $12965F |
   LDA #$9FE6                                ; $129661 |
-  JMP CODE_12A3DD                           ; $129664 |
+  JMP build_map16_object_com2               ; $129664 |
   REP #$20                                  ; $129667 |
   LDA $15                                   ; $129669 |
   AND #$0080                                ; $12966B |
@@ -2295,25 +2521,25 @@ CODE_12965D:
   STA $2A                                   ; $129673 |
   LDX #$13                                  ; $129675 |
   LDA #$A032                                ; $129677 |
-  JMP CODE_12A3DB                           ; $12967A |
+  JMP build_map16_object_com1               ; $12967A |
   REP #$20                                  ; $12967D |
   LDA #$0003                                ; $12967F |
   STA $2E                                   ; $129682 |
   LDX #$13                                  ; $129684 |
   LDA #$A079                                ; $129686 |
-  JMP CODE_12A3DB                           ; $129689 |
+  JMP build_map16_object_com1               ; $129689 |
   REP #$20                                  ; $12968C |
   LDX #$13                                  ; $12968E |
   LDA #$A0E3                                ; $129690 |
-  JMP CODE_12A3DB                           ; $129693 |
+  JMP build_map16_object_com1               ; $129693 |
   REP #$20                                  ; $129696 |
   LDX #$13                                  ; $129698 |
   LDA #$A125                                ; $12969A |
-  JMP CODE_12A3DB                           ; $12969D |
+  JMP build_map16_object_com1               ; $12969D |
   REP #$20                                  ; $1296A0 |
   LDX #$13                                  ; $1296A2 |
   LDA #$A155                                ; $1296A4 |
-  JMP CODE_12A3DB                           ; $1296A7 |
+  JMP build_map16_object_com1               ; $1296A7 |
 
   dw $A371                                  ; $1296AA |
   dw $A3AE                                  ; $1296AC |
@@ -2325,12 +2551,12 @@ CODE_12965D:
   TAY                                       ; $1296B6 |
   LDX #$13                                  ; $1296B7 |
   LDA $96AA,y                               ; $1296B9 |
-  JMP CODE_12A3DB                           ; $1296BC |
+  JMP build_map16_object_com1               ; $1296BC |
   REP #$20                                  ; $1296BF |
   STZ $A1                                   ; $1296C1 |
   LDX #$13                                  ; $1296C3 |
   LDA #$A411                                ; $1296C5 |
-  JMP CODE_12A3DB                           ; $1296C8 |
+  JMP build_map16_object_com1               ; $1296C8 |
   LDA #$13                                  ; $1296CB |
   STA $24                                   ; $1296CD |
   STA $21                                   ; $1296CF |
@@ -2370,7 +2596,7 @@ CODE_12965D:
   REP #$20                                  ; $129716 |
   LDX #$13                                  ; $129718 |
   LDA #$A64B                                ; $12971A |
-  JMP CODE_12A3DB                           ; $12971D |
+  JMP build_map16_object_com1               ; $12971D |
   LDA #$13                                  ; $129720 |
   STA $24                                   ; $129722 |
   STA $21                                   ; $129724 |
@@ -2501,7 +2727,7 @@ CODE_12965D:
   REP #$20                                  ; $129820 |
   LDX #$13                                  ; $129822 |
   LDA #$B98C                                ; $129824 |
-  JMP CODE_12A3DB                           ; $129827 |
+  JMP build_map16_object_com1               ; $129827 |
   LDA #$13                                  ; $12982A |
   STA $24                                   ; $12982C |
   STA $21                                   ; $12982E |
@@ -2794,18 +3020,18 @@ CODE_129A07:
   REP #$20                                  ; $129A54 |
   LDX #$13                                  ; $129A56 |
   LDA #$C2AE                                ; $129A58 |
-  JMP CODE_12A3DB                           ; $129A5B |
+  JMP build_map16_object_com1               ; $129A5B |
 
 CODE_129A5E:
   REP #$20                                  ; $129A5E |
   LDX #$13                                  ; $129A60 |
   LDA #$C6A4                                ; $129A62 |
-  JMP CODE_12A3DB                           ; $129A65 |
+  JMP build_map16_object_com1               ; $129A65 |
   REP #$20                                  ; $129A68 |
   LDX #$13                                  ; $129A6A |
   STX $039E                                 ; $129A6C |
   LDA #$C6C8                                ; $129A6F |
-  JMP CODE_12A3DB                           ; $129A72 |
+  JMP build_map16_object_com1               ; $129A72 |
   REP #$20                                  ; $129A75 |
   LDA $2A                                   ; $129A77 |
   CMP #$0004                                ; $129A79 |
@@ -2823,11 +3049,11 @@ CODE_129A83:
 CODE_129A91:
   LDX #$13                                  ; $129A91 |
   LDA #$C6E2                                ; $129A93 |
-  JMP CODE_12A3DB                           ; $129A96 |
+  JMP build_map16_object_com1               ; $129A96 |
   REP #$20                                  ; $129A99 |
   LDX #$13                                  ; $129A9B |
   LDA #$C727                                ; $129A9D |
-  JMP CODE_12A3DB                           ; $129AA0 |
+  JMP build_map16_object_com1               ; $129AA0 |
   REP #$20                                  ; $129AA3 |
   INC $2E                                   ; $129AA5 |
   LDA $1B                                   ; $129AA7 |
@@ -2842,23 +3068,23 @@ CODE_129A91:
   STA $1B                                   ; $129ABC |
   LDX #$13                                  ; $129ABE |
   LDA #$C741                                ; $129AC0 |
-  JMP CODE_12A3DB                           ; $129AC3 |
+  JMP build_map16_object_com1               ; $129AC3 |
   REP #$20                                  ; $129AC6 |
   LDX #$13                                  ; $129AC8 |
   LDA #$C7B1                                ; $129ACA |
-  JMP CODE_12A3DB                           ; $129ACD |
+  JMP build_map16_object_com1               ; $129ACD |
   REP #$20                                  ; $129AD0 |
   LDX #$13                                  ; $129AD2 |
   LDA #$C7BF                                ; $129AD4 |
-  JMP CODE_12A3DB                           ; $129AD7 |
+  JMP build_map16_object_com1               ; $129AD7 |
   REP #$20                                  ; $129ADA |
   LDX #$13                                  ; $129ADC |
   LDA #$C7E7                                ; $129ADE |
-  JMP CODE_12A3DB                           ; $129AE1 |
+  JMP build_map16_object_com1               ; $129AE1 |
   REP #$20                                  ; $129AE4 |
   LDX #$13                                  ; $129AE6 |
   LDA #$C81D                                ; $129AE8 |
-  JMP CODE_12A3DB                           ; $129AEB |
+  JMP build_map16_object_com1               ; $129AEB |
   REP #$20                                  ; $129AEE |
   LDA $2A                                   ; $129AF0 |
   AND #$0001                                ; $129AF2 |
@@ -2870,7 +3096,7 @@ CODE_129AF9:
   STA $2E                                   ; $129AFC |
   LDX #$13                                  ; $129AFE |
   LDA #$C869                                ; $129B00 |
-  JMP CODE_12A3DB                           ; $129B03 |
+  JMP build_map16_object_com1               ; $129B03 |
   REP #$20                                  ; $129B06 |
   LDA $2A                                   ; $129B08 |
   AND #$0001                                ; $129B0A |
@@ -2882,7 +3108,7 @@ CODE_129B11:
   STA $2E                                   ; $129B14 |
   LDX #$13                                  ; $129B16 |
   LDA #$C87E                                ; $129B18 |
-  JMP CODE_12A3DB                           ; $129B1B |
+  JMP build_map16_object_com1               ; $129B1B |
   REP #$20                                  ; $129B1E |
   LDA $2A                                   ; $129B20 |
   AND #$0001                                ; $129B22 |
@@ -2894,7 +3120,7 @@ CODE_129B29:
   STA $2E                                   ; $129B2C |
   LDX #$13                                  ; $129B2E |
   LDA #$C893                                ; $129B30 |
-  JMP CODE_12A3DB                           ; $129B33 |
+  JMP build_map16_object_com1               ; $129B33 |
   REP #$20                                  ; $129B36 |
   LDA #$0003                                ; $129B38 |
   STA $2A                                   ; $129B3B |
@@ -2906,29 +3132,29 @@ CODE_129B29:
 CODE_129B46:
   LDX #$13                                  ; $129B46 |
   LDA #$C8C5                                ; $129B48 |
-  JMP CODE_12A3DB                           ; $129B4B |
+  JMP build_map16_object_com1               ; $129B4B |
   REP #$20                                  ; $129B4E |
   LDA #$0003                                ; $129B50 |
   STA $2A                                   ; $129B53 |
   LDX #$13                                  ; $129B55 |
   LDA #$C8EE                                ; $129B57 |
-  JMP CODE_12A3DB                           ; $129B5A |
+  JMP build_map16_object_com1               ; $129B5A |
   REP #$20                                  ; $129B5D |
   LDA #$0002                                ; $129B5F |
   STA $2A                                   ; $129B62 |
   LDX #$13                                  ; $129B64 |
   LDA #$C906                                ; $129B66 |
-  JMP CODE_12A3DB                           ; $129B69 |
+  JMP build_map16_object_com1               ; $129B69 |
   REP #$20                                  ; $129B6C |
   LDA #$0002                                ; $129B6E |
   STA $2A                                   ; $129B71 |
   LDX #$13                                  ; $129B73 |
   LDA #$C91C                                ; $129B75 |
-  JMP CODE_12A3DB                           ; $129B78 |
+  JMP build_map16_object_com1               ; $129B78 |
   REP #$20                                  ; $129B7B |
   LDX #$13                                  ; $129B7D |
   LDA #$C932                                ; $129B7F |
-  JMP CODE_12A3DB                           ; $129B82 |
+  JMP build_map16_object_com1               ; $129B82 |
   LDA #$13                                  ; $129B85 |
   STA $24                                   ; $129B87 |
   STA $21                                   ; $129B89 |
@@ -2970,13 +3196,13 @@ CODE_129B46:
   REP #$20                                  ; $129BD5 |
   LDX #$13                                  ; $129BD7 |
   LDA #$C9AC                                ; $129BD9 |
-  JMP CODE_12A3DB                           ; $129BDC |
+  JMP build_map16_object_com1               ; $129BDC |
   REP #$20                                  ; $129BDF |
   LDA #$FFFF                                ; $129BE1 |
   STA $17                                   ; $129BE4 |
   LDX #$13                                  ; $129BE6 |
   LDA #$CB48                                ; $129BE8 |
-  JMP CODE_12A3DD                           ; $129BEB |
+  JMP build_map16_object_com2               ; $129BEB |
   REP #$20                                  ; $129BEE |
   LDA $2A                                   ; $129BF0 |
   BPL CODE_129BF8                           ; $129BF2 |
@@ -2987,13 +3213,13 @@ CODE_129BF8:
   STA $2E                                   ; $129BF8 |
   LDX #$13                                  ; $129BFA |
   LDA #$CCBD                                ; $129BFC |
-  JMP CODE_12A3DB                           ; $129BFF |
+  JMP build_map16_object_com1               ; $129BFF |
   REP #$20                                  ; $129C02 |
   LDA #$0002                                ; $129C04 |
   STA $2E                                   ; $129C07 |
   LDX #$13                                  ; $129C09 |
   LDA #$CD31                                ; $129C0B |
-  JMP CODE_12A3DB                           ; $129C0E |
+  JMP build_map16_object_com1               ; $129C0E |
   REP #$20                                  ; $129C11 |
   LDA $2A                                   ; $129C13 |
   CMP #$0002                                ; $129C15 |
@@ -3011,7 +3237,7 @@ CODE_129C1F:
 CODE_129C2B:
   LDX #$13                                  ; $129C2B |
   LDA #$CDD6                                ; $129C2D |
-  JMP CODE_12A3DB                           ; $129C30 |
+  JMP build_map16_object_com1               ; $129C30 |
   REP #$20                                  ; $129C33 |
   LDA $2A                                   ; $129C35 |
   BPL CODE_129C3D                           ; $129C37 |
@@ -3022,7 +3248,7 @@ CODE_129C3D:
   STA $2E                                   ; $129C3D |
   LDX #$13                                  ; $129C3F |
   LDA #$D019                                ; $129C41 |
-  JMP CODE_12A3DB                           ; $129C44 |
+  JMP build_map16_object_com1               ; $129C44 |
   LDA #$13                                  ; $129C47 |
   STA $24                                   ; $129C49 |
   STA $21                                   ; $129C4B |
@@ -3050,17 +3276,17 @@ CODE_129C6C:
   REP #$20                                  ; $129C74 |
   LDX #$13                                  ; $129C76 |
   LDA #$D0E5                                ; $129C78 |
-  JMP CODE_12A3DB                           ; $129C7B |
+  JMP build_map16_object_com1               ; $129C7B |
   REP #$20                                  ; $129C7E |
   LDA #$FFFF                                ; $129C80 |
   STA $17                                   ; $129C83 |
   LDX #$13                                  ; $129C85 |
   LDA #$D109                                ; $129C87 |
-  JMP CODE_12A3DD                           ; $129C8A |
+  JMP build_map16_object_com2               ; $129C8A |
   REP #$20                                  ; $129C8D |
   LDX #$13                                  ; $129C8F |
   LDA #$D12F                                ; $129C91 |
-  JMP CODE_12A3DB                           ; $129C94 |
+  JMP build_map16_object_com1               ; $129C94 |
   REP #$20                                  ; $129C97 |
   LDA $2A                                   ; $129C99 |
   STA $00                                   ; $129C9B |
@@ -3077,7 +3303,7 @@ CODE_129CA9:
   STA $2E                                   ; $129CA9 |
   LDX #$13                                  ; $129CAB |
   LDA #$D1AF                                ; $129CAD |
-  JMP CODE_12A3DB                           ; $129CB0 |
+  JMP build_map16_object_com1               ; $129CB0 |
   LDA #$13                                  ; $129CB3 |
   STA $24                                   ; $129CB5 |
   STA $21                                   ; $129CB7 |
@@ -3099,17 +3325,17 @@ CODE_129CA9:
   REP #$20                                  ; $129CD8 |
   LDX #$13                                  ; $129CDA |
   LDA #$D2D5                                ; $129CDC |
-  JMP CODE_12A3DB                           ; $129CDF |
+  JMP build_map16_object_com1               ; $129CDF |
   REP #$20                                  ; $129CE2 |
   LDA #$0003                                ; $129CE4 |
   STA $2E                                   ; $129CE7 |
   LDX #$13                                  ; $129CE9 |
   LDA #$D383                                ; $129CEB |
-  JMP CODE_12A3DB                           ; $129CEE |
+  JMP build_map16_object_com1               ; $129CEE |
   REP #$20                                  ; $129CF1 |
   LDX #$13                                  ; $129CF3 |
   LDA #$D3EC                                ; $129CF5 |
-  JMP CODE_12A3DB                           ; $129CF8 |
+  JMP build_map16_object_com1               ; $129CF8 |
   REP #$20                                  ; $129CFB |
   LDA $2A                                   ; $129CFD |
   INC A                                     ; $129CFF |
@@ -3119,7 +3345,7 @@ CODE_129CA9:
   STA $2E                                   ; $129D08 |
   LDX #$13                                  ; $129D0A |
   LDA #$D41B                                ; $129D0C |
-  JMP CODE_12A3DB                           ; $129D0F |
+  JMP build_map16_object_com1               ; $129D0F |
   LDA #$13                                  ; $129D12 |
   STA $24                                   ; $129D14 |
   STA $21                                   ; $129D16 |
@@ -3175,7 +3401,7 @@ CODE_129CA9:
   TAY                                       ; $129D7C |
   LDX #$13                                  ; $129D7D |
   LDA $9D58,y                               ; $129D7F |
-  JMP CODE_12A3DB                           ; $129D82 |
+  JMP build_map16_object_com1               ; $129D82 |
   REP #$20                                  ; $129D85 |
   LDA #$0004                                ; $129D87 |
   STA $2A                                   ; $129D8A |
@@ -3191,7 +3417,7 @@ CODE_129CA9:
   STA $1B                                   ; $129D9E |
   LDX #$13                                  ; $129DA0 |
   LDA #$D6D1                                ; $129DA2 |
-  JMP CODE_12A3DB                           ; $129DA5 |
+  JMP build_map16_object_com1               ; $129DA5 |
   REP #$20                                  ; $129DA8 |
   LDA $2A                                   ; $129DAA |
   INC A                                     ; $129DAC |
@@ -3203,11 +3429,11 @@ CODE_129CA9:
   STA $2E                                   ; $129DB8 |
   LDX #$13                                  ; $129DBA |
   LDA #$D738                                ; $129DBC |
-  JMP CODE_12A3DB                           ; $129DBF |
+  JMP build_map16_object_com1               ; $129DBF |
   REP #$20                                  ; $129DC2 |
   LDX #$13                                  ; $129DC4 |
   LDA #$D76A                                ; $129DC6 |
-  JMP CODE_12A3DB                           ; $129DC9 |
+  JMP build_map16_object_com1               ; $129DC9 |
   REP #$20                                  ; $129DCC |
   LDA #$0003                                ; $129DCE |
   STA $2A                                   ; $129DD1 |
@@ -3223,7 +3449,7 @@ CODE_129CA9:
   STA $1B                                   ; $129DE5 |
   LDX #$13                                  ; $129DE7 |
   LDA #$D7DD                                ; $129DE9 |
-  JMP CODE_12A3DB                           ; $129DEC |
+  JMP build_map16_object_com1               ; $129DEC |
   REP #$20                                  ; $129DEF |
   LDA #$0004                                ; $129DF1 |
   STA $2A                                   ; $129DF4 |
@@ -3246,7 +3472,7 @@ CODE_129CA9:
   STA $A1                                   ; $129E18 |
   LDX #$13                                  ; $129E1A |
   LDA #$D854                                ; $129E1C |
-  JMP CODE_12A3DB                           ; $129E1F |
+  JMP build_map16_object_com1               ; $129E1F |
 
   dw $D944                                  ; $129E22 |
   dw $D9C7                                  ; $129E24 |
@@ -3264,15 +3490,15 @@ CODE_129CA9:
   STA $A1                                   ; $129E3C |
   LDX #$13                                  ; $129E3E |
   LDA $9E22,y                               ; $129E40 |
-  JMP CODE_12A3DB                           ; $129E43 |
+  JMP build_map16_object_com1               ; $129E43 |
   REP #$20                                  ; $129E46 |
   LDX #$13                                  ; $129E48 |
   LDA #$DA36                                ; $129E4A |
-  JMP CODE_12A3DB                           ; $129E4D |
+  JMP build_map16_object_com1               ; $129E4D |
   REP #$20                                  ; $129E50 |
   LDX #$13                                  ; $129E52 |
   LDA #$DA8D                                ; $129E54 |
-  JMP CODE_12A3DB                           ; $129E57 |
+  JMP build_map16_object_com1               ; $129E57 |
   REP #$20                                  ; $129E5A |
   LDA #$0002                                ; $129E5C |
   STA $2E                                   ; $129E5F |
@@ -3282,7 +3508,7 @@ CODE_129CA9:
   STA $2A                                   ; $129E67 |
   LDX #$13                                  ; $129E69 |
   LDA #$DAA3                                ; $129E6B |
-  JMP CODE_12A3DB                           ; $129E6E |
+  JMP build_map16_object_com1               ; $129E6E |
   REP #$20                                  ; $129E71 |
   LDA $15                                   ; $129E73 |
   AND #$000F                                ; $129E75 |
@@ -3294,7 +3520,7 @@ CODE_129CA9:
   STA $2A                                   ; $129E81 |
   LDX #$13                                  ; $129E83 |
   LDA #$DACB                                ; $129E85 |
-  JMP CODE_12A3DB                           ; $129E88 |
+  JMP build_map16_object_com1               ; $129E88 |
   REP #$20                                  ; $129E8B |
   LDA $15                                   ; $129E8D |
   AND #$0004                                ; $129E8F |
@@ -3309,7 +3535,7 @@ CODE_129CA9:
   STA $2E                                   ; $129EA2 |
   LDX #$13                                  ; $129EA4 |
   LDA #$DAEB                                ; $129EA6 |
-  JMP CODE_12A3DB                           ; $129EA9 |
+  JMP build_map16_object_com1               ; $129EA9 |
 
   dw $0002, $0004                           ; $129EAC |
 
@@ -3333,7 +3559,7 @@ CODE_129ED0:
   STA $2A,x                                 ; $129ED0 |
   LDX #$13                                  ; $129ED2 |
   LDA #$DB16                                ; $129ED4 |
-  JMP CODE_12A3DB                           ; $129ED7 |
+  JMP build_map16_object_com1               ; $129ED7 |
 
   dw $DC90                                  ; $129EDA |
   dw $DCF2                                  ; $129EDC |
@@ -3363,21 +3589,21 @@ CODE_129ED0:
   TAY                                       ; $129F0A |
   LDX #$13                                  ; $129F0B |
   LDA $9EDA,y                               ; $129F0D |
-  JMP CODE_12A3DB                           ; $129F10 |
+  JMP build_map16_object_com1               ; $129F10 |
   REP #$20                                  ; $129F13 |
   LDX !r_header_bg1_tileset                 ; $129F15 |
   CPX #$03                                  ; $129F18 |
   BEQ CODE_129F24                           ; $129F1A |
   LDX #$13                                  ; $129F1C |
   LDA #$DDC9                                ; $129F1E |
-  JMP CODE_12A3DB                           ; $129F21 |
+  JMP build_map16_object_com1               ; $129F21 |
 
 CODE_129F24:
   LDA #$0002                                ; $129F24 |
   STA $2A                                   ; $129F27 |
   LDX #$13                                  ; $129F29 |
   LDA #$DDEF                                ; $129F2B |
-  JMP CODE_12A3DB                           ; $129F2E |
+  JMP build_map16_object_com1               ; $129F2E |
 
   dw $DF03                                  ; $129F31 |
   dw $DF4F                                  ; $129F33 |
@@ -3391,7 +3617,7 @@ CODE_129F24:
   TAY                                       ; $129F42 |
   LDX #$13                                  ; $129F43 |
   LDA $9F31,y                               ; $129F45 |
-  JMP CODE_12A3DB                           ; $129F48 |
+  JMP build_map16_object_com1               ; $129F48 |
 
   dw $DE60                                  ; $129F4B |
   dw $DEB7                                  ; $129F4D |
@@ -3410,7 +3636,7 @@ CODE_129F5E:
   TAY                                       ; $129F64 |
   LDX #$13                                  ; $129F65 |
   LDA $9F4B,y                               ; $129F67 |
-  JMP CODE_12A3DB                           ; $129F6A |
+  JMP build_map16_object_com1               ; $129F6A |
 
   dw $E147                                  ; $129F6D |
   dw $E16F                                  ; $129F6F |
@@ -3429,15 +3655,15 @@ CODE_129F5E:
   TAY                                       ; $129F86 |
   LDX #$13                                  ; $129F87 |
   LDA $9F6D,y                               ; $129F89 |
-  JMP CODE_12A3DB                           ; $129F8C |
+  JMP build_map16_object_com1               ; $129F8C |
   REP #$20                                  ; $129F8F |
   LDX #$13                                  ; $129F91 |
   LDA #$E1AF                                ; $129F93 |
-  JMP CODE_12A3DB                           ; $129F96 |
+  JMP build_map16_object_com1               ; $129F96 |
   REP #$20                                  ; $129F99 |
   LDX #$13                                  ; $129F9B |
   LDA #$E245                                ; $129F9D |
-  JMP CODE_12A3DB                           ; $129FA0 |
+  JMP build_map16_object_com1               ; $129FA0 |
 
   dw $E280                                  ; $129FA3 |
   dw $E2A1                                  ; $129FA5 |
@@ -3453,7 +3679,7 @@ CODE_129F5E:
   TAY                                       ; $129FB9 |
   LDX #$13                                  ; $129FBA |
   LDA $9FA3,y                               ; $129FBC |
-  JMP CODE_12A3DD                           ; $129FBF |
+  JMP build_map16_object_com2               ; $129FBF |
 
   dw $E280                                  ; $129FC2 |
   dw $E2C4                                  ; $129FC4 |
@@ -3469,7 +3695,7 @@ CODE_129F5E:
   TAY                                       ; $129FD8 |
   LDX #$13                                  ; $129FD9 |
   LDA $9FC2,y                               ; $129FDB |
-  JMP CODE_12A3DD                           ; $129FDE |
+  JMP build_map16_object_com2               ; $129FDE |
 
   dw $E2E7                                  ; $129FE1 |
   dw $E32C                                  ; $129FE3 |
@@ -3485,7 +3711,7 @@ CODE_129F5E:
   TAY                                       ; $129FF7 |
   LDX #$13                                  ; $129FF8 |
   LDA $9FE1,y                               ; $129FFA |
-  JMP CODE_12A3DD                           ; $129FFD |
+  JMP build_map16_object_com2               ; $129FFD |
 
   dw $E2E7                                  ; $12A000 |
   dw $E373                                  ; $12A002 |
@@ -3501,7 +3727,7 @@ CODE_129F5E:
   TAY                                       ; $12A016 |
   LDX #$13                                  ; $12A017 |
   LDA $A000,y                               ; $12A019 |
-  JMP CODE_12A3DD                           ; $12A01C |
+  JMP build_map16_object_com2               ; $12A01C |
 
   dw $E3BA                                  ; $12A01F |
   dw $E3E9                                  ; $12A021 |
@@ -3517,7 +3743,7 @@ CODE_129F5E:
   TAY                                       ; $12A031 |
   LDX #$13                                  ; $12A032 |
   LDA $A01F,y                               ; $12A034 |
-  JMP CODE_12A3DB                           ; $12A037 |
+  JMP build_map16_object_com1               ; $12A037 |
 
   dw $E582                                  ; $12A03A |
   dw $E62C                                  ; $12A03C |
@@ -3529,7 +3755,7 @@ CODE_129F5E:
   TAY                                       ; $12A046 |
   LDX #$13                                  ; $12A047 |
   LDA $A03A,y                               ; $12A049 |
-  JMP CODE_12A3DB                           ; $12A04C |
+  JMP build_map16_object_com1               ; $12A04C |
 
   dw $E74B                                  ; $12A04F |
   dw $E81C                                  ; $12A051 |
@@ -3549,10 +3775,10 @@ CODE_129F5E:
   LDA $A04F,y                               ; $12A06C |
   CPY #$04                                  ; $12A06F |
   BCC CODE_12A076                           ; $12A071 |
-  JMP CODE_12A3DD                           ; $12A073 |
+  JMP build_map16_object_com2               ; $12A073 |
 
 CODE_12A076:
-  JMP CODE_12A3DB                           ; $12A076 |
+  JMP build_map16_object_com1               ; $12A076 |
 
   dw $E903                                  ; $12A079 |
   dw $E90E                                  ; $12A07B |
@@ -3589,19 +3815,19 @@ CODE_12A089:
   LDA $A079,y                               ; $12A0B0 |
   CPY #$04                                  ; $12A0B3 |
   BCC CODE_12A0BA                           ; $12A0B5 |
-  JMP CODE_12A3DD                           ; $12A0B7 |
+  JMP build_map16_object_com2               ; $12A0B7 |
 
 CODE_12A0BA:
-  JMP CODE_12A3DB                           ; $12A0BA |
+  JMP build_map16_object_com1               ; $12A0BA |
   REP #$20                                  ; $12A0BD |
   LDX #$13                                  ; $12A0BF |
   LDA #$E9F5                                ; $12A0C1 |
-  JMP CODE_12A3DB                           ; $12A0C4 |
+  JMP build_map16_object_com1               ; $12A0C4 |
   REP #$20                                  ; $12A0C7 |
   STZ $A1                                   ; $12A0C9 |
   LDX #$13                                  ; $12A0CB |
   LDA #$EBFB                                ; $12A0CD |
-  JMP CODE_12A3DB                           ; $12A0D0 |
+  JMP build_map16_object_com1               ; $12A0D0 |
 
   dw $EB63                                  ; $12A0D3 |
   dw $EA59                                  ; $12A0D5 |
@@ -3616,7 +3842,7 @@ CODE_12A0BA:
   TAY                                       ; $12A0E6 |
   LDX #$13                                  ; $12A0E7 |
   LDA $A0D3,y                               ; $12A0E9 |
-  JMP CODE_12A3DD                           ; $12A0EC |
+  JMP build_map16_object_com2               ; $12A0EC |
   REP #$20                                  ; $12A0EF |
   LDA #$0001                                ; $12A0F1 |
   STA $15                                   ; $12A0F4 |
@@ -3629,7 +3855,7 @@ CODE_12A0FC:
   STA $17                                   ; $12A0FF |
   LDX #$13                                  ; $12A101 |
   LDA #$EC4B                                ; $12A103 |
-  JMP CODE_12A3DD                           ; $12A106 |
+  JMP build_map16_object_com2               ; $12A106 |
   REP #$20                                  ; $12A109 |
   LDA #$0002                                ; $12A10B |
   STA $15                                   ; $12A10E |
@@ -3642,7 +3868,7 @@ CODE_12A116:
   STA $17                                   ; $12A119 |
   LDX #$13                                  ; $12A11B |
   LDA #$EC65                                ; $12A11D |
-  JMP CODE_12A3DD                           ; $12A120 |
+  JMP build_map16_object_com2               ; $12A120 |
   REP #$20                                  ; $12A123 |
   LDA #$0002                                ; $12A125 |
   STA $15                                   ; $12A128 |
@@ -3655,19 +3881,19 @@ CODE_12A130:
   STA $17                                   ; $12A133 |
   LDX #$13                                  ; $12A135 |
   LDA #$EC80                                ; $12A137 |
-  JMP CODE_12A3DD                           ; $12A13A |
+  JMP build_map16_object_com2               ; $12A13A |
   REP #$20                                  ; $12A13D |
   LDX #$13                                  ; $12A13F |
   LDA #$ECA0                                ; $12A141 |
-  JMP CODE_12A3DB                           ; $12A144 |
+  JMP build_map16_object_com1               ; $12A144 |
   REP #$20                                  ; $12A147 |
   LDX #$13                                  ; $12A149 |
   LDA #$ECA7                                ; $12A14B |
-  JMP CODE_12A3DB                           ; $12A14E |
+  JMP build_map16_object_com1               ; $12A14E |
   REP #$20                                  ; $12A151 |
   LDX #$13                                  ; $12A153 |
   LDA #$ECB5                                ; $12A155 |
-  JMP CODE_12A3DB                           ; $12A158 |
+  JMP build_map16_object_com1               ; $12A158 |
 
   dw $ED26                                  ; $12A15B |
   dw $EE30                                  ; $12A15D |
@@ -3682,7 +3908,7 @@ CODE_12A130:
   TAY                                       ; $12A16D |
   LDX #$13                                  ; $12A16E |
   LDA $A15B,y                               ; $12A170 |
-  JMP CODE_12A3DB                           ; $12A173 |
+  JMP build_map16_object_com1               ; $12A173 |
 
   dw $0004, $0003                           ; $12A176 |
 
@@ -3699,40 +3925,40 @@ CODE_12A130:
   STA $2E                                   ; $12A18B |
   LDX #$13                                  ; $12A18D |
   LDA #$F166                                ; $12A18F |
-  JMP CODE_12A3DB                           ; $12A192 |
+  JMP build_map16_object_com1               ; $12A192 |
   REP #$20                                  ; $12A195 |
   LDX #$13                                  ; $12A197 |
   LDA #$F185                                ; $12A199 |
-  JMP CODE_12A3DB                           ; $12A19C |
+  JMP build_map16_object_com1               ; $12A19C |
   REP #$20                                  ; $12A19F |
   LDX #$13                                  ; $12A1A1 |
   LDA #$F1A1                                ; $12A1A3 |
-  JMP CODE_12A3DB                           ; $12A1A6 |
+  JMP build_map16_object_com1               ; $12A1A6 |
   REP #$20                                  ; $12A1A9 |
   LDX #$13                                  ; $12A1AB |
   LDA #$F205                                ; $12A1AD |
-  JMP CODE_12A3DB                           ; $12A1B0 |
+  JMP build_map16_object_com1               ; $12A1B0 |
   REP #$20                                  ; $12A1B3 |
   JSL $128875                               ; $12A1B5 |
   AND #$0007                                ; $12A1B9 |
   STA $15                                   ; $12A1BC |
   LDX #$13                                  ; $12A1BE |
   LDA #$F2BD                                ; $12A1C0 |
-  JMP CODE_12A3DB                           ; $12A1C3 |
+  JMP build_map16_object_com1               ; $12A1C3 |
   REP #$20                                  ; $12A1C6 |
   INC $2A                                   ; $12A1C8 |
   LDX #$13                                  ; $12A1CA |
   LDA #$F33A                                ; $12A1CC |
-  JMP CODE_12A3DB                           ; $12A1CF |
+  JMP build_map16_object_com1               ; $12A1CF |
   REP #$20                                  ; $12A1D2 |
   INC $2E                                   ; $12A1D4 |
   LDX #$13                                  ; $12A1D6 |
   LDA #$F36D                                ; $12A1D8 |
-  JMP CODE_12A3DB                           ; $12A1DB |
+  JMP build_map16_object_com1               ; $12A1DB |
   REP #$20                                  ; $12A1DE |
   LDX #$13                                  ; $12A1E0 |
   LDA #$F3B3                                ; $12A1E2 |
-  JMP CODE_12A3DB                           ; $12A1E5 |
+  JMP build_map16_object_com1               ; $12A1E5 |
   REP #$20                                  ; $12A1E8 |
   STZ $A1                                   ; $12A1EA |
   JSL $128875                               ; $12A1EC |
@@ -3747,22 +3973,22 @@ CODE_12A1F8:
   STA $15                                   ; $12A1FB |
   LDX #$13                                  ; $12A1FD |
   LDA #$F3E5                                ; $12A1FF |
-  JMP CODE_12A3DB                           ; $12A202 |
+  JMP build_map16_object_com1               ; $12A202 |
   REP #$20                                  ; $12A205 |
   LDA #$0004                                ; $12A207 |
   STA $2A                                   ; $12A20A |
   LDX #$13                                  ; $12A20C |
   LDA #$F4E3                                ; $12A20E |
-  JMP CODE_12A3DB                           ; $12A211 |
+  JMP build_map16_object_com1               ; $12A211 |
   REP #$20                                  ; $12A214 |
   LDX #$13                                  ; $12A216 |
   LDA #$F510                                ; $12A218 |
-  JMP CODE_12A3DB                           ; $12A21B |
+  JMP build_map16_object_com1               ; $12A21B |
   REP #$20                                  ; $12A21E |
   JSR CODE_12A22B                           ; $12A220 |
   LDX #$13                                  ; $12A223 |
   LDA #$F5ED                                ; $12A225 |
-  JMP CODE_12A3DB                           ; $12A228 |
+  JMP build_map16_object_com1               ; $12A228 |
 
 CODE_12A22B:
   LDA $1B                                   ; $12A22B |
@@ -3785,14 +4011,14 @@ CODE_12A22B:
   STA $17                                   ; $12A24F |
   LDX #$13                                  ; $12A251 |
   LDA #$F6D1                                ; $12A253 |
-  JMP CODE_12A3DD                           ; $12A256 |
+  JMP build_map16_object_com2               ; $12A256 |
   REP #$20                                  ; $12A259 |
   JSR CODE_12A22B                           ; $12A25B |
   LDA #$FFFF                                ; $12A25E |
   STA $17                                   ; $12A261 |
   LDX #$13                                  ; $12A263 |
   LDA #$F776                                ; $12A265 |
-  JMP CODE_12A3DD                           ; $12A268 |
+  JMP build_map16_object_com2               ; $12A268 |
   REP #$20                                  ; $12A26B |
   LDA $1B                                   ; $12A26D |
   AND #$F0F0                                ; $12A26F |
@@ -3809,21 +4035,21 @@ CODE_12A22B:
   STA $17                                   ; $12A289 |
   LDX #$13                                  ; $12A28B |
   LDA #$F7DE                                ; $12A28D |
-  JMP CODE_12A3DD                           ; $12A290 |
+  JMP build_map16_object_com2               ; $12A290 |
   REP #$20                                  ; $12A293 |
   JSR CODE_12A22B                           ; $12A295 |
   LDA #$FFFF                                ; $12A298 |
   STA $17                                   ; $12A29B |
   LDX #$13                                  ; $12A29D |
   LDA #$F887                                ; $12A29F |
-  JMP CODE_12A3DD                           ; $12A2A2 |
+  JMP build_map16_object_com2               ; $12A2A2 |
   REP #$20                                  ; $12A2A5 |
   JSR CODE_12A22B                           ; $12A2A7 |
   LDA #$FFFF                                ; $12A2AA |
   STA $17                                   ; $12A2AD |
   LDX #$13                                  ; $12A2AF |
   LDA #$F94E                                ; $12A2B1 |
-  JMP CODE_12A3DD                           ; $12A2B4 |
+  JMP build_map16_object_com2               ; $12A2B4 |
   REP #$20                                  ; $12A2B7 |
   LDA $1B                                   ; $12A2B9 |
   AND #$F0F0                                ; $12A2BB |
@@ -3840,7 +4066,7 @@ CODE_12A22B:
   STA $17                                   ; $12A2D5 |
   LDX #$13                                  ; $12A2D7 |
   LDA #$F9B6                                ; $12A2D9 |
-  JMP CODE_12A3DD                           ; $12A2DC |
+  JMP build_map16_object_com2               ; $12A2DC |
   REP #$20                                  ; $12A2DF |
   LDA $15                                   ; $12A2E1 |
   AND #$0004                                ; $12A2E3 |
@@ -3859,7 +4085,7 @@ CODE_12A22B:
   INC $2E                                   ; $12A300 |
   LDX #$13                                  ; $12A302 |
   LDA #$FA0C                                ; $12A304 |
-  JMP CODE_12A3DB                           ; $12A307 |
+  JMP build_map16_object_com1               ; $12A307 |
   REP #$20                                  ; $12A30A |
   LDA $1B                                   ; $12A30C |
   AND #$0001                                ; $12A30E |
@@ -3874,7 +4100,7 @@ CODE_12A22B:
   STA $15                                   ; $12A31E |
   LDX #$13                                  ; $12A320 |
   LDA #$FB0C                                ; $12A322 |
-  JMP CODE_12A3DB                           ; $12A325 |
+  JMP build_map16_object_com1               ; $12A325 |
   REP #$20                                  ; $12A328 |
   LDA $1B                                   ; $12A32A |
   LSR A                                     ; $12A32C |
@@ -3894,7 +4120,7 @@ CODE_12A342:
   STA $15                                   ; $12A342 |
   LDX #$13                                  ; $12A344 |
   LDA #$FB9F                                ; $12A346 |
-  JMP CODE_12A3DB                           ; $12A349 |
+  JMP build_map16_object_com1               ; $12A349 |
 
   db $20, $40, $E0, $C0                     ; $12A34C |
 
@@ -3964,15 +4190,15 @@ CODE_12A384:
   STA $0015                                 ; $12A3BC |
   LDX #$13                                  ; $12A3BF |
   LDA #$FB9F                                ; $12A3C1 |
-  JMP CODE_12A3DB                           ; $12A3C4 |
+  JMP build_map16_object_com1               ; $12A3C4 |
   REP #$20                                  ; $12A3C7 |
   LDX #$13                                  ; $12A3C9 |
   LDA #$FD6D                                ; $12A3CB |
-  JMP CODE_12A3DB                           ; $12A3CE |
+  JMP build_map16_object_com1               ; $12A3CE |
   REP #$20                                  ; $12A3D1 |
   LDX #$13                                  ; $12A3D3 |
   LDA #$FD84                                ; $12A3D5 |
-  JMP CODE_12A3DB                           ; $12A3D8 |
+  JMP build_map16_object_com1               ; $12A3D8 |
 
 ; Common code for many build_map16 subroutines
 ; Uses same function for $1F, $22, $25
