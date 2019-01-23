@@ -208,9 +208,9 @@ build_map16_jump_table:
 ; $19: y marker
 ; $1B: low yx
 ; $1C: high yx (screen num)
-; $1F: funptr
-; $22: funptr
-; $25: funptr
+; $1F: func ptr
+; $22: func ptr
+; $25: func ptr
 ; $2A: width
 ; $2E: height
 ;
@@ -646,7 +646,7 @@ CODE_128874:
 ; === Subroutine ===
 ; build_map16 ext obj 00-09
 
-  db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 |
+  db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 | widths
   db $03, $02                               ; $12888F |
 
 sub_128891:
@@ -661,7 +661,7 @@ sub_128891:
   ASL A                                     ; $1288A3 |
   STA $15                                   ; $1288A4 |
   LDX #$12                                  ; $1288A6 |
-  LDA #$A489                                ; $1288A8 | function = $12A48A
+  LDA #$A489                                ; $1288A8 | func = $12A48A
   JMP build_map16_object_com1               ; $1288AB |
 
 ; === Subroutine ===
@@ -674,9 +674,9 @@ sub_1288AE:
   LDA $15                                   ; $1288B4 |
   AND #$0001                                ; $1288B6 |
   ASL A                                     ; $1288B9 |
-  STA $15                                   ; $1288BA | id = (id%2)*2 // // 0 if 0A, 2 if 0B
+  STA $15                                   ; $1288BA | id = 0 if 0A, 2 if 0B
   LDX #$12                                  ; $1288BC |
-  LDA #$A4C8                                ; $1288BE | function = $12A4C9
+  LDA #$A4C8                                ; $1288BE | func = $12A4C9
   JMP build_map16_object_com1               ; $1288C1 |
 
 ; === Subroutine ===
@@ -688,7 +688,7 @@ sub_1288C4:
   LDA #$0004                                ; $1288C8 |
   STA $2E                                   ; $1288CB | height = 4
   LDX #$12                                  ; $1288CD |
-  LDA #$A4EB                                ; $1288CF | function = $12A4EC
+  LDA #$A4EB                                ; $1288CF | func = $12A4EC
   JMP build_map16_object_com1               ; $1288D2 |
 
 ; === Subroutine ===
@@ -698,13 +698,13 @@ sub_1288D5:
   REP #$20                                  ; $1288D5 |
   LDA $15                                   ; $1288D7 |
   AND #$0002                                ; $1288D9 |
-  STA $15                                   ; $1288DC | id = id&2 // 0 if 0D, 2 if 0E
+  STA $15                                   ; $1288DC | id = 0 if 0D, 2 if 0E
   LDA #$0008                                ; $1288DE |
   STA $2A                                   ; $1288E1 | width = 8
   LDA #$0010                                ; $1288E3 |
   STA $2E                                   ; $1288E6 | height = 16
   LDX #$12                                  ; $1288E8 |
-  LDA #$A60E                                ; $1288EA | function = $12A60F
+  LDA #$A60E                                ; $1288EA | func = $12A60F
   JMP build_map16_object_com1               ; $1288ED |
 
 ; === Subroutine ===
@@ -726,7 +726,7 @@ sub_1288FC:
   ASL A                                     ; $128903 |
   STA $2E                                   ; $128904 | height = 32
   LDX #$12                                  ; $128906 |
-  LDA #$A664                                ; $128908 | function = $12A665
+  LDA #$A664                                ; $128908 | func = $12A665
   JMP build_map16_object_com1               ; $12890B |
 
 ; === Subroutine ===
@@ -739,13 +739,13 @@ sub_12890E:
   INC A                                     ; $128915 |
   STA $2A                                   ; $128916 | width = 2
   LDX #$12                                  ; $128918 |
-  LDA #$A68A                                ; $12891A | function = $12A68B
+  LDA #$A68A                                ; $12891A | func = $12A68B
   JMP build_map16_object_com1               ; $12891D |
 
 ; === Subroutine ===
 ; build_map16 ext obj 12-13
 
-  dw $A6A5, $A6C1                           ; $128920 |
+  dw $A6A5, $A6C1                           ; $128920 | func ptrs
 
 sub_128924:
   REP #$20                                  ; $128924 |
@@ -757,14 +757,14 @@ sub_128924:
   AND #$0001                                ; $128932 |
   ASL A                                     ; $128935 |
   TAY                                       ; $128936 |
-  LDA $8920,y                               ; $128937 | lookup function
+  LDA $8920,y                               ; $128937 | lookup func
   LDX #$12                                  ; $12893A |
   JMP build_map16_object_com1               ; $12893C |
 
 ; === Subroutine ===
 ; build_map16 ext obj 14-15
 
-  dw $A6E7, $A717                           ; $12893F |
+  dw $A6E7, $A717                           ; $12893F | func ptrs
   dw $0001, $FFFF                           ; $128943 |
 
 sub_128947:
@@ -778,9 +778,9 @@ sub_128947:
   ASL A                                     ; $128958 |
   TAY                                       ; $128959 |
   LDA $8943,y                               ; $12895A |
-  STA $17                                   ; $12895D | lookup $17 TODO
+  STA $17                                   ; $12895D | lookup $17 TODOs
   LDA $893F,y                               ; $12895F |
-  LDX #$12                                  ; $128962 | lookup function
+  LDX #$12                                  ; $128962 | lookup func
   JMP build_map16_object_com2               ; $128964 |
 
 
@@ -840,7 +840,7 @@ sub_1289A0:
 
 CODE_1289B1:
   LDX #$12                                  ; $1289B1 |
-  LDA #$AA76                                ; $1289B3 | function = $12AA77
+  LDA #$AA76                                ; $1289B3 | func = $12AA77
   JMP build_map16_object_com1               ; $1289B6 |
 
 ; === Subroutine ===
@@ -869,7 +869,7 @@ CODE_1289CC:
   STA $2E                                   ; $1289D1 | height = 2
   STA $2A                                   ; $1289D3 | width = 2
   LDX #$12                                  ; $1289D5 |
-  LDA #$AAE4                                ; $1289D7 | function = $12AAE5
+  LDA #$AAE4                                ; $1289D7 | func = $12AAE5
   JMP build_map16_object_com1               ; $1289DA |
 
 ; === Subroutine ===
@@ -882,7 +882,7 @@ sub_1289DD:
   LSR A                                     ; $1289E4 | height = 4
   STA $2E                                   ; $1289E5 |
   LDX #$12                                  ; $1289E7 |
-  LDA #$AB01                                ; $1289E9 | function = $12AB02
+  LDA #$AB01                                ; $1289E9 | func = $12AB02
   JMP build_map16_object_com1               ; $1289EC |
 
   
@@ -895,7 +895,7 @@ sub_1289EF:
   STA $2A                                   ; $1289F4 | width = 4
   STA $2E                                   ; $1289F6 | height = 4
   LDX #$12                                  ; $1289F8 |
-  LDA #$AB38                                ; $1289FA | function = $12AB39
+  LDA #$AB38                                ; $1289FA | func = $12AB39
   JMP build_map16_object_com1               ; $1289FD |
 
 ; === Subroutine ===
@@ -903,7 +903,7 @@ sub_1289EF:
 ; null objects, basically do nothing useful
 
 sub_128A00:
-  JSR CODE_1286FD                           ; $128A00 |
+  JSR CODE_1286FD                           ; $128A00 | TODO
   REP #$30                                  ; $128A03 |
   LDA $15                                   ; $128A05 |
   SEC                                       ; $128A07 |
@@ -932,7 +932,7 @@ sub_128A14:
   LDA #$0002                                ; $128A2F |
   STA $2E                                   ; $128A32 | height = 2
   LDX #$12                                  ; $128A34 |
-  LDA #$AB63                                ; $128A36 | function = $12AB64
+  LDA #$AB63                                ; $128A36 | func = $12AB64
   JMP build_map16_object_com1               ; $128A39 |
 
 ; === Subroutine ===
@@ -945,7 +945,7 @@ sub_128A3C:
   INC A                                     ; $128A43 |
   STA $2E                                   ; $128A44 | height = 7
   LDX #$12                                  ; $128A46 |
-  LDA #$AB9C                                ; $128A48 | function = $12AB9D
+  LDA #$AB9C                                ; $128A48 | func = $12AB9D
   JMP build_map16_object_com1               ; $128A4B |
 
 ; === Subroutine ===
@@ -989,7 +989,7 @@ sub_128A4E:
   STA $2A                                   ; $128A8A | width = 4
   STA $2E                                   ; $128A8C | height = 4
   LDX #$12                                  ; $128A8E |
-  LDA #$AC16                                ; $128A90 | function = $12AC17
+  LDA #$AC16                                ; $128A90 | func = $12AC17
   JMP build_map16_object_com1               ; $128A93 |
 
 ; === Subroutine ===
@@ -1011,7 +1011,7 @@ sub_128A4E:
   LDA #$0014                                ; $128AB4 |
   STA $2E                                   ; $128AB7 | height = 20
   LDX #$12                                  ; $128AB9 |
-  LDA #$AC58                                ; $128ABB | function = $12AC59
+  LDA #$AC58                                ; $128ABB | func = $12AC59
   JMP build_map16_object_com1               ; $128ABE |
 
 ; === Subroutine ===
@@ -1032,7 +1032,7 @@ sub_128A4E:
   LDA #$0001                                ; $128ADC |
   STA $2E                                   ; $128ADF | height = 1
   LDX #$12                                  ; $128AE1 |
-  LDA #$ACBA                                ; $128AE3 | function = $12ACBB
+  LDA #$ACBA                                ; $128AE3 | func = $12ACBB
   JMP build_map16_object_com1               ; $128AE6 |
 
 ; === Subroutine ===
@@ -1070,7 +1070,7 @@ sub_128A4E:
   STA $2A                                   ; $128B12 | width = 2
   STA $2E                                   ; $128B14 | height = 2
   LDX #$12                                  ; $128B16 |
-  LDA #$AD3E                                ; $128B18 | function = $12AD3F
+  LDA #$AD3E                                ; $128B18 | func = $12AD3F
   JMP build_map16_object_com1               ; $128B1B |
 
 ; === Subroutine ===
@@ -1082,7 +1082,7 @@ sub_128A4E:
   LDA #$0002                                ; $128B25 |
   STA $2E                                   ; $128B28 | height = 2
   LDX #$12                                  ; $128B2A |
-  LDA #$AD5C                                ; $128B2C | function = $12AD5D
+  LDA #$AD5C                                ; $128B2C | func = $12AD5D
   JMP build_map16_object_com1               ; $128B2F |
 
 ; === Subroutine ===
@@ -1101,12 +1101,12 @@ sub_128A4E:
   LDA $15                                   ; $128B40 |
   AND #$0008                                ; $128B42 |
   ASL A                                     ; $128B45 |
-  STA $15                                   ; $128B46 | id = (id&8)*2 // 0 if 50, 0x10 if A8
+  STA $15                                   ; $128B46 | id = 0 if 50, 0x10 if A8
   LDA #$0002                                ; $128B48 |
   STA $2A                                   ; $128B4B | width = 2
   STA $2E                                   ; $128B4D | height = 2
   LDX #$12                                  ; $128B4F |
-  LDA #$ADA8                                ; $128B51 | function = $12ADA9
+  LDA #$ADA8                                ; $128B51 | func = $12ADA9
   JMP build_map16_object_com1               ; $128B54 |
 
 ; === Subroutine ===
@@ -1136,7 +1136,7 @@ sub_128A4E:
   LDA #$0002                                ; $128B7E |
   STA $2E                                   ; $128B81 | height = 2
   LDX #$12                                  ; $128B83 |
-  LDA #$AE3B                                ; $128B85 | function = $12AE3C
+  LDA #$AE3B                                ; $128B85 | func = $12AE3C
   JMP build_map16_object_com1               ; $128B88 |
 
 ; === Subroutine ===
@@ -1157,7 +1157,7 @@ sub_128A4E:
   LDA #$0003                                ; $128BA6 |
   STA $2E                                   ; $128BA9 | height = 3
   LDX #$12                                  ; $128BAB |
-  LDA #$AE87                                ; $128BAD | function = $12AE88
+  LDA #$AE87                                ; $128BAD | func = $12AE88
   JMP build_map16_object_com1               ; $128BB0 |
 
 ; === Subroutine ===
@@ -1167,12 +1167,12 @@ sub_128A4E:
   LDA $15                                   ; $128BB5 |
   AND #$0001                                ; $128BB7 |
   ASL A                                     ; $128BBA |
-  STA $15                                   ; $128BBB | id = (id&1)*2 // 0 if 54, 2 if 55
+  STA $15                                   ; $128BBB | id = 0 if 54, 2 if 55
   LDA #$0003                                ; $128BBD |
   STA $2A                                   ; $128BC0 | width = 3
   STA $2E                                   ; $128BC2 | height = 3
   LDX #$12                                  ; $128BC4 |
-  LDA #$AEF5                                ; $128BC6 | function = $12AEF6
+  LDA #$AEF5                                ; $128BC6 | func = $12AEF6
   JMP build_map16_object_com1               ; $128BC9 |
 
 ; === Subroutine ===
@@ -1182,13 +1182,13 @@ sub_128A4E:
   LDA $15                                   ; $128BCE |
   AND #$0001                                ; $128BD0 |
   ASL A                                     ; $128BD3 |
-  STA $15                                   ; $128BD4 | id = (id&1)*2 // 0 if 56, 2 if 57
+  STA $15                                   ; $128BD4 | id = 0 if 56, 2 if 57
   LDA #$0005                                ; $128BD6 |
   STA $2A                                   ; $128BD9 | width = 5
   LDA #$0003                                ; $128BDB |
   STA $2E                                   ; $128BDE | height = 3
   LDX #$12                                  ; $128BE0 |
-  LDA #$AF47                                ; $128BE2 | function = $12AF48
+  LDA #$AF47                                ; $128BE2 | func = $12AF48
   JMP build_map16_object_com1               ; $128BE5 |
 
 ; === Subroutine ===
@@ -1198,13 +1198,13 @@ sub_128A4E:
   LDA $15                                   ; $128BEA |
   AND #$0003                                ; $128BEC |
   ASL A                                     ; $128BEF |
-  STA $15                                   ; $128BF0 | id = (id&3)*2 // 0 if 58, 2 if 59, 4 if 5A
+  STA $15                                   ; $128BF0 | id = 0 if 58, 2 if 59, 4 if 5A
   LDA #$0003                                ; $128BF2 |
   STA $2A                                   ; $128BF5 | width = 3
   LDA #$0002                                ; $128BF7 |
   STA $2E                                   ; $128BFA | height = 2
   LDX #$12                                  ; $128BFC |
-  LDA #$AF83                                ; $128BFE | function = $12AF84
+  LDA #$AF83                                ; $128BFE | func = $12AF84
   JMP build_map16_object_com1               ; $128C01 |
 
 ; === Subroutine ===
@@ -1215,13 +1215,13 @@ sub_128A4E:
   INC A                                     ; $128C08 |
   AND #$0003                                ; $128C09 |
   ASL A                                     ; $128C0C |
-  STA $15                                   ; $128C0D | id = ((id+1)&3)*2 // 0 if 5B, 2 if 5C, 4 if 5D
+  STA $15                                   ; $128C0D | id = 0 if 5B, 2 if 5C, 4 if 5D
   LDA #$0003                                ; $128C0F |
   STA $2A                                   ; $128C12 | width = 3
   LDA #$0002                                ; $128C14 |
   STA $2E                                   ; $128C17 | height = 2
   LDX #$12                                  ; $128C19 |
-  LDA #$AFBE                                ; $128C1B | function = $12AFBF
+  LDA #$AFBE                                ; $128C1B | func = $12AFBF
   JMP build_map16_object_com1               ; $128C1E |
 
 ; === Subroutine ===
@@ -1298,7 +1298,7 @@ CODE_128C7D:
   STY $2E                                   ; $128C83 |
   SEP #$10                                  ; $128C85 |
   LDX #$12                                  ; $128C87 |
-  LDA #$B100                                ; $128C89 | function = $12B101
+  LDA #$B100                                ; $128C89 | func = $12B101
   JMP build_map16_object_com1               ; $128C8C |
 
 ; === Subroutine ===
@@ -1351,7 +1351,7 @@ CODE_128CCC:
   REP #$20                                  ; $128CD0 |
   SEP #$10                                  ; $128CD2 |
   LDX #$12                                  ; $128CD4 |
-  LDA #$B193                                ; $128CD6 | function = $12B193
+  LDA #$B193                                ; $128CD6 | func = $12B193
   JMP build_map16_object_com1               ; $128CD9 |
 
 ; === Subroutine ===
@@ -1362,12 +1362,12 @@ CODE_128CCC:
   DEC A                                     ; $128CE0 |
   AND #$0003                                ; $128CE1 |
   ASL A                                     ; $128CE4 |
-  STA $15                                   ; $128CE5 | id = ((id-1)&3)*2 // 0,2,4,6 for 6D,6E,6F,70
+  STA $15                                   ; $128CE5 | id = 0 if 6D, 2 if 6E, 4 if 6F, 6 if 70
   LDA #$0002                                ; $128CE7 |
   STA $2A                                   ; $128CEA | width = 2
   STA $2E                                   ; $128CEC | height = 2
   LDX #$12                                  ; $128CEE |
-  LDA #$B219                                ; $128CF0 | function = $12B21A
+  LDA #$B219                                ; $128CF0 | func = $12B21A
   JMP build_map16_object_com1               ; $128CF3 |
 
 ; === Subroutine ===
@@ -1379,7 +1379,7 @@ CODE_128CCC:
   db $01, $01, $06, $06, $04, $04, $06, $06 ; $128D03 | heights
   db $02, $02, $02, $02, $01                ; $128D0B |
 
-  dw $B23B, $B259, $B270, $B287, $B2A2      ; $128D10 | function addresses
+  dw $B23B, $B259, $B270, $B287, $B2A2      ; $128D10 | func ptrs
   dw $B2CA, $B2F7, $B325, $B348, $B369      ; $128D1A |
   dw $B392, $B3BB, $B3D0                    ; $128D24 |
 
@@ -1395,7 +1395,7 @@ CODE_128CCC:
   LDA $8D02,y                               ; $128D3C |
   AND #$00FF                                ; $128D3F |
   STA $2E                                   ; $128D42 | lookup height
-  LDA $8D0E,x                               ; $128D44 | lookup function
+  LDA $8D0E,x                               ; $128D44 | lookup func
   LDX #$12                                  ; $128D47 |
   JMP build_map16_object_com1               ; $128D49 |
 
@@ -1406,15 +1406,15 @@ CODE_128CCC:
   LDA $15                                   ; $128D4E |
   AND #$0001                                ; $128D50 |
   ASL A                                     ; $128D53 |
-  STA $15                                   ; $128D54 | id = (id&1)*2
+  STA $15                                   ; $128D54 | id = 0 if 7E, 2 if 7F
   LDX #$12                                  ; $128D56 |
-  LDA #$B3E0                                ; $128D58 | function = $12B3E1
+  LDA #$B3E0                                ; $128D58 | func = $12B3E1
   JMP build_map16_object_com1               ; $128D5B |
 
 ; === Subroutine ===
 ; build_map16 ext obj 80
 
-  JSR CODE_1286FD                           ; $128D5E |
+  JSR CODE_1286FD                           ; $128D5E | TODO
   REP #$30                                  ; $128D61 |
   JSL $12B3F1                               ; $128D63 |
   SEP #$30                                  ; $128D67 |
@@ -1423,11 +1423,11 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj 81
 
-  REP #$20                                  ; $128D6A |
+  REP #$20                                  ; $128D6A | implicit height = 1
   LDA #$0004                                ; $128D6C |
-  STA $2A                                   ; $128D6F |
+  STA $2A                                   ; $128D6F | width = 4
   LDX #$12                                  ; $128D71 |
-  LDA #$B3FA                                ; $128D73 |
+  LDA #$B3FA                                ; $128D73 | func = $12B3FB
   JMP build_map16_object_com1               ; $128D76 |
 
 ; === Subroutine ===
@@ -1443,33 +1443,28 @@ CODE_128CCC:
   SBC #$0040                                ; $128D88 |
   AND #$70F0                                ; $128D8B |
   ORA $00                                   ; $128D8E |
-  STA $1B                                   ; $128D90 |
+  STA $1B                                   ; $128D90 | y -= 4
   LDA #$0008                                ; $128D92 |
-  STA $2A                                   ; $128D95 |
+  STA $2A                                   ; $128D95 | width = 8
   LDA #$0005                                ; $128D97 |
-  STA $2E                                   ; $128D9A |
+  STA $2E                                   ; $128D9A | height = 5
   LDX #$12                                  ; $128D9C |
-  LDA #$B45B                                ; $128D9E |
+  LDA #$B45B                                ; $128D9E | func = $12B45C
   JMP build_map16_object_com1               ; $128DA1 |
 
 ; === Subroutine ===
 ; build_map16 ext obj 83-87
 
-  dw $0090, $0050, $0030, $0030             ; $128DA4 |
-  dw $0030                                  ; $128DAC |
-
-  dw $0020, $0013, $000A, $0008             ; $128DAE |
-  dw $000D                                  ; $128DB6 |
-
-  dw $0016, $000B, $0007, $0007             ; $128DB8 |
-  dw $0008                                  ; $128DC0 |
+  dw $0090, $0050, $0030, $0030, $0030      ; $128DA4 | y offsets
+  dw $0020, $0013, $000A, $0008, $000D      ; $128DAE | widths
+  dw $0016, $000B, $0007, $0007, $0008      ; $128DB8 | heights
 
   REP #$20                                  ; $128DC2 |
   LDA $15                                   ; $128DC4 |
   SEC                                       ; $128DC6 |
   SBC #$0083                                ; $128DC7 |
   ASL A                                     ; $128DCA |
-  STA $15                                   ; $128DCB |
+  STA $15                                   ; $128DCB | id = (id-0x83)*2
   TAX                                       ; $128DCD |
   LDA $1B                                   ; $128DCE |
   AND #$0F0F                                ; $128DD0 |
@@ -1480,14 +1475,14 @@ CODE_128CCC:
   SBC $8DA4,x                               ; $128DDB |
   AND #$70F0                                ; $128DDE |
   ORA $00                                   ; $128DE1 |
-  STA $1B                                   ; $128DE3 |
+  STA $1B                                   ; $128DE3 | y -= lookup y offset
   LDA $8DAE,x                               ; $128DE5 |
-  STA $2A                                   ; $128DE8 |
+  STA $2A                                   ; $128DE8 | lookup width
   LDA $8DB8,x                               ; $128DEA |
-  STA $2E                                   ; $128DED |
+  STA $2E                                   ; $128DED | lookup height
   STZ $00A1                                 ; $128DEF |
   LDX #$12                                  ; $128DF2 |
-  LDA #$B932                                ; $128DF4 |
+  LDA #$B932                                ; $128DF4 | func = $12B933
   JMP build_map16_object_com1               ; $128DF7 |
 
 ; === Subroutine ===
@@ -1495,18 +1490,18 @@ CODE_128CCC:
 
   REP #$20                                  ; $128DFA |
   LDA #$0004                                ; $128DFC |
-  STA $2A                                   ; $128DFF |
-  STA $2E                                   ; $128E01 |
+  STA $2A                                   ; $128DFF | width = 4
+  STA $2E                                   ; $128E01 | height = 4
   LDX #$12                                  ; $128E03 |
-  LDA #$B97A                                ; $128E05 |
+  LDA #$B97A                                ; $128E05 | func = $12B97B
   JMP build_map16_object_com1               ; $128E08 |
 
 ; === Subroutine ===
 ; build_map16 ext obj 89-8C
 
-  dw $0002, $0002, $0001, $0001             ; $128E0B |
-  dw $0001, $0001, $0002, $0002             ; $128E13 |
-  dw $BAEC, $BB29                                  ; $128E1B |
+  dw $0002, $0002, $0001, $0001             ; $128E0B | widths
+  dw $0001, $0001, $0002, $0002             ; $128E13 | heights
+  dw $BAEC, $BB29                           ; $128E1B | func ptrs: 89-8A, 8B-8C
 
   REP #$20                                  ; $128E1F |
   LDA $15                                   ; $128E21 |
@@ -1514,9 +1509,9 @@ CODE_128CCC:
   ASL A                                     ; $128E26 |
   TAX                                       ; $128E27 |
   LDA $8E09,x                               ; $128E28 |
-  STA $2A                                   ; $128E2B |
+  STA $2A                                   ; $128E2B | lookup width
   LDA $8E11,x                               ; $128E2D |
-  STA $2E                                   ; $128E30 |
+  STA $2E                                   ; $128E30 | lookup height
   LDA $15                                   ; $128E32 |
   DEC A                                     ; $128E34 |
   AND #$0002                                ; $128E35 |
@@ -1525,15 +1520,15 @@ CODE_128CCC:
   DEC A                                     ; $128E3B |
   AND #$0001                                ; $128E3C |
   ASL A                                     ; $128E3F |
-  STA $15                                   ; $128E40 |
+  STA $15                                   ; $128E40 | id = 0 if 89/8B, 1 if 8A/8C
   LDX #$12                                  ; $128E42 |
-  LDA $8E1B,y                               ; $128E44 |
+  LDA $8E1B,y                               ; $128E44 | lookup func
   JMP build_map16_object_com1               ; $128E47 |
 
 ; === Subroutine ===
 ; build_map16 ext obj 8D
 
-  JSR CODE_1286FD                           ; $128E4A |
+  JSR CODE_1286FD                           ; $128E4A | ToDO
   REP #$30                                  ; $128E4D |
   JSL $12BB63                               ; $128E4F |
   SEP #$30                                  ; $128E53 |
@@ -1542,7 +1537,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj 8E-91
 
-  JSR CODE_1286FD                           ; $128E56 |
+  JSR CODE_1286FD                           ; $128E56 | TODO
   REP #$30                                  ; $128E59 |
   LDA $15                                   ; $128E5B |
   INC A                                     ; $128E5D |
@@ -1562,12 +1557,12 @@ CODE_128CCC:
   INC A                                     ; $128E70 |
   AND #$0003                                ; $128E71 |
   ASL A                                     ; $128E74 |
-  STA $15                                   ; $128E75 |
+  STA $15                                   ; $128E75 | id = {0,2,4,6}[id-0x92]
   LDA #$0002                                ; $128E77 |
-  STA $2A                                   ; $128E7A |
-  STA $2E                                   ; $128E7C |
+  STA $2A                                   ; $128E7A | width = 2
+  STA $2E                                   ; $128E7C | height = 2
   LDX #$12                                  ; $128E7E |
-  LDA #$BC29                                ; $128E80 |
+  LDA #$BC29                                ; $128E80 | func = $12BC2A
   JMP build_map16_object_com1               ; $128E83 |
 
 ; === Subroutine ===
@@ -1579,18 +1574,18 @@ CODE_128CCC:
   INC A                                     ; $128E8B |
   AND #$0003                                ; $128E8C |
   ASL A                                     ; $128E8F |
-  STA $15                                   ; $128E90 |
+  STA $15                                   ; $128E90 | id = {0,2,4,6}[id-0x96]
   LDA #$0008                                ; $128E92 |
-  STA $2A                                   ; $128E95 |
-  STA $2E                                   ; $128E97 |
+  STA $2A                                   ; $128E95 | width = 8
+  STA $2E                                   ; $128E97 | height = 8
   LDX #$12                                  ; $128E99 |
-  LDA #$BD54                                ; $128E9B |
+  LDA #$BD54                                ; $128E9B | func = $12BD55
   JMP build_map16_object_com1               ; $128E9E |
 
 ; === Subroutine ===
 ; build_map16 ext obj 9A-9D
 
-  JSR CODE_1286FD                           ; $128EA1 |
+  JSR CODE_1286FD                           ; $128EA1 | TODO
   REP #$30                                  ; $128EA4 |
   LDA $15                                   ; $128EA6 |
   DEC A                                     ; $128EA8 |
@@ -1605,7 +1600,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj 9E-9F
 
-  JSR CODE_1286FD                           ; $128EB7 |
+  JSR CODE_1286FD                           ; $128EB7 | TODO
   REP #$30                                  ; $128EBA |
   LDA $15                                   ; $128EBC |
   AND #$0001                                ; $128EBE |
@@ -1618,9 +1613,9 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj A0-A3
 
-  dw $FFFF, $0000, $FFFF, $0000             ; $128ECB |
-  dw $FFF0, $FFF0, $0000, $0000             ; $128ED3 |
-  dw $BDE9, $BE41, $BE98, $BEF0                                  ; $128EDB |
+  dw $FFFF, $0000, $FFFF, $0000             ; $128ECB | x offsets: -1, 0, -1, 0
+  dw $FFF0, $FFF0, $0000, $0000             ; $128ED3 | y offsets: -1, -1, 0, 0
+  dw $BDE9, $BE41, $BE98, $BEF0             ; $128EDB | func ptrs
 
   REP #$20                                  ; $128EE3 |
   LDA $15                                   ; $128EE5 |
@@ -1630,21 +1625,21 @@ CODE_128CCC:
   LDA $1B                                   ; $128EEC |
   AND #$0F0F                                ; $128EEE |
   CLC                                       ; $128EF1 |
-  ADC $8ECB,y                               ; $128EF2 |
+  ADC $8ECB,y                               ; $128EF2 | x += x offset
   AND #$0F0F                                ; $128EF5 |
   STA $00                                   ; $128EF8 |
   LDA $1B                                   ; $128EFA |
   AND #$F0F0                                ; $128EFC |
   CLC                                       ; $128EFF |
-  ADC $8ED3,y                               ; $128F00 |
+  ADC $8ED3,y                               ; $128F00 | y += y offset
   AND #$F0F0                                ; $128F03 |
   ORA $00                                   ; $128F06 |
   STA $1B                                   ; $128F08 |
   LDA #$0002                                ; $128F0A |
-  STA $2A                                   ; $128F0D |
-  STA $2E                                   ; $128F0F |
+  STA $2A                                   ; $128F0D | width = 2
+  STA $2E                                   ; $128F0F | height = 2
   LDX #$12                                  ; $128F11 |
-  LDA $8EDB,y                               ; $128F13 |
+  LDA $8EDB,y                               ; $128F13 | lookup func
   JMP build_map16_object_com1               ; $128F16 |
 
 ; === Subroutine ===
@@ -1652,19 +1647,19 @@ CODE_128CCC:
 
   REP #$20                                  ; $128F19 |
   LDA #$0002                                ; $128F1B |
-  STA $2A                                   ; $128F1E |
-  STA $2E                                   ; $128F20 |
+  STA $2A                                   ; $128F1E | width = 2
+  STA $2E                                   ; $128F20 | height = 2
   LDX #$12                                  ; $128F22 |
-  LDA #$BF4A                                ; $128F24 |
+  LDA #$BF4A                                ; $128F24 | func = $12BF4B
   JMP build_map16_object_com1               ; $128F27 |
 
 ; === Subroutine ===
 ; build_map16 ext obj A5-A6
 
-  dw $0001, $0002                           ; $128F2A |
-  dw $0040, $0080                           ; $128F2E |
-  dw $0003, $0005                           ; $128F32 |
-  dw $0005, $0009                           ; $128F36 |
+  dw $0001, $0002                           ; $128F2A | x offsets: 2, 1
+  dw $0040, $0080                           ; $128F2E | y offsets: 8, 4
+  dw $0003, $0005                           ; $128F32 | widths: 5, 3
+  dw $0005, $0009                           ; $128F36 | heights: 9, 5
 
   REP #$20                                  ; $128F3A |
   LDA $15                                   ; $128F3C |
@@ -1675,28 +1670,28 @@ CODE_128CCC:
   LDA $001B                                 ; $128F45 |
   AND #$0F0F                                ; $128F48 |
   SEC                                       ; $128F4B |
-  SBC $8F2A,x                               ; $128F4C |
+  SBC $8F2A,x                               ; $128F4C | x -= lookup x offset
   AND #$0F0F                                ; $128F4F |
   STA $00                                   ; $128F52 |
   LDA $001B                                 ; $128F54 |
   AND #$F0F0                                ; $128F57 |
   SEC                                       ; $128F5A |
-  SBC $8F2E,x                               ; $128F5B |
+  SBC $8F2E,x                               ; $128F5B | y -= lookup y offset
   AND #$F0F0                                ; $128F5E |
   ORA $00                                   ; $128F61 |
   STA $001B                                 ; $128F63 |
   LDA $8F32,x                               ; $128F66 |
-  STA $2A                                   ; $128F69 |
+  STA $2A                                   ; $128F69 | lookup width
   LDA $8F36,x                               ; $128F6B |
-  STA $2E                                   ; $128F6E |
+  STA $2E                                   ; $128F6E | lookup height
   LDX #$12                                  ; $128F70 |
-  LDA #$BFF3                                ; $128F72 |
+  LDA #$BFF3                                ; $128F72 | func = $12BFF4
   JMP build_map16_object_com1               ; $128F75 |
 
 ; === Subroutine ===
 ; build_map16 ext obj A7
 
-  JSR CODE_1286FD                           ; $128F78 |
+  JSR CODE_1286FD                           ; $128F78 | TOOD
   REP #$30                                  ; $128F7B |
   JSL $12C063                               ; $128F7D |
   SEP #$30                                  ; $128F81 |
@@ -1705,19 +1700,19 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj A9-AC
 
-  dw $0005, $0004, $0003, $0003             ; $128F84 |
+  dw $0005, $0004, $0003, $0003             ; $128F84 | heights
 
-  REP #$20                                  ; $128F8C |
+  REP #$20                                  ; $128F8C | implicit width = 1
   LDA $15                                   ; $128F8E |
   AND #$0007                                ; $128F90 |
   DEC A                                     ; $128F93 |
   ASL A                                     ; $128F94 |
-  STA $15                                   ; $128F95 |
+  STA $15                                   ; $128F95 | id = {0,2,4,6}[id-0xA9]
   TAY                                       ; $128F97 |
   LDA $8F84,y                               ; $128F98 |
-  STA $2E                                   ; $128F9B |
+  STA $2E                                   ; $128F9B | lookup height
   LDX #$12                                  ; $128F9D |
-  LDA #$C043                                ; $128F9F |
+  LDA #$C043                                ; $128F9F | func = $12C044
   JMP build_map16_object_com1               ; $128FA2 |
 
 ; === Subroutine ===
@@ -1729,11 +1724,11 @@ CODE_128CCC:
   dw $0002, $0002                           ; $128FB5 |
 
   REP #$20                                  ; $128FB9 |
-  JSL $128875                               ; $128FBB |
+  JSL $128875                               ; $128FBB | TODO
   AND #$0006                                ; $128FBF |
   TAY                                       ; $128FC2 |
   LDA $8FA5,y                               ; $128FC3 |
-  STA $A1                                   ; $128FC6 |
+  STA $A1                                   ; $128FC6 | TODO $A1
   LDA #$0002                                ; $128FC8 |
   STA $2A                                   ; $128FCB |
   LDA $15                                   ; $128FCD |
@@ -1751,7 +1746,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj B3
 
-  JSR CODE_1286FD                           ; $128FE4 |
+  JSR CODE_1286FD                           ; $128FE4 | TODO
   REP #$30                                  ; $128FE7 |
   JSL $12C0CF                               ; $128FE9 |
   SEP #$30                                  ; $128FED |
@@ -1762,11 +1757,11 @@ CODE_128CCC:
 
   REP #$20                                  ; $128FF0 |
   LDA #$0002                                ; $128FF2 |
-  STA $2A                                   ; $128FF5 |
-  STA $2E                                   ; $128FF7 |
-  JSL $128875                               ; $128FF9 |
+  STA $2A                                   ; $128FF5 | width = 2
+  STA $2E                                   ; $128FF7 | height = 2
+  JSL $128875                               ; $128FF9 | TODO
   AND #$0004                                ; $128FFD |
-  STA $A1                                   ; $129000 |
+  STA $A1                                   ; $129000 | TODO $A1
   LDA $15                                   ; $129002 |
   AND #$0001                                ; $129004 |
   STA $15                                   ; $129007 |
@@ -1779,9 +1774,9 @@ CODE_128CCC:
 
   REP #$20                                  ; $129011 |
   LDA #$0003                                ; $129013 |
-  STA $2A                                   ; $129016 |
-  STA $2E                                   ; $129018 |
-  JSL $128875                               ; $12901A |
+  STA $2A                                   ; $129016 | width = 3
+  STA $2E                                   ; $129018 | height = 3
+  JSL $128875                               ; $12901A | TODO
   AND #$0001                                ; $12901E |
   STA $00                                   ; $129021 |
   LDA $15                                   ; $129023 |
@@ -1797,21 +1792,21 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 ext obj B8-B9
 
-  dw $0004, $0005                           ; $129036 |
-  dw $0004, $0006                           ; $12903A |
+  dw $0004, $0005                           ; $129036 | widths
+  dw $0004, $0006                           ; $12903A | heights
 
   REP #$20                                  ; $12903E |
   LDA $15                                   ; $129040 |
   AND #$0001                                ; $129042 |
   ASL A                                     ; $129045 |
-  STA $15                                   ; $129046 |
+  STA $15                                   ; $129046 | id = {0,2}[id-0xB8]
   TAY                                       ; $129048 |
   LDA $9036,y                               ; $129049 |
-  STA $2A                                   ; $12904C |
+  STA $2A                                   ; $12904C | lookup width
   LDA $903A,y                               ; $12904E |
-  STA $2E                                   ; $129051 |
+  STA $2E                                   ; $129051 | lookup height
   LDX #$12                                  ; $129053 |
-  LDA #$C243                                ; $129055 |
+  LDA #$C243                                ; $129055 | func = $12C244
   JMP build_map16_object_com1               ; $129058 |
 
 ; === Subroutine ===
@@ -1829,7 +1824,7 @@ CODE_128CCC:
   TAY                                       ; $129072 |
   LDA $905B,y                               ; $129073 |
   STA $2E                                   ; $129076 |
-  JSL $128875                               ; $129078 |
+  JSL $128875                               ; $129078 | TODO
   AND #$0003                                ; $12907C |
   BEQ CODE_129084                           ; $12907F |
   EOR #$0003                                ; $129081 |
@@ -1845,10 +1840,10 @@ CODE_129084:
 
   REP #$20                                  ; $12908E |
   LDA #$0002                                ; $129090 |
-  STA $2A                                   ; $129093 |
-  STA $2E                                   ; $129095 |
+  STA $2A                                   ; $129093 | width = 2
+  STA $2E                                   ; $129095 | height = 2
   LDX #$12                                  ; $129097 |
-  LDA #$C2C9                                ; $129099 |
+  LDA #$C2C9                                ; $129099 | func = $12C2CA
   JMP build_map16_object_com1               ; $12909C |
 
 ; === Subroutine ===
@@ -1856,11 +1851,11 @@ CODE_129084:
 
   REP #$20                                  ; $12909F |
   LDA #$0002                                ; $1290A1 |
-  STA $2A                                   ; $1290A4 |
+  STA $2A                                   ; $1290A4 | width = 2
   DEC A                                     ; $1290A6 |
-  STA $2E                                   ; $1290A7 |
+  STA $2E                                   ; $1290A7 | height = 1
   LDX #$12                                  ; $1290A9 |
-  LDA #$C301                                ; $1290AB |
+  LDA #$C301                                ; $1290AB | func = $12C302
   JMP build_map16_object_com1               ; $1290AE |
 
 ; === Subroutine ===
@@ -1868,23 +1863,23 @@ CODE_129084:
 
   REP #$20                                  ; $1290B1 |
   LDA #$0004                                ; $1290B3 |
-  STA $2A                                   ; $1290B6 |
-  STA $2E                                   ; $1290B8 |
+  STA $2A                                   ; $1290B6 | width = 4
+  STA $2E                                   ; $1290B8 | height = 4
   LDA $15                                   ; $1290BA |
   AND #$0001                                ; $1290BC |
   ASL A                                     ; $1290BF |
   ASL A                                     ; $1290C0 |
   ASL A                                     ; $1290C1 |
   ASL A                                     ; $1290C2 |
-  STA $15                                   ; $1290C3 |
+  STA $15                                   ; $1290C3 | id = {0,16}[id-0xC2]
   LDX #$12                                  ; $1290C5 |
-  LDA #$C374                                ; $1290C7 |
+  LDA #$C374                                ; $1290C7 | func = $12C375
   JMP build_map16_object_com1               ; $1290CA |
 
 ; === Subroutine ===
 ; build_map16 ext obj C4
 
-  JSR CODE_1286FD                           ; $1290CD |
+  JSR CODE_1286FD                           ; $1290CD | TODO
   REP #$30                                  ; $1290D0 |
   JSL $12C38E                               ; $1290D2 |
   SEP #$30                                  ; $1290D6 |
@@ -1893,31 +1888,28 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 ext obj C5-C9
 
-  dw $0002, $0003, $0002, $0002             ; $1290D9 |
-  dw $0002                                  ; $1290E1 |
-
-  dw $0002, $0003, $0003, $0002             ; $1290E3 |
-  dw $0002                                  ; $1290EB |
+  dw $0002, $0003, $0002, $0002, $0002      ; $1290D9 | widths
+  dw $0002, $0003, $0003, $0002, $0002      ; $1290E3 | heights
 
   REP #$20                                  ; $1290ED |
   LDA $15                                   ; $1290EF |
   SEC                                       ; $1290F1 |
   SBC #$00C5                                ; $1290F2 |
   ASL A                                     ; $1290F5 |
-  STA $15                                   ; $1290F6 |
+  STA $15                                   ; $1290F6 | id = (id-0xC5)*2
   TAX                                       ; $1290F8 |
   LDA $90D9,x                               ; $1290F9 |
-  STA $2A                                   ; $1290FC |
+  STA $2A                                   ; $1290FC | lookup width
   LDA $90E3,x                               ; $1290FE |
-  STA $2E                                   ; $129101 |
+  STA $2E                                   ; $129101 | lookup height
   LDX #$12                                  ; $129103 |
-  LDA #$C3D2                                ; $129105 |
+  LDA #$C3D2                                ; $129105 | func = $12C3D3
   JMP build_map16_object_com1               ; $129108 |
 
 ; === Subroutine ===
 ; build_map16 ext obj CA-D3
 
-  JSR CODE_1286FD                           ; $12910B |
+  JSR CODE_1286FD                           ; $12910B | TODO
   REP #$30                                  ; $12910E |
   LDA $15                                   ; $129110 |
   SEC                                       ; $129112 |
@@ -1930,10 +1922,10 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 ext obj D4-DF
 
-  db $05, $05, $05, $03, $03, $05, $05, $05 ; $12911F |
+  db $05, $05, $05, $03, $03, $05, $05, $05 ; $12911F | widths
   db $03, $03, $07, $07                     ; $129127 |
 
-  db $05, $05, $06, $04, $03, $05, $05, $06 ; $12912B |
+  db $05, $05, $06, $04, $03, $05, $05, $06 ; $12912B | heights
   db $04, $03, $06, $06                     ; $129133 |
 
   REP #$20                                  ; $129137 |
@@ -1942,15 +1934,15 @@ CODE_129084:
   SBC #$00D4                                ; $12913C |
   TAY                                       ; $12913F |
   ASL A                                     ; $129140 |
-  STA $15                                   ; $129141 |
+  STA $15                                   ; $129141 | id = (id-0xD4)*2
   LDA $911F,y                               ; $129143 |
   AND #$00FF                                ; $129146 |
-  STA $2A                                   ; $129149 |
+  STA $2A                                   ; $129149 | lookup width
   LDA $912B,y                               ; $12914B |
   AND #$000F                                ; $12914E |
-  STA $2E                                   ; $129151 |
+  STA $2E                                   ; $129151 | lookup height
   LDX #$12                                  ; $129153 |
-  LDA #$C68F                                ; $129155 |
+  LDA #$C68F                                ; $129155 | func = $12C690
   JMP build_map16_object_com1               ; $129158 |
 
 ; === Subroutine ===
@@ -1958,16 +1950,16 @@ CODE_129084:
 
   REP #$20                                  ; $12915B |
   LDA #$0002                                ; $12915D |
-  STA $2A                                   ; $129160 |
-  STA $2E                                   ; $129162 |
+  STA $2A                                   ; $129160 | width = 2
+  STA $2E                                   ; $129162 | height = 2
   LDX #$12                                  ; $129164 |
-  LDA #$C6E9                                ; $129166 |
+  LDA #$C6E9                                ; $129166 | func = $12C6EA
   JMP build_map16_object_com1               ; $129169 |
 
 ; === Subroutine ===
 ; build_map16 ext obj FB
 
-  LDX $001C                                 ; $12916C |
+  LDX $001C                                 ; $12916C | TODO
   LDY $001B                                 ; $12916F |
   LDA !s_screen_num_to_id,x                 ; $129172 |
   STA !s_screen_num_to_id,y                 ; $129175 |
@@ -1981,7 +1973,7 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 ext obj FD
 
-  JSR CODE_1286FD                           ; $12917A |
+  JSR CODE_1286FD                           ; $12917A | TODO
   REP #$30                                  ; $12917D |
   JSL $12C6FF                               ; $12917F |
   SEP #$30                                  ; $129183 |
@@ -1990,7 +1982,7 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 ext obj FE
 
-  LDX $1C                                   ; $129186 |
+  LDX $1C                                   ; $129186 | TODO
   LDA !s_screen_num_to_id,x                 ; $129188 |
   ORA #$80                                  ; $12918B |
   STA !s_screen_num_to_id,x                 ; $12918D |
@@ -1999,7 +1991,7 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 ext obj FF
 
-  LDY $1C                                   ; $129191 |
+  LDY $1C                                   ; $129191 | TODO
   LDA !s_screen_num_to_id,y                 ; $129193 |
   AND #$3F                                  ; $129196 |
   BEQ CODE_1291D3                           ; $129198 |
