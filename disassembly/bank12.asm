@@ -644,7 +644,7 @@ CODE_128874:
   RTL                                       ; $128886 |
 
 ; === Subroutine ===
-; build_map16 ext obj 00-09
+; build_map16 obj func ext 00-09
 
   db $02, $02, $02, $02, $01, $01, $01, $01 ; $128887 | widths
   db $03, $02                               ; $12888F |
@@ -665,7 +665,7 @@ sub_128891:
   JMP build_map16_object_com1               ; $1288AB |
 
 ; === Subroutine ===
-; build_map16 ext obj 0A-0B
+; build_map16 obj func ext 0A-0B
 
 sub_1288AE:
   REP #$20                                  ; $1288AE |
@@ -680,7 +680,7 @@ sub_1288AE:
   JMP build_map16_object_com1               ; $1288C1 |
 
 ; === Subroutine ===
-; build_map16 ext obj 0C
+; build_map16 obj func ext 0C
 
 sub_1288C4:
   REP #$20                                  ; $1288C4 |
@@ -692,7 +692,7 @@ sub_1288C4:
   JMP build_map16_object_com1               ; $1288D2 |
 
 ; === Subroutine ===
-; build_map16 ext obj 0D-0E
+; build_map16 obj func ext 0D-0E
 
 sub_1288D5:
   REP #$20                                  ; $1288D5 |
@@ -708,7 +708,7 @@ sub_1288D5:
   JMP build_map16_object_com1               ; $1288ED |
 
 ; === Subroutine ===
-; build_map16 ext obj 0F
+; build_map16 obj func ext 0F
 
   JSR CODE_1286FD                           ; $1288F0 | TODO
   REP #$30                                  ; $1288F3 |
@@ -717,7 +717,7 @@ sub_1288D5:
   RTL                                       ; $1288FB |
 
 ; === Subroutine ===
-; build_map16 ext obj 10
+; build_map16 obj func ext 10
 
 sub_1288FC:
   REP #$20                                  ; $1288FC |
@@ -730,7 +730,7 @@ sub_1288FC:
   JMP build_map16_object_com1               ; $12890B |
 
 ; === Subroutine ===
-; build_map16 ext obj 11
+; build_map16 obj func ext 11
 
 sub_12890E:
   REP #$20                                  ; $12890E |
@@ -743,7 +743,7 @@ sub_12890E:
   JMP build_map16_object_com1               ; $12891D |
 
 ; === Subroutine ===
-; build_map16 ext obj 12-13
+; build_map16 obj func ext 12-13
 
   dw $A6A5, $A6C1                           ; $128920 | func ptrs
 
@@ -762,7 +762,7 @@ sub_128924:
   JMP build_map16_object_com1               ; $12893C |
 
 ; === Subroutine ===
-; build_map16 ext obj 14-15
+; build_map16 obj func ext 14-15
 
   dw $A6E7, $A717                           ; $12893F | func ptrs
   dw $0001, $FFFF                           ; $128943 |
@@ -785,7 +785,7 @@ sub_128947:
 
 
 ; === Subroutine ===
-; build_map16 ext obj 16
+; build_map16 obj func ext 16
 
 sub_128967:
   JSR CODE_1286FD                           ; $128967 | TODO
@@ -795,7 +795,7 @@ sub_128967:
   RTL                                       ; $128972 |
 
 ; === Subroutine ===
-; build_map16 ext obj 17
+; build_map16 obj func ext 17
 
 sub_128973:
   JSR CODE_1286FD                           ; $128973 | TODO
@@ -805,7 +805,7 @@ sub_128973:
   RTL                                       ; $12897E |
 
 ; === Subroutine ===
-; build_map16 ext obj 18
+; build_map16 obj func ext 18
 
   REP #$20                                  ; $12897F |
   LDA #$0010                                ; $128981 |
@@ -816,7 +816,7 @@ sub_128973:
   JMP build_map16_object_com1               ; $12898D |
 
 ; === Subroutine ===
-; build_map16 ext obj 19-1A
+; build_map16 obj func ext 19-1A
 
 ; 19 entry point
 sub_128990:
@@ -844,7 +844,7 @@ CODE_1289B1:
   JMP build_map16_object_com1               ; $1289B6 |
 
 ; === Subroutine ===
-; build_map16 ext obj 1B-1D
+; build_map16 obj func ext 1B-1D
 
 ; 1B entry point
 sub_1289B9:
@@ -873,7 +873,7 @@ CODE_1289CC:
   JMP build_map16_object_com1               ; $1289DA |
 
 ; === Subroutine ===
-; build_map16 ext obj 1E
+; build_map16 obj func ext 1E
 
 sub_1289DD:
   REP #$20                                  ; $1289DD |
@@ -887,7 +887,7 @@ sub_1289DD:
 
   
 ; === Subroutine ===
-; build_map16 ext obj 1F
+; build_map16 obj func ext 1F
 
 sub_1289EF:
   REP #$20                                  ; $1289EF |
@@ -899,7 +899,7 @@ sub_1289EF:
   JMP build_map16_object_com1               ; $1289FD |
 
 ; === Subroutine ===
-; build_map16 ext obj 20-2F
+; build_map16 obj func ext 20-2F
 ; null objects, basically do nothing useful
 
 sub_128A00:
@@ -914,7 +914,7 @@ sub_128A00:
   RTL                                       ; $128A13 |
 
 ; === Subroutine ===
-; build_map16 ext obj 30
+; build_map16 obj func ext 30
 
 sub_128A14:
   REP #$20                                  ; $128A14 |
@@ -936,7 +936,7 @@ sub_128A14:
   JMP build_map16_object_com1               ; $128A39 |
 
 ; === Subroutine ===
-; build_map16 ext obj 31
+; build_map16 obj func ext 31
 
 sub_128A3C:
   REP #$20                                  ; $128A3C |
@@ -949,7 +949,7 @@ sub_128A3C:
   JMP build_map16_object_com1               ; $128A4B |
 
 ; === Subroutine ===
-; build_map16 ext obj 32-45
+; build_map16 obj func ext 32-45
 
 sub_128A4E:
   JSR CODE_1286FD                           ; $128A4E |
@@ -963,7 +963,7 @@ sub_128A4E:
   RTL                                       ; $128A61 |
 
 ; === Subroutine ===
-; build_map16 ext obj 46
+; build_map16 obj func ext 46
 
   JSR CODE_1286FD                           ; $128A62 |
   REP #$30                                  ; $128A65 |
@@ -972,7 +972,7 @@ sub_128A4E:
   RTL                                       ; $128A6D |
 
 ; === Subroutine ===
-; build_map16 ext obj 47
+; build_map16 obj func ext 47
 
   REP #$20                                  ; $128A6E |
   LDA $1B                                   ; $128A70 |
@@ -993,7 +993,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128A93 |
 
 ; === Subroutine ===
-; build_map16 ext obj 48
+; build_map16 obj func ext 48
 
   REP #$20                                  ; $128A96 |
   LDA $1B                                   ; $128A98 |
@@ -1015,7 +1015,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128ABE |
 
 ; === Subroutine ===
-; build_map16 ext obj 49
+; build_map16 obj func ext 49
 
   REP #$20                                  ; $128AC1 |
   LDA $1B                                   ; $128AC3 |
@@ -1036,7 +1036,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128AE6 |
 
 ; === Subroutine ===
-; build_map16 ext obj 4A
+; build_map16 obj func ext 4A
 
   JSR CODE_1286FD                           ; $128AE9 |
   REP #$30                                  ; $128AEC |
@@ -1045,7 +1045,7 @@ sub_128A4E:
   RTL                                       ; $128AF4 |
 
 ; === Subroutine ===
-; build_map16 ext obj 4B
+; build_map16 obj func ext 4B
 
   JSR CODE_1286FD                           ; $128AF5 |
   REP #$30                                  ; $128AF8 |
@@ -1054,7 +1054,7 @@ sub_128A4E:
   RTL                                       ; $128B00 |
 
 ; === Subroutine ===
-; build_map16 ext obj 4C
+; build_map16 obj func ext 4C
 
   JSR CODE_1286FD                           ; $128B01 |
   REP #$30                                  ; $128B04 |
@@ -1063,7 +1063,7 @@ sub_128A4E:
   RTL                                       ; $128B0C |
 
 ; === Subroutine ===
-; build_map16 ext obj 4D
+; build_map16 obj func ext 4D
 
   REP #$20                                  ; $128B0D |
   LDA #$0002                                ; $128B0F |
@@ -1074,7 +1074,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128B1B |
 
 ; === Subroutine ===
-; build_map16 ext obj 4E
+; build_map16 obj func ext 4E
 
   REP #$20                                  ; $128B1E |
   LDA #$0001                                ; $128B20 |
@@ -1086,7 +1086,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128B2F |
 
 ; === Subroutine ===
-; build_map16 ext obj 4F
+; build_map16 obj func ext 4F
 
   JSR CODE_1286FD                           ; $128B32 |
   REP #$30                                  ; $128B35 |
@@ -1095,7 +1095,7 @@ sub_128A4E:
   RTL                                       ; $128B3D |
 
 ; === Subroutine ===
-; build_map16 ext obj 50,A8
+; build_map16 obj func ext 50,A8
 
   REP #$20                                  ; $128B3E |
   LDA $15                                   ; $128B40 |
@@ -1110,7 +1110,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128B54 |
 
 ; === Subroutine ===
-; build_map16 ext obj 51
+; build_map16 obj func ext 51
 
   JSR CODE_1286FD                           ; $128B57 |
   REP #$30                                  ; $128B5A |
@@ -1119,7 +1119,7 @@ sub_128A4E:
   RTL                                       ; $128B62 |
 
 ; === Subroutine ===
-; build_map16 ext obj 52
+; build_map16 obj func ext 52
 
   REP #$20                                  ; $128B63 |
   LDA $1B                                   ; $128B65 |
@@ -1140,7 +1140,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128B88 |
 
 ; === Subroutine ===
-; build_map16 ext obj 53
+; build_map16 obj func ext 53
 
   REP #$20                                  ; $128B8B |
   LDA $1B                                   ; $128B8D |
@@ -1161,7 +1161,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128BB0 |
 
 ; === Subroutine ===
-; build_map16 ext obj 54-55
+; build_map16 obj func ext 54-55
 
   REP #$20                                  ; $128BB3 |
   LDA $15                                   ; $128BB5 |
@@ -1176,7 +1176,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128BC9 |
 
 ; === Subroutine ===
-; build_map16 ext obj 56-57
+; build_map16 obj func ext 56-57
 
   REP #$20                                  ; $128BCC |
   LDA $15                                   ; $128BCE |
@@ -1192,7 +1192,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128BE5 |
 
 ; === Subroutine ===
-; build_map16 ext obj 58-5A
+; build_map16 obj func ext 58-5A
 
   REP #$20                                  ; $128BE8 |
   LDA $15                                   ; $128BEA |
@@ -1208,7 +1208,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128C01 |
 
 ; === Subroutine ===
-; build_map16 ext obj 5B-5D
+; build_map16 obj func ext 5B-5D
 
   REP #$20                                  ; $128C04 |
   LDA $15                                   ; $128C06 |
@@ -1225,7 +1225,7 @@ sub_128A4E:
   JMP build_map16_object_com1               ; $128C1E |
 
 ; === Subroutine ===
-; build_map16 ext obj 5E
+; build_map16 obj func ext 5E
 
   JSR CODE_1286FD                           ; $128C21 |
   REP #$30                                  ; $128C24 |
@@ -1234,7 +1234,7 @@ sub_128A4E:
   RTL                                       ; $128C2C |
 
 ; === Subroutine ===
-; build_map16 ext obj 5F-66
+; build_map16 obj func ext 5F-66
 
 ; 5F entry point
   REP #$10                                  ; $128C2D |
@@ -1302,7 +1302,7 @@ CODE_128C7D:
   JMP build_map16_object_com1               ; $128C8C |
 
 ; === Subroutine ===
-; build_map16 ext obj 67
+; build_map16 obj func ext 67
 
   JSR CODE_1286FD                           ; $128C8F |
   REP #$30                                  ; $128C92 |
@@ -1311,7 +1311,7 @@ CODE_128C7D:
   RTL                                       ; $128C9A |
 
 ; === Subroutine ===
-; build_map16 ext obj 68-69
+; build_map16 obj func ext 68-69
 
   JSR CODE_1286FD                           ; $128C9B |
   REP #$30                                  ; $128C9E |
@@ -1320,7 +1320,7 @@ CODE_128C7D:
   RTL                                       ; $128CA6 |
 
 ; === Subroutine ===
-; build_map16 ext obj 6A-6C
+; build_map16 obj func ext 6A-6C
 
 ; 6A entry point
   REP #$10                                  ; $128CA7 |
@@ -1355,7 +1355,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128CD9 |
 
 ; === Subroutine ===
-; build_map16 ext obj 6D-70
+; build_map16 obj func ext 6D-70
 
   REP #$20                                  ; $128CDC |
   LDA $15                                   ; $128CDE |
@@ -1371,7 +1371,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128CF3 |
 
 ; === Subroutine ===
-; build_map16 ext obj 71-7D
+; build_map16 obj func ext 71-7D
 
   db $06, $06, $01, $01, $02, $02, $02, $02 ; $128CF6 | widths
   db $04, $04, $06, $06, $02                ; $128CFE |
@@ -1400,7 +1400,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128D49 |
 
 ; === Subroutine ===
-; build_map16 ext obj 7E-7F
+; build_map16 obj func ext 7E-7F
 
   REP #$20                                  ; $128D4C | implicit width = 1, height = 1
   LDA $15                                   ; $128D4E |
@@ -1412,7 +1412,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128D5B |
 
 ; === Subroutine ===
-; build_map16 ext obj 80
+; build_map16 obj func ext 80
 
   JSR CODE_1286FD                           ; $128D5E | TODO
   REP #$30                                  ; $128D61 |
@@ -1421,7 +1421,7 @@ CODE_128CCC:
   RTL                                       ; $128D69 |
 
 ; === Subroutine ===
-; build_map16 ext obj 81
+; build_map16 obj func ext 81
 
   REP #$20                                  ; $128D6A | implicit height = 1
   LDA #$0004                                ; $128D6C |
@@ -1431,7 +1431,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128D76 |
 
 ; === Subroutine ===
-; build_map16 ext obj 82
+; build_map16 obj func ext 82
 
   REP #$20                                  ; $128D79 |
   LDA $1B                                   ; $128D7B |
@@ -1453,7 +1453,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128DA1 |
 
 ; === Subroutine ===
-; build_map16 ext obj 83-87
+; build_map16 obj func ext 83-87
 
   dw $0090, $0050, $0030, $0030, $0030      ; $128DA4 | y offsets
   dw $0020, $0013, $000A, $0008, $000D      ; $128DAE | widths
@@ -1486,7 +1486,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128DF7 |
 
 ; === Subroutine ===
-; build_map16 ext obj 88
+; build_map16 obj func ext 88
 
   REP #$20                                  ; $128DFA |
   LDA #$0004                                ; $128DFC |
@@ -1497,7 +1497,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128E08 |
 
 ; === Subroutine ===
-; build_map16 ext obj 89-8C
+; build_map16 obj func ext 89-8C
 
   dw $0002, $0002, $0001, $0001             ; $128E0B | widths
   dw $0001, $0001, $0002, $0002             ; $128E13 | heights
@@ -1526,7 +1526,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128E47 |
 
 ; === Subroutine ===
-; build_map16 ext obj 8D
+; build_map16 obj func ext 8D
 
   JSR CODE_1286FD                           ; $128E4A | ToDO
   REP #$30                                  ; $128E4D |
@@ -1535,7 +1535,7 @@ CODE_128CCC:
   RTL                                       ; $128E55 |
 
 ; === Subroutine ===
-; build_map16 ext obj 8E-91
+; build_map16 obj func ext 8E-91
 
   JSR CODE_1286FD                           ; $128E56 | TODO
   REP #$30                                  ; $128E59 |
@@ -1549,7 +1549,7 @@ CODE_128CCC:
   RTL                                       ; $128E6A |
 
 ; === Subroutine ===
-; build_map16 ext obj 92-95
+; build_map16 obj func ext 92-95
 
   REP #$20                                  ; $128E6B |
   LDA $15                                   ; $128E6D |
@@ -1566,7 +1566,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128E83 |
 
 ; === Subroutine ===
-; build_map16 ext obj 96-99
+; build_map16 obj func ext 96-99
 
   REP #$20                                  ; $128E86 |
   LDA $15                                   ; $128E88 |
@@ -1583,7 +1583,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128E9E |
 
 ; === Subroutine ===
-; build_map16 ext obj 9A-9D
+; build_map16 obj func ext 9A-9D
 
   JSR CODE_1286FD                           ; $128EA1 | TODO
   REP #$30                                  ; $128EA4 |
@@ -1598,7 +1598,7 @@ CODE_128CCC:
   RTL                                       ; $128EB6 |
 
 ; === Subroutine ===
-; build_map16 ext obj 9E-9F
+; build_map16 obj func ext 9E-9F
 
   JSR CODE_1286FD                           ; $128EB7 | TODO
   REP #$30                                  ; $128EBA |
@@ -1611,7 +1611,7 @@ CODE_128CCC:
   RTL                                       ; $128ECA |
 
 ; === Subroutine ===
-; build_map16 ext obj A0-A3
+; build_map16 obj func ext A0-A3
 
   dw $FFFF, $0000, $FFFF, $0000             ; $128ECB | x offsets: -1, 0, -1, 0
   dw $FFF0, $FFF0, $0000, $0000             ; $128ED3 | y offsets: -1, -1, 0, 0
@@ -1643,7 +1643,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128F16 |
 
 ; === Subroutine ===
-; build_map16 ext obj A4
+; build_map16 obj func ext A4
 
   REP #$20                                  ; $128F19 |
   LDA #$0002                                ; $128F1B |
@@ -1654,7 +1654,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128F27 |
 
 ; === Subroutine ===
-; build_map16 ext obj A5-A6
+; build_map16 obj func ext A5-A6
 
   dw $0001, $0002                           ; $128F2A | x offsets: 2, 1
   dw $0040, $0080                           ; $128F2E | y offsets: 8, 4
@@ -1689,7 +1689,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128F75 |
 
 ; === Subroutine ===
-; build_map16 ext obj A7
+; build_map16 obj func ext A7
 
   JSR CODE_1286FD                           ; $128F78 | TOOD
   REP #$30                                  ; $128F7B |
@@ -1698,7 +1698,7 @@ CODE_128CCC:
   RTL                                       ; $128F83 |
 
 ; === Subroutine ===
-; build_map16 ext obj A9-AC
+; build_map16 obj func ext A9-AC
 
   dw $0005, $0004, $0003, $0003             ; $128F84 | heights
 
@@ -1716,7 +1716,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128FA2 |
 
 ; === Subroutine ===
-; build_map16 ext obj AD-B2
+; build_map16 obj func ext AD-B2
 
   dw $0000, $000E, $001C, $002A             ; $128FA5 |
 
@@ -1744,7 +1744,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $128FE1 |
 
 ; === Subroutine ===
-; build_map16 ext obj B3
+; build_map16 obj func ext B3
 
   JSR CODE_1286FD                           ; $128FE4 | TODO
   REP #$30                                  ; $128FE7 |
@@ -1753,7 +1753,7 @@ CODE_128CCC:
   RTL                                       ; $128FEF |
 
 ; === Subroutine ===
-; build_map16 ext obj B4-B5
+; build_map16 obj func ext B4-B5
 
   REP #$20                                  ; $128FF0 |
   LDA #$0002                                ; $128FF2 |
@@ -1770,7 +1770,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $12900E |
 
 ; === Subroutine ===
-; build_map16 ext obj B6-B7
+; build_map16 obj func ext B6-B7
 
   REP #$20                                  ; $129011 |
   LDA #$0003                                ; $129013 |
@@ -1790,7 +1790,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $129033 |
 
 ; === Subroutine ===
-; build_map16 ext obj B8-B9
+; build_map16 obj func ext B8-B9
 
   dw $0004, $0005                           ; $129036 | widths
   dw $0004, $0006                           ; $12903A | heights
@@ -1810,7 +1810,7 @@ CODE_128CCC:
   JMP build_map16_object_com1               ; $129058 |
 
 ; === Subroutine ===
-; build_map16 ext obj BA-BF
+; build_map16 obj func ext BA-BF
 
   dw $0002, $0003, $0004, $0004             ; $12905B |
   dw $0003, $0002                           ; $129063 |
@@ -1836,7 +1836,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $12908B |
 
 ; === Subroutine ===
-; build_map16 ext obj C0
+; build_map16 obj func ext C0
 
   REP #$20                                  ; $12908E |
   LDA #$0002                                ; $129090 |
@@ -1847,7 +1847,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $12909C |
 
 ; === Subroutine ===
-; build_map16 ext obj C1
+; build_map16 obj func ext C1
 
   REP #$20                                  ; $12909F |
   LDA #$0002                                ; $1290A1 |
@@ -1859,7 +1859,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $1290AE |
 
 ; === Subroutine ===
-; build_map16 ext obj C2-C3
+; build_map16 obj func ext C2-C3
 
   REP #$20                                  ; $1290B1 |
   LDA #$0004                                ; $1290B3 |
@@ -1877,7 +1877,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $1290CA |
 
 ; === Subroutine ===
-; build_map16 ext obj C4
+; build_map16 obj func ext C4
 
   JSR CODE_1286FD                           ; $1290CD | TODO
   REP #$30                                  ; $1290D0 |
@@ -1886,7 +1886,7 @@ CODE_129084:
   RTL                                       ; $1290D8 |
 
 ; === Subroutine ===
-; build_map16 ext obj C5-C9
+; build_map16 obj func ext C5-C9
 
   dw $0002, $0003, $0002, $0002, $0002      ; $1290D9 | widths
   dw $0002, $0003, $0003, $0002, $0002      ; $1290E3 | heights
@@ -1907,7 +1907,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $129108 |
 
 ; === Subroutine ===
-; build_map16 ext obj CA-D3
+; build_map16 obj func ext CA-D3
 
   JSR CODE_1286FD                           ; $12910B | TODO
   REP #$30                                  ; $12910E |
@@ -1920,7 +1920,7 @@ CODE_129084:
   RTL                                       ; $12911E |
 
 ; === Subroutine ===
-; build_map16 ext obj D4-DF
+; build_map16 obj func ext D4-DF
 
   db $05, $05, $05, $03, $03, $05, $05, $05 ; $12911F | widths
   db $03, $03, $07, $07                     ; $129127 |
@@ -1946,7 +1946,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $129158 |
 
 ; === Subroutine ===
-; build_map16 ext obj E0
+; build_map16 obj func ext E0
 
   REP #$20                                  ; $12915B |
   LDA #$0002                                ; $12915D |
@@ -1957,7 +1957,7 @@ CODE_129084:
   JMP build_map16_object_com1               ; $129169 |
 
 ; === Subroutine ===
-; build_map16 ext obj FB
+; build_map16 obj func ext FB
 
   LDX $001C                                 ; $12916C | TODO
   LDY $001B                                 ; $12916F |
@@ -1966,12 +1966,12 @@ CODE_129084:
   RTL                                       ; $129178 |
 
 ; === Subroutine ===
-; build_map16 ext obj FC
+; build_map16 obj func ext FC
 
   RTL                                       ; $129179 |
 
 ; === Subroutine ===
-; build_map16 ext obj FD
+; build_map16 obj func ext FD
 
   JSR CODE_1286FD                           ; $12917A | TODO
   REP #$30                                  ; $12917D |
@@ -1980,7 +1980,7 @@ CODE_129084:
   RTL                                       ; $129185 |
 
 ; === Subroutine ===
-; build_map16 ext obj FE
+; build_map16 obj func ext FE
 
   LDX $1C                                   ; $129186 | TODO
   LDA !s_screen_num_to_id,x                 ; $129188 |
@@ -1989,7 +1989,7 @@ CODE_129084:
   RTL                                       ; $129190 |
 
 ; === Subroutine ===
-; build_map16 ext obj FF
+; build_map16 obj func ext FF
 
   LDY $1C                                   ; $129191 | TODO
   LDA !s_screen_num_to_id,y                 ; $129193 |
@@ -2033,7 +2033,7 @@ CODE_1291D3:
   RTL                                       ; $1291D3 |
 
 ; === Subroutine ===
-; build_map16 obj 01
+; build_map16 obj func 01
 
 sub_1291D4:
   LDA #$13                                  ; $1291D4 |
@@ -2069,7 +2069,7 @@ sub_1291D4:
   RTL                                       ; $129216 |
 
 ; === Subroutine ===
-; build_map16 obj 02-03,0A-0B
+; build_map16 obj func 02-03,0A-0B
 ; TODO
 
 sub_129217:
@@ -2141,7 +2141,7 @@ CODE_129280:
   dw $0000, $0001, $0001                    ; $1292B2 |
 
 ; === Subroutine ===
-; build_map16 obj 04-05
+; build_map16 obj func 04-05
 ; TODO
 
   dw $FFFF, $0001                           ; $1292B8 |
@@ -2165,7 +2165,7 @@ CODE_1292D5:
   JMP build_map16_object_com2               ; $1292DA |
 
 ; === Subroutine ===
-; build_map16 obj 06-09
+; build_map16 obj func 06-09
 ; TODO
 
   LDA #$13                                  ; $1292DD |
@@ -2233,7 +2233,7 @@ sub_12933A:
 ; End of function sub_12933A
 
 ; === Subroutine ===
-; build_map16 obj 0C,0E-0F
+; build_map16 obj func 0C,0E-0F
 
   REP #$20                                  ; $129354 |
   LDX #$13                                  ; $129356 |
@@ -2241,7 +2241,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $12935B |
 
 ; === Subroutine ===
-; build_map16 obj 0D
+; build_map16 obj func 0D
 
   REP #$20                                  ; $12935E |
   LDX #$13                                  ; $129360 |
@@ -2249,7 +2249,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $129365 |
 
 ; === Subroutine ===
-; build_map16 obj 10
+; build_map16 obj func 10
 
   REP #$20                                  ; $129368 |
   LDA #$0002                                ; $12936A |
@@ -2261,7 +2261,7 @@ sub_12933A:
   JMP build_map16_object_com2               ; $129379 |
 
 ; === Subroutine ===
-; build_map16 obj 11-12
+; build_map16 obj func 11-12
 
   REP #$20                                  ; $12937C |
   LDA $15                                   ; $12937E |
@@ -2279,7 +2279,7 @@ sub_12933A:
   dw $FFFF, $FFFE                           ; $12939A |
 
 ; === Subroutine ===
-; build_map16 obj 13
+; build_map16 obj func 13
 
   REP #$20                                  ; $12939E |
   LDX #$13                                  ; $1293A0 |
@@ -2287,7 +2287,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $1293A5 |
 
 ; === Subroutine ===
-; build_map16 obj 14
+; build_map16 obj func 14
 
   REP #$20                                  ; $1293A8 |
   LDX #$13                                  ; $1293AA |
@@ -2295,7 +2295,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $1293AF |
 
 ; === Subroutine ===
-; build_map16 obj 15
+; build_map16 obj func 15
 
   REP #$20                                  ; $1293B2 |
   LDA #$0002                                ; $1293B4 |
@@ -2305,7 +2305,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $1293BE |
 
 ; === Subroutine ===
-; build_map16 obj 16
+; build_map16 obj func 16
 
   REP #$20                                  ; $1293C1 |
   LDX #$13                                  ; $1293C3 |
@@ -2313,7 +2313,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $1293C8 |
 
 ; === Subroutine ===
-; build_map16 obj 17
+; build_map16 obj func 17
 
   REP #$20                                  ; $1293CB |
   LDA $1B                                   ; $1293CD |
@@ -2332,7 +2332,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $1293EB |
 
 ; === Subroutine ===
-; build_map16 obj 18-19
+; build_map16 obj func 18-19
 
   REP #$20                                  ; $1293EE |
   LDA $15                                   ; $1293F0 |
@@ -2347,7 +2347,7 @@ sub_12933A:
   dw $1313, $8DEA, $8E51                    ; $129401 |
 
 ; === Subroutine ===
-; build_map16 obj 1A-1B
+; build_map16 obj func 1A-1B
 
   REP #$20                                  ; $129407 |
   LDA $15                                   ; $129409 |
@@ -2362,7 +2362,7 @@ sub_12933A:
   dw $1313, $8EB7, $8EEE                    ; $12941A |
 
 ; === Subroutine ===
-; build_map16 obj 1C
+; build_map16 obj func 1C
 
   REP #$20                                  ; $129420 |
   LDA #$0002                                ; $129422 |
@@ -2372,7 +2372,7 @@ sub_12933A:
   JMP build_map16_object_com1               ; $12942C |
 
 ; === Subroutine ===
-; build_map16 obj 1D-1E
+; build_map16 obj func 1D-1E
 
   REP #$20                                  ; $12942F |
   LDA $15                                   ; $129431 |
@@ -2387,7 +2387,7 @@ sub_12933A:
   dw $1313, $8F76, $8F76                    ; $129442 |
 
 ; === Subroutine ===
-; build_map16 obj 1F-20
+; build_map16 obj func 1F-20
 
   LDA $15                                   ; $129448 |
   AND #$AA01                                ; $12944A |
@@ -2480,7 +2480,7 @@ CODE_1294BD:
   dw $0002, $0005                           ; $1294E6 |
 
 ; === Subroutine ===
-; build_map16 obj 21
+; build_map16 obj func 21
 
   REP #$20                                  ; $1294EA |
   STZ $A1                                   ; $1294EC |
@@ -2489,7 +2489,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $1294F3 |
 
 ; === Subroutine ===
-; build_map16 obj 22
+; build_map16 obj func 22
 
   REP #$20                                  ; $1294F6 |
   INC $2A                                   ; $1294F8 |
@@ -2498,7 +2498,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $1294FF |
 
 ; === Subroutine ===
-; build_map16 obj 23
+; build_map16 obj func 23
 
   REP #$20                                  ; $129502 |
   INC $2A                                   ; $129504 |
@@ -2507,7 +2507,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $12950B |
 
 ; === Subroutine ===
-; build_map16 obj 24
+; build_map16 obj func 24
 
   REP #$20                                  ; $12950E |
   LDX #$13                                  ; $129510 |
@@ -2515,7 +2515,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $129515 |
 
 ; === Subroutine ===
-; build_map16 obj 25-26
+; build_map16 obj func 25-26
 
   dw $925B                                  ; $129518 |
   dw $925B                                  ; $12951A |
@@ -2530,7 +2530,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $12952B |
 
 ; === Subroutine ===
-; build_map16 obj 27-28
+; build_map16 obj func 27-28
 
   dw $9351                                  ; $12952E |
   dw $93E9                                  ; $129530 |
@@ -2549,7 +2549,7 @@ CODE_1294BD:
   JMP build_map16_object_com2               ; $129548 |
 
 ; === Subroutine ===
-; build_map16 obj 29-2A
+; build_map16 obj func 29-2A
 
   dw $94CF                                  ; $12954B |
   dw $94CF                                  ; $12954D |
@@ -2568,7 +2568,7 @@ CODE_1294BD:
   JMP build_map16_object_com2               ; $129566 |
 
 ; === Subroutine ===
-; build_map16 obj 2B
+; build_map16 obj func 2B
 
   REP #$20                                  ; $129569 |
   LDX #$13                                  ; $12956B |
@@ -2576,7 +2576,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $129570 |
 
 ; === Subroutine ===
-; build_map16 obj 2C
+; build_map16 obj func 2C
 
   REP #$20                                  ; $129573 |
   INC $2A                                   ; $129575 |
@@ -2585,7 +2585,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $12957C |
 
 ; === Subroutine ===
-; build_map16 obj 2D-2E
+; build_map16 obj func 2D-2E
 
   dw $958B                                  ; $12957F |
   dw $95FD                                  ; $129581 |
@@ -2602,7 +2602,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $129599 |
 
 ; === Subroutine ===
-; build_map16 obj 2F
+; build_map16 obj func 2F
 
   REP #$20                                  ; $12959C |
   LDX #$13                                  ; $12959E |
@@ -2610,7 +2610,7 @@ CODE_1294BD:
   JMP build_map16_object_com1               ; $1295A3 |
 
 ; === Subroutine ===
-; build_map16 obj 30-31
+; build_map16 obj func 30-31
 
   dw $96B1                                  ; $1295A6 |
   dw $9768                                  ; $1295A8 |
@@ -2633,7 +2633,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $1295C8 |
 
 ; === Subroutine ===
-; build_map16 obj 32-33
+; build_map16 obj func 32-33
 
   dw $97EA                                  ; $1295CB |
   dw $98F2                                  ; $1295CD |
@@ -2648,7 +2648,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $1295DD |
 
 ; === Subroutine ===
-; build_map16 obj 34
+; build_map16 obj func 34
 
   REP #$20                                  ; $1295E0 |
   INC $2E                                   ; $1295E2 |
@@ -2658,7 +2658,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $1295EB |
 
 ; === Subroutine ===
-; build_map16 obj 35
+; build_map16 obj func 35
 
   REP #$20                                  ; $1295EE |
   STZ $15                                   ; $1295F0 |
@@ -2667,7 +2667,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $1295F7 |
 
 ; === Subroutine ===
-; build_map16 obj 36
+; build_map16 obj func 36
 
   REP #$20                                  ; $1295FA |
   LDA #$000B                                ; $1295FC |
@@ -2677,7 +2677,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $129606 |
 
 ; === Subroutine ===
-; build_map16 obj 37
+; build_map16 obj func 37
 
   REP #$20                                  ; $129609 |
   LDX #$13                                  ; $12960B |
@@ -2685,7 +2685,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $129610 |
 
 ; === Subroutine ===
-; build_map16 obj 38
+; build_map16 obj func 38
 
   REP #$20                                  ; $129613 |
   JSL $128875                               ; $129615 |
@@ -2696,7 +2696,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $129623 |
 
 ; === Subroutine ===
-; build_map16 obj 39
+; build_map16 obj func 39
 
   REP #$20                                  ; $129626 |
   LDA $2A                                   ; $129628 |
@@ -2712,7 +2712,7 @@ CODE_1295BC:
   JMP build_map16_object_com1               ; $12963D |
 
 ; === Subroutine ===
-; build_map16 obj 3A
+; build_map16 obj func 3A
 
   REP #$20                                  ; $129640 |
   LDX #$13                                  ; $129642 |
@@ -2720,7 +2720,7 @@ CODE_1295BC:
   JMP build_map16_object_com2               ; $129647 |
 
 ; === Subroutine ===
-; build_map16 obj 3B
+; build_map16 obj func 3B
 
   REP #$20                                  ; $12964A |
   LDA $2A                                   ; $12964C |
@@ -2742,7 +2742,7 @@ CODE_12965D:
   JMP build_map16_object_com2               ; $129664 |
 
 ; === Subroutine ===
-; build_map16 obj 3C,F4
+; build_map16 obj func 3C,F4
 
   REP #$20                                  ; $129667 |
   LDA $15                                   ; $129669 |
@@ -2755,7 +2755,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $12967A |
 
 ; === Subroutine ===
-; build_map16 obj 3D
+; build_map16 obj func 3D
 
   REP #$20                                  ; $12967D |
   LDA #$0003                                ; $12967F |
@@ -2765,7 +2765,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $129689 |
 
 ; === Subroutine ===
-; build_map16 obj 3E
+; build_map16 obj func 3E
 
   REP #$20                                  ; $12968C |
   LDX #$13                                  ; $12968E |
@@ -2773,7 +2773,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $129693 |
 
 ; === Subroutine ===
-; build_map16 obj 3F-40
+; build_map16 obj func 3F-40
 
   REP #$20                                  ; $129696 |
   LDX #$13                                  ; $129698 |
@@ -2781,7 +2781,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $12969D |
 
 ; === Subroutine ===
-; build_map16 obj 41
+; build_map16 obj func 41
 
   REP #$20                                  ; $1296A0 |
   LDX #$13                                  ; $1296A2 |
@@ -2789,7 +2789,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $1296A7 |
 
 ; === Subroutine ===
-; build_map16 obj 42-43
+; build_map16 obj func 42-43
 
   dw $A371                                  ; $1296AA |
   dw $A3AE                                  ; $1296AC |
@@ -2804,7 +2804,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $1296BC |
 
 ; === Subroutine ===
-; build_map16 obj 44
+; build_map16 obj func 44
 
   REP #$20                                  ; $1296BF |
   STZ $A1                                   ; $1296C1 |
@@ -2813,7 +2813,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $1296C8 |
 
 ; === Subroutine ===
-; build_map16 obj 45-46
+; build_map16 obj func 45-46
 
   LDA #$13                                  ; $1296CB |
   STA $24                                   ; $1296CD |
@@ -2852,7 +2852,7 @@ CODE_12965D:
   dw $FFFF, $0001                           ; $129712 |
 
 ; === Subroutine ===
-; build_map16 obj 47
+; build_map16 obj func 47
 
   REP #$20                                  ; $129716 |
   LDX #$13                                  ; $129718 |
@@ -2860,7 +2860,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $12971D |
 
 ; === Subroutine ===
-; build_map16 obj 48
+; build_map16 obj func 48
 
   LDA #$13                                  ; $129720 |
   STA $24                                   ; $129722 |
@@ -2880,7 +2880,7 @@ CODE_12965D:
   RTL                                       ; $129742 |
 
 ; === Subroutine ===
-; build_map16 obj 49-4A
+; build_map16 obj func 49-4A
 
   LDA #$13                                  ; $129743 |
   STA $24                                   ; $129745 |
@@ -2901,7 +2901,7 @@ CODE_12965D:
   RTL                                       ; $129767 |
 
 ; === Subroutine ===
-; build_map16 obj 4B-4D
+; build_map16 obj func 4B-4D
 
   LDA #$13                                  ; $129768 |
   STA $24                                   ; $12976A |
@@ -2931,7 +2931,7 @@ CODE_12965D:
   dw $0004, $0006, $0008                    ; $129797 |
 
 ; === Subroutine ===
-; build_map16 obj 4E
+; build_map16 obj func 4E
 
   LDA #$13                                  ; $12979D |
   STA $24                                   ; $12979F |
@@ -2950,7 +2950,7 @@ CODE_12965D:
   RTL                                       ; $1297BC |
 
 ; === Subroutine ===
-; build_map16 obj 4F
+; build_map16 obj func 4F
 
   LDA #$13                                  ; $1297BD |
   STA $24                                   ; $1297BF |
@@ -2969,7 +2969,7 @@ CODE_12965D:
   RTL                                       ; $1297DC |
 
 ; === Subroutine ===
-; build_map16 obj 50-51
+; build_map16 obj func 50-51
 
   LDA #$13                                  ; $1297DD |
   STA $24                                   ; $1297DF |
@@ -2988,7 +2988,7 @@ CODE_12965D:
   RTL                                       ; $1297FC |
 
 ; === Subroutine ===
-; build_map16 obj 52
+; build_map16 obj func 52
 
   LDA #$13                                  ; $1297FD |
   STA $24                                   ; $1297FF |
@@ -3008,7 +3008,7 @@ CODE_12965D:
   RTL                                       ; $12981F |
 
 ; === Subroutine ===
-; build_map16 obj 53
+; build_map16 obj func 53
 
   REP #$20                                  ; $129820 |
   LDX #$13                                  ; $129822 |
@@ -3016,7 +3016,7 @@ CODE_12965D:
   JMP build_map16_object_com1               ; $129827 |
 
 ; === Subroutine ===
-; build_map16 obj 54-56
+; build_map16 obj func 54-56
 
   LDA #$13                                  ; $12982A |
   STA $24                                   ; $12982C |
@@ -3042,7 +3042,7 @@ CODE_12965D:
   dw $FFFF, $FFFF, $FFFE                    ; $129854 |
 
 ; === Subroutine ===
-; build_map16 obj 57
+; build_map16 obj func 57
 
   LDA #$13                                  ; $12985A |
   STA $24                                   ; $12985C |
@@ -3061,7 +3061,7 @@ CODE_12965D:
   RTL                                       ; $129879 |
 
 ; === Subroutine ===
-; build_map16 obj 58
+; build_map16 obj func 58
 
   LDA #$13                                  ; $12987A |
   STA $24                                   ; $12987C |
@@ -3081,7 +3081,7 @@ CODE_12965D:
   RTL                                       ; $12989B |
 
 ; === Subroutine ===
-; build_map16 obj 59-5B
+; build_map16 obj func 59-5B
 
   LDA #$13                                  ; $12989C |
   STA $24                                   ; $12989E |
@@ -3129,7 +3129,7 @@ CODE_12965D:
   dw $FFFF, $FFFF, $FFFE                    ; $1298EF |
 
 ; === Subroutine ===
-; build_map16 obj 5C-5E
+; build_map16 obj func 5C-5E
 
   LDA #$13                                  ; $1298F5 |
   STA $24                                   ; $1298F7 |
@@ -3168,7 +3168,7 @@ CODE_12965D:
   dw $0001, $0001, $0002                    ; $129938 |
 
 ; === Subroutine ===
-; build_map16 obj 5F-60
+; build_map16 obj func 5F-60
 
   LDA #$13                                  ; $12993E |
   STA $24                                   ; $129940 |
@@ -3215,7 +3215,7 @@ CODE_12996D:
   RTL                                       ; $12998E |
 
 ; === Subroutine ===
-; build_map16 obj 61-62
+; build_map16 obj func 61-62
 
   LDA #$13                                  ; $12998F |
   STA $24                                   ; $129991 |
@@ -3291,7 +3291,7 @@ CODE_129A07:
   RTL                                       ; $129A0C |
 
 ; === Subroutine ===
-; build_map16 obj 63-65
+; build_map16 obj func 63-65
 
   LDA #$13                                  ; $129A0D |
   STA $24                                   ; $129A0F |
@@ -3310,7 +3310,7 @@ CODE_129A07:
   RTL                                       ; $129A2C |
 
 ; === Subroutine ===
-; build_map16 obj 66
+; build_map16 obj func 66
 
   LDA #$13                                  ; $129A2D |
   STA $24                                   ; $129A2F |
@@ -3329,7 +3329,7 @@ CODE_129A07:
   RTL                                       ; $129A4C |
 
 ; === Subroutine ===
-; build_map16 obj 67
+; build_map16 obj func 67
 
   LDA !r_header_bg1_tileset                 ; $129A4D |
   CMP #$0C                                  ; $129A50 |
@@ -3346,7 +3346,7 @@ CODE_129A5E:
   JMP build_map16_object_com1               ; $129A65 |
 
 ; === Subroutine ===
-; build_map16 obj 68,8A
+; build_map16 obj func 68,8A
 
   REP #$20                                  ; $129A68 |
   LDX #$13                                  ; $129A6A |
@@ -3355,7 +3355,7 @@ CODE_129A5E:
   JMP build_map16_object_com1               ; $129A72 |
 
 ; === Subroutine ===
-; build_map16 obj 69
+; build_map16 obj func 69
 
   REP #$20                                  ; $129A75 |
   LDA $2A                                   ; $129A77 |
@@ -3377,7 +3377,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129A96 |
 
 ; === Subroutine ===
-; build_map16 obj 6A
+; build_map16 obj func 6A
 
   REP #$20                                  ; $129A99 |
   LDX #$13                                  ; $129A9B |
@@ -3385,7 +3385,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129AA0 |
 
 ; === Subroutine ===
-; build_map16 obj 6B
+; build_map16 obj func 6B
 
   REP #$20                                  ; $129AA3 |
   INC $2E                                   ; $129AA5 |
@@ -3404,7 +3404,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129AC3 |
 
 ; === Subroutine ===
-; build_map16 obj 6C
+; build_map16 obj func 6C
 
   REP #$20                                  ; $129AC6 |
   LDX #$13                                  ; $129AC8 |
@@ -3412,7 +3412,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129ACD |
 
 ; === Subroutine ===
-; build_map16 obj 6D
+; build_map16 obj func 6D
 
   REP #$20                                  ; $129AD0 |
   LDX #$13                                  ; $129AD2 |
@@ -3420,7 +3420,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129AD7 |
 
 ; === Subroutine ===
-; build_map16 obj 6E,8B
+; build_map16 obj func 6E,8B
 
   REP #$20                                  ; $129ADA |
   LDX #$13                                  ; $129ADC |
@@ -3428,7 +3428,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129AE1 |
 
 ; === Subroutine ===
-; build_map16 obj 6F
+; build_map16 obj func 6F
 
   REP #$20                                  ; $129AE4 |
   LDX #$13                                  ; $129AE6 |
@@ -3436,7 +3436,7 @@ CODE_129A91:
   JMP build_map16_object_com1               ; $129AEB |
 
 ; === Subroutine ===
-; build_map16 obj 70
+; build_map16 obj func 70
 
   REP #$20                                  ; $129AEE |
   LDA $2A                                   ; $129AF0 |
@@ -3452,7 +3452,7 @@ CODE_129AF9:
   JMP build_map16_object_com1               ; $129B03 |
 
 ; === Subroutine ===
-; build_map16 obj 71
+; build_map16 obj func 71
 
   REP #$20                                  ; $129B06 |
   LDA $2A                                   ; $129B08 |
@@ -3468,7 +3468,7 @@ CODE_129B11:
   JMP build_map16_object_com1               ; $129B1B |
 
 ; === Subroutine ===
-; build_map16 obj 72
+; build_map16 obj func 72
 
   REP #$20                                  ; $129B1E |
   LDA $2A                                   ; $129B20 |
@@ -3484,7 +3484,7 @@ CODE_129B29:
   JMP build_map16_object_com1               ; $129B33 |
 
 ; === Subroutine ===
-; build_map16 obj 73
+; build_map16 obj func 73
 
   REP #$20                                  ; $129B36 |
   LDA #$0003                                ; $129B38 |
@@ -3500,7 +3500,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129B4B |
 
 ; === Subroutine ===
-; build_map16 obj 74
+; build_map16 obj func 74
 
   REP #$20                                  ; $129B4E |
   LDA #$0003                                ; $129B50 |
@@ -3510,7 +3510,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129B5A |
 
 ; === Subroutine ===
-; build_map16 obj 75
+; build_map16 obj func 75
 
   REP #$20                                  ; $129B5D |
   LDA #$0002                                ; $129B5F |
@@ -3520,7 +3520,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129B69 |
 
 ; === Subroutine ===
-; build_map16 obj 76
+; build_map16 obj func 76
 
   REP #$20                                  ; $129B6C |
   LDA #$0002                                ; $129B6E |
@@ -3530,7 +3530,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129B78 |
 
 ; === Subroutine ===
-; build_map16 obj 77
+; build_map16 obj func 77
 
   REP #$20                                  ; $129B7B |
   LDX #$13                                  ; $129B7D |
@@ -3538,7 +3538,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129B82 |
 
 ; === Subroutine ===
-; build_map16 obj 78
+; build_map16 obj func 78
 
   LDA #$13                                  ; $129B85 |
   STA $24                                   ; $129B87 |
@@ -3560,7 +3560,7 @@ CODE_129B46:
   RTL                                       ; $129BAC |
 
 ; === Subroutine ===
-; build_map16 obj 79
+; build_map16 obj func 79
 
   LDA #$13                                  ; $129BAD |
   STA $24                                   ; $129BAF |
@@ -3582,7 +3582,7 @@ CODE_129B46:
   RTL                                       ; $129BD4 |
 
 ; === Subroutine ===
-; build_map16 obj 7A
+; build_map16 obj func 7A
 
   REP #$20                                  ; $129BD5 |
   LDX #$13                                  ; $129BD7 |
@@ -3590,7 +3590,7 @@ CODE_129B46:
   JMP build_map16_object_com1               ; $129BDC |
 
 ; === Subroutine ===
-; build_map16 obj 7B
+; build_map16 obj func 7B
 
   REP #$20                                  ; $129BDF |
   LDA #$FFFF                                ; $129BE1 |
@@ -3600,7 +3600,7 @@ CODE_129B46:
   JMP build_map16_object_com2               ; $129BEB |
 
 ; === Subroutine ===
-; build_map16 obj 7C
+; build_map16 obj func 7C
 
   REP #$20                                  ; $129BEE |
   LDA $2A                                   ; $129BF0 |
@@ -3615,7 +3615,7 @@ CODE_129BF8:
   JMP build_map16_object_com1               ; $129BFF |
 
 ; === Subroutine ===
-; build_map16 obj 7D
+; build_map16 obj func 7D
 
   REP #$20                                  ; $129C02 |
   LDA #$0002                                ; $129C04 |
@@ -3625,7 +3625,7 @@ CODE_129BF8:
   JMP build_map16_object_com1               ; $129C0E |
 
 ; === Subroutine ===
-; build_map16 obj 7F
+; build_map16 obj func 7F
 
   REP #$20                                  ; $129C11 |
   LDA $2A                                   ; $129C13 |
@@ -3647,7 +3647,7 @@ CODE_129C2B:
   JMP build_map16_object_com1               ; $129C30 |
 
 ; === Subroutine ===
-; build_map16 obj 80
+; build_map16 obj func 80
 
   REP #$20                                  ; $129C33 |
   LDA $2A                                   ; $129C35 |
@@ -3662,7 +3662,7 @@ CODE_129C3D:
   JMP build_map16_object_com1               ; $129C44 |
 
 ; === Subroutine ===
-; build_map16 obj 81
+; build_map16 obj func 81
 
   LDA #$13                                  ; $129C47 |
   STA $24                                   ; $129C49 |
@@ -3689,7 +3689,7 @@ CODE_129C6C:
   RTL                                       ; $129C73 |
 
 ; === Subroutine ===
-; build_map16 obj 82-83
+; build_map16 obj func 82-83
 
   REP #$20                                  ; $129C74 |
   LDX #$13                                  ; $129C76 |
@@ -3697,7 +3697,7 @@ CODE_129C6C:
   JMP build_map16_object_com1               ; $129C7B |
 
 ; === Subroutine ===
-; build_map16 obj 84
+; build_map16 obj func 84
 
   REP #$20                                  ; $129C7E |
   LDA #$FFFF                                ; $129C80 |
@@ -3707,7 +3707,7 @@ CODE_129C6C:
   JMP build_map16_object_com2               ; $129C8A |
 
 ; === Subroutine ===
-; build_map16 obj 85
+; build_map16 obj func 85
 
   REP #$20                                  ; $129C8D |
   LDX #$13                                  ; $129C8F |
@@ -3715,7 +3715,7 @@ CODE_129C6C:
   JMP build_map16_object_com1               ; $129C94 |
 
 ; === Subroutine ===
-; build_map16 obj 86
+; build_map16 obj func 86
 
   REP #$20                                  ; $129C97 |
   LDA $2A                                   ; $129C99 |
@@ -3736,7 +3736,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129CB0 |
 
 ; === Subroutine ===
-; build_map16 obj 87-88
+; build_map16 obj func 87-88
 
   LDA #$13                                  ; $129CB3 |
   STA $24                                   ; $129CB5 |
@@ -3757,7 +3757,7 @@ CODE_129CA9:
   RTL                                       ; $129CD7 |
 
 ; === Subroutine ===
-; build_map16 obj 89
+; build_map16 obj func 89
 
   REP #$20                                  ; $129CD8 |
   LDX #$13                                  ; $129CDA |
@@ -3765,7 +3765,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129CDF |
 
 ; === Subroutine ===
-; build_map16 obj 8C
+; build_map16 obj func 8C
 
   REP #$20                                  ; $129CE2 |
   LDA #$0003                                ; $129CE4 |
@@ -3775,7 +3775,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129CEE |
 
 ; === Subroutine ===
-; build_map16 obj 8D
+; build_map16 obj func 8D
 
   REP #$20                                  ; $129CF1 |
   LDX #$13                                  ; $129CF3 |
@@ -3783,7 +3783,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129CF8 |
 
 ; === Subroutine ===
-; build_map16 obj 8E
+; build_map16 obj func 8E
 
   REP #$20                                  ; $129CFB |
   LDA $2A                                   ; $129CFD |
@@ -3797,7 +3797,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129D0F |
 
 ; === Subroutine ===
-; build_map16 obj 8F
+; build_map16 obj func 8F
 
   LDA #$13                                  ; $129D12 |
   STA $24                                   ; $129D14 |
@@ -3817,7 +3817,7 @@ CODE_129CA9:
   RTL                                       ; $129D34 |
 
 ; === Subroutine ===
-; build_map16 obj 90
+; build_map16 obj func 90
 
   LDA #$13                                  ; $129D35 |
   STA $24                                   ; $129D37 |
@@ -3837,7 +3837,7 @@ CODE_129CA9:
   RTL                                       ; $129D57 |
 
 ; === Subroutine ===
-; build_map16 obj 91-92
+; build_map16 obj func 91-92
 
   dw $D619                                  ; $129D58 |
   dw $D674                                  ; $129D5A |
@@ -3863,7 +3863,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129D82 |
 
 ; === Subroutine ===
-; build_map16 obj 93
+; build_map16 obj func 93
 
   REP #$20                                  ; $129D85 |
   LDA #$0004                                ; $129D87 |
@@ -3883,7 +3883,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129DA5 |
 
 ; === Subroutine ===
-; build_map16 obj 94-97
+; build_map16 obj func 94-97
 
   REP #$20                                  ; $129DA8 |
   LDA $2A                                   ; $129DAA |
@@ -3899,7 +3899,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129DBF |
 
 ; === Subroutine ===
-; build_map16 obj 98
+; build_map16 obj func 98
 
   REP #$20                                  ; $129DC2 |
   LDX #$13                                  ; $129DC4 |
@@ -3907,7 +3907,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129DC9 |
 
 ; === Subroutine ===
-; build_map16 obj 99
+; build_map16 obj func 99
 
   REP #$20                                  ; $129DCC |
   LDA #$0003                                ; $129DCE |
@@ -3927,7 +3927,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129DEC |
 
 ; === Subroutine ===
-; build_map16 obj 9A
+; build_map16 obj func 9A
 
   REP #$20                                  ; $129DEF |
   LDA #$0004                                ; $129DF1 |
@@ -3954,7 +3954,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E1F |
 
 ; === Subroutine ===
-; build_map16 obj 9B-9C
+; build_map16 obj func 9B-9C
 
   dw $D944                                  ; $129E22 |
   dw $D9C7                                  ; $129E24 |
@@ -3975,7 +3975,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E43 |
 
 ; === Subroutine ===
-; build_map16 obj 9D
+; build_map16 obj func 9D
 
   REP #$20                                  ; $129E46 |
   LDX #$13                                  ; $129E48 |
@@ -3983,7 +3983,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E4D |
 
 ; === Subroutine ===
-; build_map16 obj 9E
+; build_map16 obj func 9E
 
   REP #$20                                  ; $129E50 |
   LDX #$13                                  ; $129E52 |
@@ -3991,7 +3991,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E57 |
 
 ; === Subroutine ===
-; build_map16 obj 9F
+; build_map16 obj func 9F
 
   REP #$20                                  ; $129E5A |
   LDA #$0002                                ; $129E5C |
@@ -4005,7 +4005,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E6E |
   
 ; === Subroutine ===
-; build_map16 obj A0-A2
+; build_map16 obj func A0-A2
 
   REP #$20                                  ; $129E71 |
   LDA $15                                   ; $129E73 |
@@ -4021,7 +4021,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129E88 |
 
 ; === Subroutine ===
-; build_map16 obj A3-A4
+; build_map16 obj func A3-A4
 
   REP #$20                                  ; $129E8B |
   LDA $15                                   ; $129E8D |
@@ -4040,7 +4040,7 @@ CODE_129CA9:
   JMP build_map16_object_com1               ; $129EA9 |
 
 ; === Subroutine ===
-; build_map16 obj A5-A6
+; build_map16 obj func A5-A6
 
   dw $0002, $0004                           ; $129EAC |
 
@@ -4067,7 +4067,7 @@ CODE_129ED0:
   JMP build_map16_object_com1               ; $129ED7 |
 
 ; === Subroutine ===
-; build_map16 obj A7-A8
+; build_map16 obj func A7-A8
 
   dw $DC90                                  ; $129EDA |
   dw $DCF2                                  ; $129EDC |
@@ -4100,7 +4100,7 @@ CODE_129ED0:
   JMP build_map16_object_com1               ; $129F10 |
 
 ; === Subroutine ===
-; build_map16 obj A9
+; build_map16 obj func A9
 
   REP #$20                                  ; $129F13 |
   LDX !r_header_bg1_tileset                 ; $129F15 |
@@ -4118,7 +4118,7 @@ CODE_129F24:
   JMP build_map16_object_com1               ; $129F2E |
 
 ; === Subroutine ===
-; build_map16 obj AA-AB
+; build_map16 obj func AA-AB
 
   dw $DF03                                  ; $129F31 |
   dw $DF4F                                  ; $129F33 |
@@ -4135,7 +4135,7 @@ CODE_129F24:
   JMP build_map16_object_com1               ; $129F48 |
 
 ; === Subroutine ===
-; build_map16 obj AC-AD
+; build_map16 obj func AC-AD
 
   dw $DE60                                  ; $129F4B |
   dw $DEB7                                  ; $129F4D |
@@ -4157,7 +4157,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $129F6A |
 
 ; === Subroutine ===
-; build_map16 obj AE-AF
+; build_map16 obj func AE-AF
 
   dw $E147                                  ; $129F6D |
   dw $E16F                                  ; $129F6F |
@@ -4179,7 +4179,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $129F8C |
 
 ; === Subroutine ===
-; build_map16 obj B0
+; build_map16 obj func B0
 
   REP #$20                                  ; $129F8F |
   LDX #$13                                  ; $129F91 |
@@ -4187,7 +4187,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $129F96 |
 
 ; === Subroutine ===
-; build_map16 obj B1
+; build_map16 obj func B1
 
   REP #$20                                  ; $129F99 |
   LDX #$13                                  ; $129F9B |
@@ -4195,7 +4195,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $129FA0 |
 
 ; === Subroutine ===
-; build_map16 obj B2-B3
+; build_map16 obj func B2-B3
 
   dw $E280                                  ; $129FA3 |
   dw $E2A1                                  ; $129FA5 |
@@ -4214,7 +4214,7 @@ CODE_129F5E:
   JMP build_map16_object_com2               ; $129FBF |
 
 ; === Subroutine ===
-; build_map16 obj B4-B5
+; build_map16 obj func B4-B5
 
   dw $E280                                  ; $129FC2 |
   dw $E2C4                                  ; $129FC4 |
@@ -4233,7 +4233,7 @@ CODE_129F5E:
   JMP build_map16_object_com2               ; $129FDE |
 
 ; === Subroutine ===
-; build_map16 obj B6-B7
+; build_map16 obj func B6-B7
 
   dw $E2E7                                  ; $129FE1 |
   dw $E32C                                  ; $129FE3 |
@@ -4252,7 +4252,7 @@ CODE_129F5E:
   JMP build_map16_object_com2               ; $129FFD |
 
 ; === Subroutine ===
-; build_map16 obj B8-B9
+; build_map16 obj func B8-B9
 
   dw $E2E7                                  ; $12A000 |
   dw $E373                                  ; $12A002 |
@@ -4271,7 +4271,7 @@ CODE_129F5E:
   JMP build_map16_object_com2               ; $12A01C |
 
 ; === Subroutine ===
-; build_map16 obj BA-BD
+; build_map16 obj func BA-BD
 
   dw $E3BA                                  ; $12A01F |
   dw $E3E9                                  ; $12A021 |
@@ -4290,7 +4290,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $12A037 |
 
 ; === Subroutine ===
-; build_map16 obj BE-BF
+; build_map16 obj func BE-BF
 
   dw $E582                                  ; $12A03A |
   dw $E62C                                  ; $12A03C |
@@ -4305,7 +4305,7 @@ CODE_129F5E:
   JMP build_map16_object_com1               ; $12A04C |
 
 ; === Subroutine ===
-; build_map16 obj C0-C3
+; build_map16 obj func C0-C3
 
   dw $E74B                                  ; $12A04F |
   dw $E81C                                  ; $12A051 |
@@ -4331,7 +4331,7 @@ CODE_12A076:
   JMP build_map16_object_com1               ; $12A076 |
 
 ; === Subroutine ===
-; build_map16 obj C4-C9
+; build_map16 obj func C4-C9
 
   dw $E903                                  ; $12A079 |
   dw $E90E                                  ; $12A07B |
@@ -4374,7 +4374,7 @@ CODE_12A0BA:
   JMP build_map16_object_com1               ; $12A0BA |
 
 ; === Subroutine ===
-; build_map16 obj CA
+; build_map16 obj func CA
 
   REP #$20                                  ; $12A0BD |
   LDX #$13                                  ; $12A0BF |
@@ -4382,7 +4382,7 @@ CODE_12A0BA:
   JMP build_map16_object_com1               ; $12A0C4 |
 
 ; === Subroutine ===
-; build_map16 obj CB
+; build_map16 obj func CB
 
   REP #$20                                  ; $12A0C7 |
   STZ $A1                                   ; $12A0C9 |
@@ -4391,7 +4391,7 @@ CODE_12A0BA:
   JMP build_map16_object_com1               ; $12A0D0 |
 
 ; === Subroutine ===
-; build_map16 obj CC-CD
+; build_map16 obj func CC-CD
 
   dw $EB63                                  ; $12A0D3 |
   dw $EA59                                  ; $12A0D5 |
@@ -4409,7 +4409,7 @@ CODE_12A0BA:
   JMP build_map16_object_com2               ; $12A0EC |
 
 ; === Subroutine ===
-; build_map16 obj CE
+; build_map16 obj func CE
 
   REP #$20                                  ; $12A0EF |
   LDA #$0001                                ; $12A0F1 |
@@ -4426,7 +4426,7 @@ CODE_12A0FC:
   JMP build_map16_object_com2               ; $12A106 |
 
 ; === Subroutine ===
-; build_map16 obj CF
+; build_map16 obj func CF
 
   REP #$20                                  ; $12A109 |
   LDA #$0002                                ; $12A10B |
@@ -4443,7 +4443,7 @@ CODE_12A116:
   JMP build_map16_object_com2               ; $12A120 |
 
 ; === Subroutine ===
-; build_map16 obj D0
+; build_map16 obj func D0
 
   REP #$20                                  ; $12A123 |
   LDA #$0002                                ; $12A125 |
@@ -4460,7 +4460,7 @@ CODE_12A130:
   JMP build_map16_object_com2               ; $12A13A |
 
 ; === Subroutine ===
-; build_map16 obj D1
+; build_map16 obj func D1
 
   REP #$20                                  ; $12A13D |
   LDX #$13                                  ; $12A13F |
@@ -4468,7 +4468,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A144 |
 
 ; === Subroutine ===
-; build_map16 obj D2
+; build_map16 obj func D2
 
   REP #$20                                  ; $12A147 |
   LDX #$13                                  ; $12A149 |
@@ -4476,7 +4476,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A14E |
 
 ; === Subroutine ===
-; build_map16 obj D3
+; build_map16 obj func D3
 
   REP #$20                                  ; $12A151 |
   LDX #$13                                  ; $12A153 |
@@ -4484,7 +4484,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A158 |
 
 ; === Subroutine ===
-; build_map16 obj D4-D7
+; build_map16 obj func D4-D7
 
   dw $ED26                                  ; $12A15B |
   dw $EE30                                  ; $12A15D |
@@ -4502,7 +4502,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A173 |
 
 ; === Subroutine ===
-; build_map16 obj D8-D9
+; build_map16 obj func D8-D9
 
   dw $0004, $0003                           ; $12A176 |
 
@@ -4522,7 +4522,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A192 |
 
 ; === Subroutine ===
-; build_map16 obj DA
+; build_map16 obj func DA
 
   REP #$20                                  ; $12A195 |
   LDX #$13                                  ; $12A197 |
@@ -4530,7 +4530,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A19C |
 
 ; === Subroutine ===
-; build_map16 obj DB
+; build_map16 obj func DB
 
   REP #$20                                  ; $12A19F |
   LDX #$13                                  ; $12A1A1 |
@@ -4538,7 +4538,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1A6 |
 
 ; === Subroutine ===
-; build_map16 obj DC
+; build_map16 obj func DC
 
   REP #$20                                  ; $12A1A9 |
   LDX #$13                                  ; $12A1AB |
@@ -4546,7 +4546,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1B0 |
 
 ; === Subroutine ===
-; build_map16 obj DD
+; build_map16 obj func DD
 
   REP #$20                                  ; $12A1B3 |
   JSL $128875                               ; $12A1B5 |
@@ -4557,7 +4557,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1C3 |
 
 ; === Subroutine ===
-; build_map16 obj DE
+; build_map16 obj func DE
 
   REP #$20                                  ; $12A1C6 |
   INC $2A                                   ; $12A1C8 |
@@ -4566,7 +4566,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1CF |
 
 ; === Subroutine ===
-; build_map16 obj DF
+; build_map16 obj func DF
 
   REP #$20                                  ; $12A1D2 |
   INC $2E                                   ; $12A1D4 |
@@ -4575,7 +4575,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1DB |
 
 ; === Subroutine ===
-; build_map16 obj E0
+; build_map16 obj func E0
 
   REP #$20                                  ; $12A1DE |
   LDX #$13                                  ; $12A1E0 |
@@ -4583,7 +4583,7 @@ CODE_12A130:
   JMP build_map16_object_com1               ; $12A1E5 |
 
 ; === Subroutine ===
-; build_map16 obj E1
+; build_map16 obj func E1
 
   REP #$20                                  ; $12A1E8 |
   STZ $A1                                   ; $12A1EA |
@@ -4602,7 +4602,7 @@ CODE_12A1F8:
   JMP build_map16_object_com1               ; $12A202 |
 
 ; === Subroutine ===
-; build_map16 obj E2
+; build_map16 obj func E2
 
   REP #$20                                  ; $12A205 |
   LDA #$0004                                ; $12A207 |
@@ -4612,7 +4612,7 @@ CODE_12A1F8:
   JMP build_map16_object_com1               ; $12A211 |
 
 ; === Subroutine ===
-; build_map16 obj E3
+; build_map16 obj func E3
 
   REP #$20                                  ; $12A214 |
   LDX #$13                                  ; $12A216 |
@@ -4620,7 +4620,7 @@ CODE_12A1F8:
   JMP build_map16_object_com1               ; $12A21B |
 
 ; === Subroutine ===
-; build_map16 obj E4
+; build_map16 obj func E4
 
   REP #$20                                  ; $12A21E |
   JSR CODE_12A22B                           ; $12A220 |
@@ -4647,7 +4647,7 @@ CODE_12A22B:
   RTS                                       ; $12A246 |
 
 ; === Subroutine ===
-; build_map16 obj E5
+; build_map16 obj func E5
 
   REP #$20                                  ; $12A247 |
   JSR CODE_12A22B                           ; $12A249 |
@@ -4658,7 +4658,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A256 |
 
 ; === Subroutine ===
-; build_map16 obj E6
+; build_map16 obj func E6
 
   REP #$20                                  ; $12A259 |
   JSR CODE_12A22B                           ; $12A25B |
@@ -4669,7 +4669,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A268 |
 
 ; === Subroutine ===
-; build_map16 obj E7
+; build_map16 obj func E7
 
   REP #$20                                  ; $12A26B |
   LDA $1B                                   ; $12A26D |
@@ -4690,7 +4690,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A290 |
 
 ; === Subroutine ===
-; build_map16 obj E8
+; build_map16 obj func E8
 
   REP #$20                                  ; $12A293 |
   JSR CODE_12A22B                           ; $12A295 |
@@ -4701,7 +4701,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A2A2 |
 
 ; === Subroutine ===
-; build_map16 obj E9
+; build_map16 obj func E9
 
   REP #$20                                  ; $12A2A5 |
   JSR CODE_12A22B                           ; $12A2A7 |
@@ -4712,7 +4712,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A2B4 |
 
 ; === Subroutine ===
-; build_map16 obj EA
+; build_map16 obj func EA
 
   REP #$20                                  ; $12A2B7 |
   LDA $1B                                   ; $12A2B9 |
@@ -4733,7 +4733,7 @@ CODE_12A22B:
   JMP build_map16_object_com2               ; $12A2DC |
 
 ; === Subroutine ===
-; build_map16 obj EB-EC
+; build_map16 obj func EB-EC
 
   REP #$20                                  ; $12A2DF |
   LDA $15                                   ; $12A2E1 |
@@ -4756,7 +4756,7 @@ CODE_12A22B:
   JMP build_map16_object_com1               ; $12A307 |
 
 ; === Subroutine ===
-; build_map16 obj ED
+; build_map16 obj func ED
 
   REP #$20                                  ; $12A30A |
   LDA $1B                                   ; $12A30C |
@@ -4775,7 +4775,7 @@ CODE_12A22B:
   JMP build_map16_object_com1               ; $12A325 |
 
 ; === Subroutine ===
-; build_map16 obj EE-EF
+; build_map16 obj func EE-EF
 
   REP #$20                                  ; $12A328 |
   LDA $1B                                   ; $12A32A |
@@ -4799,7 +4799,7 @@ CODE_12A342:
   JMP build_map16_object_com1               ; $12A349 |
 
 ; === Subroutine ===
-; build_map16 obj F0-F3
+; build_map16 obj func F0-F3
 
   dw $4020, $C0E0                           ; $12A34C |
 
@@ -4872,7 +4872,7 @@ CODE_12A384:
   JMP build_map16_object_com1               ; $12A3C4 |
 
 ; === Subroutine ===
-; build_map16 obj F5
+; build_map16 obj func F5
 
   REP #$20                                  ; $12A3C7 |
   LDX #$13                                  ; $12A3C9 |
@@ -4880,7 +4880,7 @@ CODE_12A384:
   JMP build_map16_object_com1               ; $12A3CE |
 
 ; === Subroutine ===
-; build_map16 obj F6
+; build_map16 obj func F6
 
   REP #$20                                  ; $12A3D1 |
   LDX #$13                                  ; $12A3D3 |
