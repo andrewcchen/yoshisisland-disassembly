@@ -15,6 +15,8 @@ for filename in sys.argv[1:]:
     with open(filename, 'r+') as f:
         lines = f.readlines()
         for i in range(len(lines)):
+            lines[i] = lines[i].rstrip() + '\n'
+
             l = lines[i]
             com_pos = l.find(';')
             if com_pos > comment_column:

@@ -201,7 +201,8 @@ build_map16_jump_table:
   db $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF ; $1285E4 |
 
 ; === Subroutine ===
-; Common driver for object subroutines in build_map16_table
+; Common driver for object funcs in build_map16_table
+; Calls tile funcs
 ;
 ; Parameters:
 ; $17: ???
@@ -220,27 +221,28 @@ build_map16_jump_table:
 ; $2C: y index
 ; $9B: ???
 ;
-; Arguments for subroutines:
+; Arguments for tile funcs:
 ; $1D: tile table offset
 ; $12: existing data at offset
+
 build_map16_object_driver:
   STZ $28                                   ; $1285EC | x index = 0
   STZ $2C                                   ; $1285EE | y index = 0
   STZ $9B                                   ; $1285F0 | ??? = 0
 
-CODE_1285F2:
+.loc_1285F2:
   SEP #$30                                  ; $1285F2 |
   STZ $14                                   ; $1285F4 | ??? = 0
-  JSR sub_1286FD                            ; $1285F6 | table offset -> $1D
+  JSR get_map16_table_ofst_ram              ; $1285F6 | table offset -> $1D
   REP #$20                                  ; $1285F9 |
 
-CODE_1285FB:
+.loc_1285FB:
   SEP #$10                                  ; $1285FB |
   PHK                                       ; $1285FD |
   PEA $862E                                 ; $1285FE | PUSH $12862F   // return address
   LDA $2C                                   ; $128601 |\ if y index < y marker:
   CMP $19                                   ; $128603 | |
-  BCC CODE_128612                           ; $128605 | |
+  BCC .loc_128612                           ; $128605 | |
   LDX $27                                   ; $128607 | |
   PHX                                       ; $128609 | |
   PHX                                       ; $12860A | |
@@ -250,10 +252,10 @@ CODE_1285FB:
   SEP #$20                                  ; $12860F | |
   RTL                                       ; $128611 |/  JMP [$25]
 
-CODE_128612:
+.loc_128612:
   LDA $28                                   ; $128612 |\ if x index is even:
   AND #$0001                                ; $128614 | |
-  BNE CODE_128624                           ; $128617 | |
+  BNE .loc_128624                           ; $128617 | |
   LDX $24                                   ; $128619 | |
   PHX                                       ; $12861B | |
   PHX                                       ; $12861C | |
@@ -263,7 +265,7 @@ CODE_128612:
   SEP #$20                                  ; $128621 | |
   RTL                                       ; $128623 |/  JMP [$22]
 
-CODE_128624:
+.loc_128624:
   LDX $21                                   ; $128624 |\ else: // x index is odd
   PHX                                       ; $128626 | |
   PHX                                       ; $128627 | |
@@ -279,30 +281,30 @@ CODE_128624:
   REP #$30                                  ; $128631 |
   LDY #$0000                                ; $128633 |
   LDA $2E                                   ; $128636 |\ if height < 0:
-  BPL CODE_128640                           ; $128638 | | y index -= 1
+  BPL .loc_128640                           ; $128638 | | y index -= 1
   DEC $2C                                   ; $12863A | |
   INY                                       ; $12863C | |
   INY                                       ; $12863D | |
-  BRA CODE_128642                           ; $12863E |/
+  BRA .loc_128642                           ; $12863E |/
 
-CODE_128640:
+.loc_128640:
   INC $2C                                   ; $128640 |  else: y index += 1
 
-CODE_128642:
+.loc_128642:
   LDA $2C                                   ; $128642 |\ if height != y index:
   CMP $2E                                   ; $128644 | |
-  BEQ CODE_128680                           ; $128646 | |
+  BEQ .loc_128680                           ; $128646 | |
   LDA $1D                                   ; $128648 | | // table offset from last iteration
   CLC                                       ; $12864A | |
   ADC $86C9,y                               ; $12864B | | A = offset + (height >= 0 ? 0x20 : -0x20)
   TAX                                       ; $12864E | | X = A
   BIT #$FE00                                ; $12864F | |\ if A & 0xFE00 == 0 or
-  BEQ CODE_12865C                           ; $128652 | | |   A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
+  BEQ .loc_12865C                           ; $128652 | | |   A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
   AND #$01E0                                ; $128654 | | | // under these conditions (new screen?)
   CMP $86CD,y                               ; $128657 | | | // we need to recalculate the offset
-  BNE CODE_128675                           ; $12865A | | | // otherwise inc/dec by 0x20 (a row) is good enough
+  BNE .loc_128675                           ; $12865A | | | // otherwise inc/dec by 0x20 (a row) is good enough
 
-CODE_12865C:
+.loc_12865C:
   TXA                                       ; $12865C | | | TODO
   AND #$01FF                                ; $12865D | | |
   STA $00                                   ; $128660 | | |
@@ -315,56 +317,56 @@ CODE_12865C:
   ADC $1C                                   ; $12866D | | |
   TAX                                       ; $12866F | | |
   SEP #$10                                  ; $128670 | | |
-  JSR get_map16_index_table_offset          ; $128672 | |/
+  JSR get_map16_table_ofst                  ; $128672 | |/
 
-CODE_128675:
+.loc_128675:
   STX $1D                                   ; $128675 | | offset = X
   LDA $7F8000,x                             ; $128677 | |
   STA $12                                   ; $12867B | | $12 = table[offset]
-  JMP CODE_1285FB                           ; $12867D |/  do call subroutine
+  JMP .loc_1285FB                           ; $12867D |/  do call subroutine
 
-CODE_128680:
+.loc_128680:
   LDA $1B                                   ; $128680 |\ else: // height == y index
   AND #$F0F0                                ; $128682 | |
   STA $00                                   ; $128685 | | $00 = obj y (in format Y0y0)
   STZ $2C                                   ; $128687 | | y index = 0
   LDA $2A                                   ; $128689 | |\ if obj width < 0:
-  BPL CODE_128697                           ; $12868B | | |
+  BPL .loc_128697                           ; $12868B | | |
   DEC $28                                   ; $12868D | | | x index -= 1
   LDA $1B                                   ; $12868F | | | // Note: x here is actually index x
   AND #$0F0F                                ; $128691 | | | //       since the variable is updated in the loop
   DEC A                                     ; $128694 | | | A = -1 + x (in format 0X0x)
-  BRA CODE_1286A2                           ; $128695 | |/
+  BRA .loc_1286A2                           ; $128695 | |/
 
-CODE_128697:
+.loc_128697:
   INC $28                                   ; $128697 | |\ else:
   LDA $1B                                   ; $128699 | | | x index += 1
   AND #$0F0F                                ; $12869B | | |
   ORA #$00F0                                ; $12869E | | |
   INC A                                     ; $1286A1 | |/  A = 1 + x (in format 0x0x)
 
-CODE_1286A2:
+.loc_1286A2:
   AND #$0F0F                                ; $1286A2 | |
   ORA $00                                   ; $1286A5 | | // basically we update yx with x inc/dec by 1
   STA $1B                                   ; $1286A7 | | yx = A | $00
   LDA $28                                   ; $1286A9 | |
   CMP $2A                                   ; $1286AB | |
-  BEQ CODE_1286C6                           ; $1286AD | | if x index == width: return
+  BEQ .loc_1286C6                           ; $1286AD | | if x index == width: return
   LDA $9B                                   ; $1286AF | | TODO
-  BEQ CODE_1286C3                           ; $1286B1 | |
-  JSR CODE_1286D5                           ; $1286B3 | |
+  BEQ .loc_1286C3                           ; $1286B1 | |
+  JSR sub_1286D5                            ; $1286B3 | |
   LDA $9B                                   ; $1286B6 | |
-  BMI CODE_1286C3                           ; $1286B8 | |
+  BMI .loc_1286C3                           ; $1286B8 | |
   LDA $2E                                   ; $1286BA | |
   CLC                                       ; $1286BC | |
   ADC $17                                   ; $1286BD | |
   STA $2E                                   ; $1286BF | |
-  BEQ CODE_1286C6                           ; $1286C1 | |
+  BEQ .loc_1286C6                           ; $1286C1 | |
 
-CODE_1286C3:
-  JMP CODE_1285F2                           ; $1286C3 |/  do call subroutine
+.loc_1286C3:
+  JMP .loc_1285F2                           ; $1286C3 |/  do call subroutine
 
-CODE_1286C6:
+.loc_1286C6:
   SEP #$30                                  ; $1286C6 |
   RTS                                       ; $1286C8 |
 
@@ -373,8 +375,10 @@ CODE_1286C6:
   dw $0010, $00F0                           ; $1286D1 |
 ; End of function build_map16_object_driver
 
+; === Subroutine ===
+; TODO
 
-CODE_1286D5:
+sub_1286D5:
   LDA $17                                   ; $1286D5 |
   AND #$0F00                                ; $1286D7 |
   STA $02                                   ; $1286DA |
@@ -398,29 +402,31 @@ CODE_1286D5:
   RTS                                       ; $1286FC |
 
 ; === Subroutine ===
-; TODO
+; Wrapper around get_map16_table_ofst to use ram vars
+;
 ; Parameters:
-; $1B: high xy (screen num)
-; $1C: low xy
+; $1B: low yx
+; $1C: high yx (screen num)
 ;
 ; Return:
 ; $1D: map16 index table offset
 ; $12: data at that location
-sub_1286FD:
-CODE_1286FD:
+
+get_map16_table_ofst_ram:
   REP #$20                                  ; $1286FD |
-  LDA $1B                                   ; $1286FF | $1B = low xy
+  LDA $1B                                   ; $1286FF |
   AND #$00FF                                ; $128701 |
   ASL A                                     ; $128704 |
   STA $00                                   ; $128705 |
   SEP #$20                                  ; $128707 |
-  LDX $1C                                   ; $128709 | $1C = high xy
-  JSR get_map16_index_table_offset          ; $12870B |
+  LDX $1C                                   ; $128709 |
+  JSR get_map16_table_ofst                  ; $12870B |
   STX $1D                                   ; $12870E |
   LDA $7F8000,x                             ; $128710 |
   STA $12                                   ; $128714 |
   SEP #$30                                  ; $128716 |
   RTS                                       ; $128718 |
+; End of function get_map16_table_ofst_ram
 
   LDA $2C                                   ; $128719 |
   AND #$000F                                ; $12871B |
@@ -578,20 +584,19 @@ CODE_1286FD:
 ;
 ; Return:
 ; X: offset (from $7F8000)
-get_map16_index_table_offset:
-CODE_128824:
+get_map16_table_ofst:
   CPX #$80                                  ; $128824 |
-  BCS CODE_12883A                           ; $128826 | if (high xy > 0x80) bail out
+  BCS .loc_12883A                           ; $128826 | if (high xy > 0x80) bail out
   LDA !s_screen_num_to_id,x                 ; $128828 |
   AND #$3F                                  ; $12882B |
-  BNE CODE_12886A                           ; $12882D | found screen num to id mapping
+  BNE .finish_up                            ; $12882D | found screen num to id mapping
   INC $0D4D                                 ; $12882F | otherwise create a new mapping
   LDA $0D4D                                 ; $128832 | TODO $0D4D?
   AND #$3F                                  ; $128835 |
   TAY                                       ; $128837 |
-  BNE CODE_128850                           ; $128838 | if (new id != 0) we are good, else bail out
+  BNE .loc_128850                           ; $128838 | if (new id != 0) we are good, else bail out
 
-CODE_12883A:
+.loc_12883A:
   REP #$30                                  ; $12883A | if high xy > 0x80
   JSL $109A85                               ; $12883C | TODO invalid xy???
   SEP #$10                                  ; $128840 |
@@ -603,24 +608,23 @@ CODE_12883A:
   PLB                                       ; $12884B |
   JML $108B5D                               ; $12884C |
 
-CODE_128850:
+.loc_128850:
   LDA $0D4E,y                               ; $128850 |
-  BEQ CODE_128861                           ; $128853 |
+  BEQ .loc_128861                           ; $128853 |
   INY                                       ; $128855 |
   TYA                                       ; $128856 |
   AND #$3F                                  ; $128857 |
   TAY                                       ; $128859 |
   CMP $0D4D                                 ; $12885A |
-  BEQ CODE_128874                           ; $12885D |
-  BRA CODE_128850                           ; $12885F |
+  BEQ .ret                                  ; $12885D |
+  BRA .loc_128850                           ; $12885F |
 
-CODE_128861:
+.loc_128861:
   TYA                                       ; $128861 |
   INC $97                                   ; $128862 |
   STA !s_screen_num_to_id,x                 ; $128864 |
   STA $0D4E,y                               ; $128867 |
 
-CODE_12886A:
 .finish_up:
   REP #$30                                  ; $12886A | we found a screen num to id mapping
   AND #$00FF                                ; $12886C | so just calculate the table offset and return
@@ -629,17 +633,20 @@ CODE_12886A:
   ADC $00                                   ; $128871 |
   TAX                                       ; $128873 |
 
-CODE_128874:
 .ret:
   RTS                                       ; $128874 |
-; End of function get_map16_index_table_offset
+; End of function get_map16_table_ofst
 
+; === Subroutine ===
+; RNG
+
+rand_byte:
   PHP                                       ; $128875 |
   SEP #$20                                  ; $128876 |
-  LDA $002137                               ; $128878 |
+  LDA $002137                               ; $128878 | !reg_slhv
   LSR A                                     ; $12887C |
-  LDA $00213C                               ; $12887D |
-  ADC $00213D                               ; $128881 |
+  LDA $00213C                               ; $12887D | !reg_ophct
+  ADC $00213D                               ; $128881 | !reg_opvct
   PLP                                       ; $128885 |
   RTL                                       ; $128886 |
 
@@ -659,7 +666,7 @@ sub_128891:
   STA $2E                                   ; $1288A0 | height = 3
   TYA                                       ; $1288A2 |
   ASL A                                     ; $1288A3 |
-  STA $15                                   ; $1288A4 |
+  STA $15                                   ; $1288A4 | id = id * 2
   LDX #$12                                  ; $1288A6 |
   LDA #$A489                                ; $1288A8 | func = $12A48A
   JMP build_map16_object_com1               ; $1288AB |
@@ -674,7 +681,7 @@ sub_1288AE:
   LDA $15                                   ; $1288B4 |
   AND #$0001                                ; $1288B6 |
   ASL A                                     ; $1288B9 |
-  STA $15                                   ; $1288BA | id = 0 if 0A, 2 if 0B
+  STA $15                                   ; $1288BA | id = {0,2}[id-0x0A]
   LDX #$12                                  ; $1288BC |
   LDA #$A4C8                                ; $1288BE | func = $12A4C9
   JMP build_map16_object_com1               ; $1288C1 |
@@ -698,7 +705,7 @@ sub_1288D5:
   REP #$20                                  ; $1288D5 |
   LDA $15                                   ; $1288D7 |
   AND #$0002                                ; $1288D9 |
-  STA $15                                   ; $1288DC | id = 0 if 0D, 2 if 0E
+  STA $15                                   ; $1288DC | id = {0,2}[id-0x0D]
   LDA #$0008                                ; $1288DE |
   STA $2A                                   ; $1288E1 | width = 8
   LDA #$0010                                ; $1288E3 |
@@ -710,9 +717,9 @@ sub_1288D5:
 ; === Subroutine ===
 ; build_map16 obj func ext 0F
 
-  JSR CODE_1286FD                           ; $1288F0 | TODO
+  JSR get_map16_table_ofst_ram              ; $1288F0 |
   REP #$30                                  ; $1288F3 |
-  JSL $12A64B                               ; $1288F5 |
+  JSL sub_12A64B                            ; $1288F5 | tile func: map16 index = 00B6
   SEP #$30                                  ; $1288F9 |
   RTL                                       ; $1288FB |
 
@@ -788,9 +795,9 @@ sub_128947:
 ; build_map16 obj func ext 16
 
 sub_128967:
-  JSR CODE_1286FD                           ; $128967 | TODO
+  JSR get_map16_table_ofst_ram              ; $128967 |
   REP #$30                                  ; $12896A |
-  JSL $12A734                               ; $12896C |
+  JSL sub_12A734                            ; $12896C | tile func
   SEP #$30                                  ; $128970 |
   RTL                                       ; $128972 |
 
@@ -798,9 +805,9 @@ sub_128967:
 ; build_map16 obj func ext 17
 
 sub_128973:
-  JSR CODE_1286FD                           ; $128973 | TODO
+  JSR get_map16_table_ofst_ram              ; $128973 |
   REP #$30                                  ; $128976 |
-  JSL $12A749                               ; $128978 |
+  JSL sub_12A749                            ; $128978 | tile func
   SEP #$30                                  ; $12897C |
   RTL                                       ; $12897E |
 
@@ -885,7 +892,7 @@ sub_1289DD:
   LDA #$AB01                                ; $1289E9 | func = $12AB02
   JMP build_map16_object_com1               ; $1289EC |
 
-  
+
 ; === Subroutine ===
 ; build_map16 obj func ext 1F
 
@@ -900,16 +907,16 @@ sub_1289EF:
 
 ; === Subroutine ===
 ; build_map16 obj func ext 20-2F
-; null objects, basically do nothing useful
+; unused objects
 
 sub_128A00:
-  JSR CODE_1286FD                           ; $128A00 | TODO
+  JSR get_map16_table_ofst_ram              ; $128A00 |
   REP #$30                                  ; $128A03 |
   LDA $15                                   ; $128A05 |
   SEC                                       ; $128A07 |
   SBC #$0008                                ; $128A08 |
   STA $15                                   ; $128A0B |
-  JSL $12AB55                               ; $128A0D | nullsub
+  JSL nullsub_12AB55                        ; $128A0D | nullsub
   SEP #$30                                  ; $128A11 |
   RTL                                       ; $128A13 |
 
@@ -952,22 +959,22 @@ sub_128A3C:
 ; build_map16 obj func ext 32-45
 
 sub_128A4E:
-  JSR CODE_1286FD                           ; $128A4E |
+  JSR get_map16_table_ofst_ram              ; $128A4E |
   REP #$30                                  ; $128A51 |
   LDA $15                                   ; $128A53 |
   SEC                                       ; $128A55 |
   SBC #$0032                                ; $128A56 |
   STA $15                                   ; $128A59 | id -= 0x32
-  JSL $12ABE1                               ; $128A5B | TODO
+  JSL sub_12ABE1                            ; $128A5B | tile func
   SEP #$30                                  ; $128A5F |
   RTL                                       ; $128A61 |
 
 ; === Subroutine ===
 ; build_map16 obj func ext 46
 
-  JSR CODE_1286FD                           ; $128A62 |
+  JSR get_map16_table_ofst_ram              ; $128A62 |
   REP #$30                                  ; $128A65 |
-  JSL $12ABFF                               ; $128A67 | TODO
+  JSL sub_12ABFF                            ; $128A67 | tile func
   SEP #$30                                  ; $128A6B |
   RTL                                       ; $128A6D |
 
@@ -1038,27 +1045,27 @@ sub_128A4E:
 ; === Subroutine ===
 ; build_map16 obj func ext 4A
 
-  JSR CODE_1286FD                           ; $128AE9 |
+  JSR get_map16_table_ofst_ram              ; $128AE9 |
   REP #$30                                  ; $128AEC |
-  JSL $12ACD3                               ; $128AEE | TODO
+  JSL sub_12ACD3                            ; $128AEE | tile func
   SEP #$30                                  ; $128AF2 |
   RTL                                       ; $128AF4 |
 
 ; === Subroutine ===
 ; build_map16 obj func ext 4B
 
-  JSR CODE_1286FD                           ; $128AF5 |
+  JSR get_map16_table_ofst_ram              ; $128AF5 |
   REP #$30                                  ; $128AF8 |
-  JSL $12AD00                               ; $128AFA | TODO
+  JSL sub_12AD00                            ; $128AFA | tile func
   SEP #$30                                  ; $128AFE |
   RTL                                       ; $128B00 |
 
 ; === Subroutine ===
 ; build_map16 obj func ext 4C
 
-  JSR CODE_1286FD                           ; $128B01 |
+  JSR get_map16_table_ofst_ram              ; $128B01 |
   REP #$30                                  ; $128B04 |
-  JSL $12AD2D                               ; $128B06 | TODO
+  JSL sub_12AD2D                            ; $128B06 | tile func
   SEP #$30                                  ; $128B0A |
   RTL                                       ; $128B0C |
 
@@ -1088,9 +1095,9 @@ sub_128A4E:
 ; === Subroutine ===
 ; build_map16 obj func ext 4F
 
-  JSR CODE_1286FD                           ; $128B32 |
+  JSR get_map16_table_ofst_ram              ; $128B32 |
   REP #$30                                  ; $128B35 |
-  JSL $12AD6F                               ; $128B37 | TODO
+  JSL sub_12AD6F                            ; $128B37 | TODO
   SEP #$30                                  ; $128B3B |
   RTL                                       ; $128B3D |
 
@@ -1112,9 +1119,9 @@ sub_128A4E:
 ; === Subroutine ===
 ; build_map16 obj func ext 51
 
-  JSR CODE_1286FD                           ; $128B57 |
+  JSR get_map16_table_ofst_ram              ; $128B57 |
   REP #$30                                  ; $128B5A |
-  JSL $12AE22                               ; $128B5C | TODO
+  JSL $12AE22                               ; $128B5C | tile func
   SEP #$30                                  ; $128B60 |
   RTL                                       ; $128B62 |
 
@@ -1167,7 +1174,7 @@ sub_128A4E:
   LDA $15                                   ; $128BB5 |
   AND #$0001                                ; $128BB7 |
   ASL A                                     ; $128BBA |
-  STA $15                                   ; $128BBB | id = 0 if 54, 2 if 55
+  STA $15                                   ; $128BBB | id = {0,2}[id-0x54]
   LDA #$0003                                ; $128BBD |
   STA $2A                                   ; $128BC0 | width = 3
   STA $2E                                   ; $128BC2 | height = 3
@@ -1182,7 +1189,7 @@ sub_128A4E:
   LDA $15                                   ; $128BCE |
   AND #$0001                                ; $128BD0 |
   ASL A                                     ; $128BD3 |
-  STA $15                                   ; $128BD4 | id = 0 if 56, 2 if 57
+  STA $15                                   ; $128BD4 | id = {0,2}[id-0x56A]
   LDA #$0005                                ; $128BD6 |
   STA $2A                                   ; $128BD9 | width = 5
   LDA #$0003                                ; $128BDB |
@@ -1198,7 +1205,7 @@ sub_128A4E:
   LDA $15                                   ; $128BEA |
   AND #$0003                                ; $128BEC |
   ASL A                                     ; $128BEF |
-  STA $15                                   ; $128BF0 | id = 0 if 58, 2 if 59, 4 if 5A
+  STA $15                                   ; $128BF0 | id = {0,2,4}[id-0x58]
   LDA #$0003                                ; $128BF2 |
   STA $2A                                   ; $128BF5 | width = 3
   LDA #$0002                                ; $128BF7 |
@@ -1215,7 +1222,7 @@ sub_128A4E:
   INC A                                     ; $128C08 |
   AND #$0003                                ; $128C09 |
   ASL A                                     ; $128C0C |
-  STA $15                                   ; $128C0D | id = 0 if 5B, 2 if 5C, 4 if 5D
+  STA $15                                   ; $128C0D | id = {0,2,4}[id-0x5B]
   LDA #$0003                                ; $128C0F |
   STA $2A                                   ; $128C12 | width = 3
   LDA #$0002                                ; $128C14 |
@@ -1227,7 +1234,7 @@ sub_128A4E:
 ; === Subroutine ===
 ; build_map16 obj func ext 5E
 
-  JSR CODE_1286FD                           ; $128C21 |
+  JSR get_map16_table_ofst_ram              ; $128C21 |
   REP #$30                                  ; $128C24 |
   JSL $12B001                               ; $128C26 | TODO
   SEP #$30                                  ; $128C2A |
@@ -1304,18 +1311,18 @@ CODE_128C7D:
 ; === Subroutine ===
 ; build_map16 obj func ext 67
 
-  JSR CODE_1286FD                           ; $128C8F |
+  JSR get_map16_table_ofst_ram              ; $128C8F |
   REP #$30                                  ; $128C92 |
-  JSL $12B14A                               ; $128C94 | TODO
+  JSL sub_12B14A                            ; $128C94 | tile func
   SEP #$30                                  ; $128C98 |
   RTL                                       ; $128C9A |
 
 ; === Subroutine ===
 ; build_map16 obj func ext 68-69
 
-  JSR CODE_1286FD                           ; $128C9B |
+  JSR get_map16_table_ofst_ram              ; $128C9B |
   REP #$30                                  ; $128C9E |
-  JSL $12B179                               ; $128CA0 | TODO
+  JSL sub_12B179                            ; $128CA0 | tile func
   SEP #$30                                  ; $128CA4 |
   RTL                                       ; $128CA6 |
 
@@ -1362,7 +1369,7 @@ CODE_128CCC:
   DEC A                                     ; $128CE0 |
   AND #$0003                                ; $128CE1 |
   ASL A                                     ; $128CE4 |
-  STA $15                                   ; $128CE5 | id = 0 if 6D, 2 if 6E, 4 if 6F, 6 if 70
+  STA $15                                   ; $128CE5 | id = {0,2,4,6}[id-0x6D]
   LDA #$0002                                ; $128CE7 |
   STA $2A                                   ; $128CEA | width = 2
   STA $2E                                   ; $128CEC | height = 2
@@ -1406,7 +1413,7 @@ CODE_128CCC:
   LDA $15                                   ; $128D4E |
   AND #$0001                                ; $128D50 |
   ASL A                                     ; $128D53 |
-  STA $15                                   ; $128D54 | id = 0 if 7E, 2 if 7F
+  STA $15                                   ; $128D54 | id = {0,2}[id-0x7E]
   LDX #$12                                  ; $128D56 |
   LDA #$B3E0                                ; $128D58 | func = $12B3E1
   JMP build_map16_object_com1               ; $128D5B |
@@ -1414,7 +1421,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext 80
 
-  JSR CODE_1286FD                           ; $128D5E | TODO
+  JSR get_map16_table_ofst_ram              ; $128D5E | TODO
   REP #$30                                  ; $128D61 |
   JSL $12B3F1                               ; $128D63 |
   SEP #$30                                  ; $128D67 |
@@ -1528,7 +1535,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext 8D
 
-  JSR CODE_1286FD                           ; $128E4A | ToDO
+  JSR get_map16_table_ofst_ram              ; $128E4A |
   REP #$30                                  ; $128E4D |
   JSL $12BB63                               ; $128E4F |
   SEP #$30                                  ; $128E53 |
@@ -1537,7 +1544,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext 8E-91
 
-  JSR CODE_1286FD                           ; $128E56 | TODO
+  JSR get_map16_table_ofst_ram              ; $128E56 |
   REP #$30                                  ; $128E59 |
   LDA $15                                   ; $128E5B |
   INC A                                     ; $128E5D |
@@ -1585,7 +1592,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext 9A-9D
 
-  JSR CODE_1286FD                           ; $128EA1 | TODO
+  JSR get_map16_table_ofst_ram              ; $128EA1 |
   REP #$30                                  ; $128EA4 |
   LDA $15                                   ; $128EA6 |
   DEC A                                     ; $128EA8 |
@@ -1600,7 +1607,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext 9E-9F
 
-  JSR CODE_1286FD                           ; $128EB7 | TODO
+  JSR get_map16_table_ofst_ram              ; $128EB7 |
   REP #$30                                  ; $128EBA |
   LDA $15                                   ; $128EBC |
   AND #$0001                                ; $128EBE |
@@ -1691,7 +1698,7 @@ CODE_128CCC:
 ; === Subroutine ===
 ; build_map16 obj func ext A7
 
-  JSR CODE_1286FD                           ; $128F78 | TOOD
+  JSR get_map16_table_ofst_ram              ; $128F78 | TOOD
   REP #$30                                  ; $128F7B |
   JSL $12C063                               ; $128F7D |
   SEP #$30                                  ; $128F81 |
@@ -1724,7 +1731,7 @@ CODE_128CCC:
   dw $0002, $0002                           ; $128FB5 |
 
   REP #$20                                  ; $128FB9 |
-  JSL $128875                               ; $128FBB | TODO
+  JSL rand_byte                             ; $128FBB | TODO
   AND #$0006                                ; $128FBF |
   TAY                                       ; $128FC2 |
   LDA $8FA5,y                               ; $128FC3 |
@@ -1740,13 +1747,13 @@ CODE_128CCC:
   LDA $8FAD,y                               ; $128FD7 |
   STA $2E                                   ; $128FDA |
   LDX #$12                                  ; $128FDC |
-  LDA #$C0B0                                ; $128FDE |
+  LDA #$C0B0                                ; $128FDE | func = $12C0B1
   JMP build_map16_object_com1               ; $128FE1 |
 
 ; === Subroutine ===
 ; build_map16 obj func ext B3
 
-  JSR CODE_1286FD                           ; $128FE4 | TODO
+  JSR get_map16_table_ofst_ram              ; $128FE4 | TODO
   REP #$30                                  ; $128FE7 |
   JSL $12C0CF                               ; $128FE9 |
   SEP #$30                                  ; $128FED |
@@ -1759,14 +1766,14 @@ CODE_128CCC:
   LDA #$0002                                ; $128FF2 |
   STA $2A                                   ; $128FF5 | width = 2
   STA $2E                                   ; $128FF7 | height = 2
-  JSL $128875                               ; $128FF9 | TODO
+  JSL rand_byte                             ; $128FF9 | TODO
   AND #$0004                                ; $128FFD |
   STA $A1                                   ; $129000 | TODO $A1
   LDA $15                                   ; $129002 |
   AND #$0001                                ; $129004 |
   STA $15                                   ; $129007 |
   LDX #$12                                  ; $129009 |
-  LDA #$C107                                ; $12900B |
+  LDA #$C107                                ; $12900B | func = $12C108
   JMP build_map16_object_com1               ; $12900E |
 
 ; === Subroutine ===
@@ -1776,7 +1783,7 @@ CODE_128CCC:
   LDA #$0003                                ; $129013 |
   STA $2A                                   ; $129016 | width = 3
   STA $2E                                   ; $129018 | height = 3
-  JSL $128875                               ; $12901A | TODO
+  JSL rand_byte                             ; $12901A | TODO
   AND #$0001                                ; $12901E |
   STA $00                                   ; $129021 |
   LDA $15                                   ; $129023 |
@@ -1786,7 +1793,7 @@ CODE_128CCC:
   ASL A                                     ; $12902B |
   STA $15                                   ; $12902C |
   LDX #$12                                  ; $12902E |
-  LDA #$C190                                ; $129030 |
+  LDA #$C190                                ; $129030 | func = $12C191
   JMP build_map16_object_com1               ; $129033 |
 
 ; === Subroutine ===
@@ -1824,7 +1831,7 @@ CODE_128CCC:
   TAY                                       ; $129072 |
   LDA $905B,y                               ; $129073 |
   STA $2E                                   ; $129076 |
-  JSL $128875                               ; $129078 | TODO
+  JSL rand_byte                             ; $129078 | TODO
   AND #$0003                                ; $12907C |
   BEQ CODE_129084                           ; $12907F |
   EOR #$0003                                ; $129081 |
@@ -1832,7 +1839,7 @@ CODE_128CCC:
 CODE_129084:
   STA $A1                                   ; $129084 |
   LDX #$12                                  ; $129086 |
-  LDA #$C29B                                ; $129088 |
+  LDA #$C29B                                ; $129088 | func = $12C29C
   JMP build_map16_object_com1               ; $12908B |
 
 ; === Subroutine ===
@@ -1879,9 +1886,9 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 obj func ext C4
 
-  JSR CODE_1286FD                           ; $1290CD | TODO
+  JSR get_map16_table_ofst_ram              ; $1290CD |
   REP #$30                                  ; $1290D0 |
-  JSL $12C38E                               ; $1290D2 |
+  JSL $12C38E                               ; $1290D2 | tile func
   SEP #$30                                  ; $1290D6 |
   RTL                                       ; $1290D8 |
 
@@ -1909,7 +1916,7 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 obj func ext CA-D3
 
-  JSR CODE_1286FD                           ; $12910B | TODO
+  JSR get_map16_table_ofst_ram              ; $12910B | TODO
   REP #$30                                  ; $12910E |
   LDA $15                                   ; $129110 |
   SEC                                       ; $129112 |
@@ -1973,7 +1980,7 @@ CODE_129084:
 ; === Subroutine ===
 ; build_map16 obj func ext FD
 
-  JSR CODE_1286FD                           ; $12917A | TODO
+  JSR get_map16_table_ofst_ram              ; $12917A | TODO
   REP #$30                                  ; $12917D |
   JSL $12C6FF                               ; $12917F |
   SEP #$30                                  ; $129183 |
@@ -2591,7 +2598,7 @@ CODE_1294BD:
   dw $95FD                                  ; $129581 |
 
   REP #$20                                  ; $129583 |
-  JSL $128875                               ; $129585 |
+  JSL rand_byte                             ; $129585 |
   AND #$0002                                ; $129589 |
   STA $A1                                   ; $12958C |
   LDA $15                                   ; $12958E |
@@ -2617,7 +2624,7 @@ CODE_1294BD:
 
   REP #$20                                  ; $1295AA |
   STZ $A1                                   ; $1295AC |
-  JSL $128875                               ; $1295AE |
+  JSL rand_byte                             ; $1295AE |
   AND #$0002                                ; $1295B2 |
   BEQ CODE_1295BC                           ; $1295B5 |
   LDA #$000B                                ; $1295B7 |
@@ -2688,7 +2695,7 @@ CODE_1295BC:
 ; build_map16 obj func 38
 
   REP #$20                                  ; $129613 |
-  JSL $128875                               ; $129615 |
+  JSL rand_byte                             ; $129615 |
   AND #$0002                                ; $129619 |
   STA $15                                   ; $12961C |
   LDX #$13                                  ; $12961E |
@@ -3943,7 +3950,7 @@ CODE_129CA9:
   AND #$0F0F                                ; $129E04 |
   ORA $00                                   ; $129E07 |
   STA $1B                                   ; $129E09 |
-  JSL $128875                               ; $129E0B |
+  JSL rand_byte                             ; $129E0B |
   AND #$0003                                ; $129E0F |
   STA $15                                   ; $129E12 |
   EOR #$0003                                ; $129E14 |
@@ -3964,7 +3971,7 @@ CODE_129CA9:
   AND #$0004                                ; $129E2A |
   LSR A                                     ; $129E2D |
   TAY                                       ; $129E2E |
-  JSL $128875                               ; $129E2F |
+  JSL rand_byte                             ; $129E2F |
   AND #$0003                                ; $129E33 |
   STA $15                                   ; $129E36 |
   EOR #$0003                                ; $129E38 |
@@ -4003,7 +4010,7 @@ CODE_129CA9:
   LDX #$13                                  ; $129E69 |
   LDA #$DAA3                                ; $129E6B |
   JMP build_map16_object_com1               ; $129E6E |
-  
+
 ; === Subroutine ===
 ; build_map16 obj func A0-A2
 
@@ -4549,7 +4556,7 @@ CODE_12A130:
 ; build_map16 obj func DD
 
   REP #$20                                  ; $12A1B3 |
-  JSL $128875                               ; $12A1B5 |
+  JSL rand_byte                             ; $12A1B5 |
   AND #$0007                                ; $12A1B9 |
   STA $15                                   ; $12A1BC |
   LDX #$13                                  ; $12A1BE |
@@ -4587,7 +4594,7 @@ CODE_12A130:
 
   REP #$20                                  ; $12A1E8 |
   STZ $A1                                   ; $12A1EA |
-  JSL $128875                               ; $12A1EC |
+  JSL rand_byte                             ; $12A1EC |
   AND #$0003                                ; $12A1F0 |
   BEQ CODE_12A1F8                           ; $12A1F3 |
   EOR #$0003                                ; $12A1F5 |
@@ -4908,6 +4915,10 @@ build_map16_object_com2:
   SEP #$30                                  ; $12A3F3 |
   RTL                                       ; $12A3F5 |
 
+; === Subroutine ===
+; build_map16 tile func ext 00-09
+
+; map16 arrays, tiles l to r then t to d
   dw $9600, $9601, $9610, $9611             ; $12A3F6 |
   dw $0000, $920D                           ; $12A3FE |
 
@@ -4935,64 +4946,50 @@ build_map16_object_com2:
   dw $9606, $9607, $9616, $9617             ; $12A450 |
   dw $920B, $920C                           ; $12A458 |
 
-  dw $A3F6                                  ; $12A45C |
-  dw $A402                                  ; $12A45E |
-  dw $A40E                                  ; $12A460 |
-  dw $A41A                                  ; $12A462 |
-  dw $A426                                  ; $12A464 |
-  dw $A42C                                  ; $12A466 |
-  dw $A432                                  ; $12A468 |
-  dw $A438                                  ; $12A46A |
-  dw $A43E                                  ; $12A46C |
-  dw $A450                                  ; $12A46E |
+  dw $A3F6, $A402, $A40E, $A41A, $A426      ; $12A45C | ptr to map16 arrays
+  dw $A42C, $A432, $A438, $A43E, $A450      ; $12A466 |
 
-  dw $0402, $0201, $0603                    ; $12A470 |
+  db $02,$04, $01,$02, $03,$06              ; $12A470 | obj widths (*1,*2)
 
-  dw $A46F                                  ; $12A476 |
-  dw $A46F                                  ; $12A478 |
-  dw $A46F                                  ; $12A47A |
-  dw $A46F                                  ; $12A47C |
-  dw $A471                                  ; $12A47E |
-  dw $A471                                  ; $12A480 |
-  dw $A471                                  ; $12A482 |
-  dw $A471                                  ; $12A484 |
-  dw $A473                                  ; $12A486 |
-  dw $A46F                                  ; $12A488 |
+  dw $A46F, $A46F, $A46F, $A46F, $A471      ; $12A476 | ptr to obj widths
+  dw $A471, $A471, $A471, $A473, $A46F      ; $12A480 |
 
+sub_12A48A:
   REP #$30                                  ; $12A48A |
   LDX $15                                   ; $12A48C |
   LDA $A45C,x                               ; $12A48E |
   STA $00                                   ; $12A491 |
   LDA $A476,x                               ; $12A493 |
   STA $02                                   ; $12A496 |
-  LDY $2C                                   ; $12A498 |
-  BEQ CODE_12A4A2                           ; $12A49A |
+  LDY $2C                                   ; $12A498 | y index
+  BEQ .loc_12A4A2                           ; $12A49A |
   LDA ($02),y                               ; $12A49C |
   AND #$00FF                                ; $12A49E |
   TAY                                       ; $12A4A1 |
 
-CODE_12A4A2:
+.loc_12A4A2:
   TYA                                       ; $12A4A2 |
   CLC                                       ; $12A4A3 |
-  ADC $28                                   ; $12A4A4 |
+  ADC $28                                   ; $12A4A4 | x index
   ASL A                                     ; $12A4A6 |
   TAY                                       ; $12A4A7 |
   LDA ($00),y                               ; $12A4A8 |
-  BEQ CODE_12A4B2                           ; $12A4AA |
+  BEQ .ret                                  ; $12A4AA |
   LDX $1D                                   ; $12A4AC |
   STA $7F8000,x                             ; $12A4AE |
 
-CODE_12A4B2:
+.ret:
   SEP #$30                                  ; $12A4B2 |
   RTL                                       ; $12A4B4 |
 
-  dw $9096, $9097, $90A6, $90A7             ; $12A4B5 |
+; === Subroutine ===
+; build_map16 tile func ext 0A-0B
 
-  dw $907C, $9095, $90A4, $90A5             ; $12A4BD |
+  dw $9096, $9097, $90A6, $90A7             ; $12A4B5 | map16 for 0A
+  dw $907C, $9095, $90A4, $90A5             ; $12A4BD | map16 for 0B
+  dw $A4B5, $A4BD                           ; $12A4C5 | ptr to map16 arrays
 
-  dw $A4B5                                  ; $12A4C5 |
-  dw $A4BD                                  ; $12A4C7 |
-
+sub_12A4C9:
   REP #$30                                  ; $12A4C9 |
   LDX $15                                   ; $12A4CB |
   LDA $A4C5,x                               ; $12A4CD |
@@ -5008,7 +5005,10 @@ CODE_12A4B2:
   SEP #$30                                  ; $12A4E1 |
   RTL                                       ; $12A4E3 |
 
-  dw $920F, $9066, $9076, $9086             ; $12A4E4 |
+; === Subroutine ===
+; build_map16 tile func ext 0C
+
+  dw $920F, $9066, $9076, $9086             ; $12A4E4 | map16
 
   REP #$30                                  ; $12A4EC |
   LDA $2C                                   ; $12A4EE |
@@ -5017,10 +5017,10 @@ CODE_12A4B2:
   LDA $A4E4,y                               ; $12A4F2 |
   LDX $12                                   ; $12A4F5 |
   CPX #$9216                                ; $12A4F7 |
-  BNE CODE_12A4FF                           ; $12A4FA |
+  BNE .loc_12A4FF                           ; $12A4FA |
   LDA #$9213                                ; $12A4FC |
 
-CODE_12A4FF:
+.loc_12A4FF:
   CLC                                       ; $12A4FF |
   ADC $28                                   ; $12A500 |
   LDX $1D                                   ; $12A502 |
@@ -5028,7 +5028,10 @@ CODE_12A4FF:
   SEP #$30                                  ; $12A508 |
   RTL                                       ; $12A50A |
 
-  dw $5554, $5554, $5554, $5554             ; $12A50B |
+; === Subroutine ===
+; build_map16 tile func ext 0D-0E
+
+  dw $5554, $5554, $5554, $5554             ; $12A50B | map16 for 0D
   dw $5756, $5756, $5756, $5756             ; $12A513 |
   dw $0100, $0302, $0504, $0706             ; $12A51B |
   dw $0908, $0B0A, $0D0C, $0F0E             ; $12A523 |
@@ -5045,7 +5048,7 @@ CODE_12A4FF:
   dw $5859, $5859, $5859, $5859             ; $12A57B |
   dw $5A5A, $5A5A, $5A5A, $5A5A             ; $12A583 |
 
-  dw $5554, $5554, $5554, $5554             ; $12A58B |
+  dw $5554, $5554, $5554, $5554             ; $12A58B | map16 for 0E
   dw $5756, $5756, $5756, $5756             ; $12A593 |
   dw $0100, $211E, $3736, $3938             ; $12A59B |
   dw $1110, $3B3A, $3D3C, $3F3E             ; $12A5A3 |
@@ -5062,8 +5065,7 @@ CODE_12A4FF:
   dw $5859, $5859, $5859, $5859             ; $12A5FB |
   dw $5A5A, $5A5A, $5A5A, $5A5A             ; $12A603 |
 
-  dw $A50B                                  ; $12A60B |
-  dw $A58B                                  ; $12A60D |
+  dw $A50B, $A58B                           ; $12A60B | ptr to map16 arrays
 
   REP #$30                                  ; $12A60F |
   LDA $2C                                   ; $12A611 |
@@ -5102,10 +5104,17 @@ CODE_12A648:
   SEP #$30                                  ; $12A648 |
   RTL                                       ; $12A64A |
 
+; === Subroutine ===
+; build_map16 tile func ext 0F
+
+sub_12A64B:
   LDA #$00B6                                ; $12A64B |
   LDX $1D                                   ; $12A64E |
   STA $7F8000,x                             ; $12A650 |
   RTL                                       ; $12A654 |
+
+; === Subroutine ===
+; build_map16 tile func ext 10
 
   db $00, $01, $00, $01, $02, $03, $02, $03 ; $12A655 |
   db $01, $00, $01, $00, $03, $02, $03, $02 ; $12A65D |
@@ -5129,17 +5138,22 @@ CODE_12A648:
   SEP #$30                                  ; $12A688 |
   RTL                                       ; $12A68A |
 
+; === Subroutine ===
+; build_map16 tile func ext 11
+
   REP #$30                                  ; $12A68B |
   LDX $1D                                   ; $12A68D |
   LDA $28                                   ; $12A68F |
   CLC                                       ; $12A691 |
-  ADC #$7797                                ; $12A692 |
+  ADC #$7797                                ; $12A692 | map16 = 7797 + x
   STA $7F8000,x                             ; $12A695 |
   SEP #$30                                  ; $12A699 |
   RTL                                       ; $12A69B |
 
-  dw $96D1, $96D1, $96D1, $96D2             ; $12A69C |
-  dw $96D2                                  ; $12A6A4 |
+; === Subroutine ===
+; build_map16 tile func ext 12
+
+  dw $96D1, $96D1, $96D1, $96D2, $96D2      ; $12A69C | map16
 
   REP #$30                                  ; $12A6A6 |
   LDA $28                                   ; $12A6A8 |
@@ -5151,8 +5165,10 @@ CODE_12A648:
   SEP #$30                                  ; $12A6B5 |
   RTL                                       ; $12A6B7 |
 
-  dw $96D3, $96D3, $96D1, $96D1             ; $12A6B8 |
-  dw $96D1                                  ; $12A6C0 |
+; === Subroutine ===
+; build_map16 tile func ext 13
+
+  dw $96D3, $96D3, $96D1, $96D1, $96D1      ; $12A6B8 | map16
 
   REP #$30                                  ; $12A6C2 |
   LDA $28                                   ; $12A6C4 |
@@ -5164,9 +5180,11 @@ CODE_12A648:
   SEP #$30                                  ; $12A6D1 |
   RTL                                       ; $12A6D3 |
 
-  dw $96D6, $0000, $96D6, $96D7             ; $12A6D4 |
-  dw $0000, $96D7, $0000, $96D4             ; $12A6DC |
-  dw $0000, $96D4                           ; $12A6E4 |
+; === Subroutine ===
+; build_map16 tile func ext 14
+
+  dw $96D6, $0000, $96D6, $96D7, $0000      ; $12A6D4 | map16
+  dw $96D7, $0000, $96D4, $0000, $96D4      ; $12A6DE |
 
   REP #$30                                  ; $12A6E8 |
   LDA #$FFFF                                ; $12A6EA |
@@ -5185,9 +5203,11 @@ CODE_12A701:
   SEP #$30                                  ; $12A701 |
   RTL                                       ; $12A703 |
 
-  dw $0000, $96D5, $0000, $96D5             ; $12A704 |
-  dw $0000, $96D8, $96D9, $96D8             ; $12A70C |
-  dw $96D9, $0000                           ; $12A714 |
+; === Subroutine ===
+; build_map16 tile func ext 15
+
+  dw $0000, $96D5, $0000, $96D5, $0000      ; $12A704 | map16
+  dw $96D8, $96D9, $96D8, $96D9, $0000      ; $12A70E |
 
   REP #$30                                  ; $12A718 |
   LDA #$FFFF                                ; $12A71A |
@@ -5206,27 +5226,38 @@ CODE_12A731:
   SEP #$30                                  ; $12A731 |
   RTL                                       ; $12A733 |
 
+; === Subroutine ===
+; build_map16 tile func ext 16
+
+sub_12A734:
   LDX $1D                                   ; $12A734 |
-  JSL $01E501                               ; $12A736 |
-  BNE CODE_12A748                           ; $12A73A |
+  JSL $01E501                               ; $12A736 | TODO
+  BNE .ret                                  ; $12A73A |
   LDA $12                                   ; $12A73C |
   AND #$00FF                                ; $12A73E |
   ORA $1DF8                                 ; $12A741 |
   STA $7F8000,x                             ; $12A744 |
 
-CODE_12A748:
+.ret:
   RTL                                       ; $12A748 |
 
+; === Subroutine ===
+; build_map16 tile func ext 17
+
+sub_12A749:
   LDX $1D                                   ; $12A749 |
-  JSL $01E501                               ; $12A74B |
-  BNE CODE_12A758                           ; $12A74F |
+  JSL $01E501                               ; $12A74B | TODO
+  BNE .ret                                  ; $12A74F |
   LDA #$A400                                ; $12A751 |
   STA $7F8000,x                             ; $12A754 |
 
-CODE_12A758:
+.ret:
   RTL                                       ; $12A758 |
 
-  db $00, $00, $00, $00, $00, $01, $02, $00 ; $12A759 |
+; === Subroutine ===
+; build_map16 tile func ext 18
+
+  db $00, $00, $00, $00, $00, $01, $02, $00 ; $12A759 | low part of map16
   db $00, $03, $04, $05, $06, $07, $08, $09 ; $12A761 |
   db $0B, $00, $00, $00, $0C, $07, $08, $0B ; $12A769 |
   db $0D, $07, $0E, $0A, $0A, $05, $06, $08 ; $12A771 |
@@ -5283,6 +5314,9 @@ CODE_12A878:
   STA $7F8000,x                             ; $12A87A |
   SEP #$30                                  ; $12A87E |
   RTL                                       ; $12A880 |
+
+; === Subroutine ===
+; build_map16 tile func ext 19-1A
 
   dw $1A46, $1A52, $1A2C, $1A36             ; $12A881 |
   dw $1A04, $1A06, $1A24, $1A26             ; $12A889 |
@@ -5403,15 +5437,13 @@ CODE_12AAC4:
   SEP #$30                                  ; $12AAC4 |
   RTL                                       ; $12AAC6 |
 
-  dw $0000, $A55E, $A561, $A562             ; $12AAC7 |
+; === Subroutine ===
+; build_map16 tile func ext 1B-1D
 
-  dw $0000, $A55F, $A563, $A564             ; $12AACF |
-
-  dw $0000, $A560, $A565, $A566             ; $12AAD7 |
-
-  dw $AAC7                                  ; $12AADF |
-  dw $AACF                                  ; $12AAE1 |
-  dw $AAD7                                  ; $12AAE3 |
+  dw $0000, $A55E, $A561, $A562             ; $12AAC7 | map16 for 1B
+  dw $0000, $A55F, $A563, $A564             ; $12AACF | map16 for 1C
+  dw $0000, $A560, $A565, $A566             ; $12AAD7 | map16 for 1D
+  dw $AAC7, $AACF, $AAD7                    ; $12AADF | ptrs
 
   REP #$30                                  ; $12AAE5 |
   LDX $15                                   ; $12AAE7 |
@@ -5430,6 +5462,9 @@ CODE_12AAC4:
 CODE_12AAFF:
   SEP #$30                                  ; $12AAFF |
   RTL                                       ; $12AB01 |
+
+; === Subroutine ===
+; build_map16 tile func ext 1E
 
   REP #$30                                  ; $12AB02 |
   LDA $28                                   ; $12AB04 |
@@ -5459,8 +5494,11 @@ CODE_12AB20:
   SEP #$30                                  ; $12AB26 |
   RTL                                       ; $12AB28 |
 
-  dw $CBCA, $D0CF, $CDCC, $CECD             ; $12AB29 |
-  dw $CDCD, $CDCD, $CDCD, $CDCD             ; $12AB31 |
+; === Subroutine ===
+; build_map16 tile func ext 1F
+
+  db $CA, $CB, $CF, $D0, $CC, $CD, $CD, $CE ; $12AB29 | low byte of map16
+  db $CD, $CD, $CD, $CD, $CD, $CD, $CD, $CD ; $12AB31 | high byte = 96
 
   REP #$30                                  ; $12AB39 |
   LDA $2C                                   ; $12AB3B |
@@ -5477,32 +5515,40 @@ CODE_12AB20:
   SEP #$30                                  ; $12AB52 |
   RTL                                       ; $12AB54 |
 
+; === Subroutine ===
+; build_map16 tile func ext 20-2F
+
+nullsub_12AB55:
   RTL                                       ; $12AB55 |
+
+; === Subroutine ===
+; build_map16 tile func ext 30
 
   dw $015D, $015E, $015F, $0160             ; $12AB56 |
   dw $015C                                  ; $12AB5E |
 
   dw $015A, $015B                           ; $12AB60 |
 
+sub_12AB64:
   REP #$30                                  ; $12AB64 |
   LDX $1D                                   ; $12AB66 |
   LDY #$0000                                ; $12AB68 |
   LDA $28                                   ; $12AB6B |
-  BEQ CODE_12AB76                           ; $12AB6D |
+  BEQ .loc_12AB76                           ; $12AB6D |
   INC A                                     ; $12AB6F |
   CMP $2A                                   ; $12AB70 |
-  BNE CODE_12AB82                           ; $12AB72 |
+  BNE .loc_12AB82                           ; $12AB72 |
   INY                                       ; $12AB74 |
   INY                                       ; $12AB75 |
 
-CODE_12AB76:
+.loc_12AB76:
   LDA $12                                   ; $12AB76 |
   CMP $AB60,y                               ; $12AB78 |
-  BNE CODE_12AB96                           ; $12AB7B |
+  BNE .loc_12AB96                           ; $12AB7B |
   LDY #$0008                                ; $12AB7D |
-  BRA CODE_12AB8F                           ; $12AB80 |
+  BRA .loc_12AB8F                           ; $12AB80 |
 
-CODE_12AB82:
+.loc_12AB82:
   LDA $28                                   ; $12AB82 |
   DEC A                                     ; $12AB84 |
   ASL A                                     ; $12AB85 |
@@ -5513,40 +5559,48 @@ CODE_12AB82:
   ORA $00                                   ; $12AB8C |
   TAY                                       ; $12AB8E |
 
-CODE_12AB8F:
+.loc_12AB8F:
   LDA $AB56,y                               ; $12AB8F |
   STA $7F8000,x                             ; $12AB92 |
 
-CODE_12AB96:
+.loc_12AB96:
   SEP #$30                                  ; $12AB96 |
   RTL                                       ; $12AB98 |
 
-  dw $00BD, $00BC                           ; $12AB99 |
+; === Subroutine ===
+; build_map16 tile func ext 31
 
+  dw $00BD, $00BC                           ; $12AB99 | map16: {x even, x odd}
+
+sub_12AB9D:
   REP #$30                                  ; $12AB9D |
   LDX $1D                                   ; $12AB9F |
   LDA $28                                   ; $12ABA1 |
-  BNE CODE_12ABAA                           ; $12ABA3 |
-  LDA #$00BB                                ; $12ABA5 |
-  BRA CODE_12ABB2                           ; $12ABA8 |
+  BNE .loc_12ABAA                           ; $12ABA3 |
+  LDA #$00BB                                ; $12ABA5 | when x == 0
+  BRA .store_ret                            ; $12ABA8 |
 
-CODE_12ABAA:
+.loc_12ABAA:
   AND #$0001                                ; $12ABAA |
   ASL A                                     ; $12ABAD |
   TAY                                       ; $12ABAE |
   LDA $AB99,y                               ; $12ABAF |
 
-CODE_12ABB2:
+.store_ret:
   STA $7F8000,x                             ; $12ABB2 |
   SEP #$30                                  ; $12ABB6 |
   RTL                                       ; $12ABB8 |
 
-  dw $1C44, $1C4A, $1C4C, $1C4E             ; $12ABB9 |
+; === Subroutine ===
+; build_map16 tile func ext 32-45
+
+  dw $1C44, $1C4A, $1C4C, $1C4E             ; $12ABB9 | map16
   dw $1C50, $1C54, $1C56, $1C58             ; $12ABC1 |
   dw $1C5A, $1DD8, $1DD8, $1D88             ; $12ABC9 |
   dw $1D88, $1DDA, $1DDC, $1DDE             ; $12ABD1 |
   dw $1DE0, $1DE2, $1DE4, $1DE6             ; $12ABD9 |
 
+sub_12ABE1:
   REP #$30                                  ; $12ABE1 |
   LDX $1D                                   ; $12ABE3 |
   LDA $15                                   ; $12ABE5 |
@@ -5559,10 +5613,14 @@ CODE_12ABB2:
   SEP #$30                                  ; $12ABF4 |
   RTL                                       ; $12ABF6 |
 
-  dw $5F00, $5F01, $5F03, $5F03             ; $12ABF7 |
+; === Subroutine ===
+; build_map16 tile func ext 46
 
+  dw $5F00, $5F01, $5F03, $5F03             ; $12ABF7 | map16 (selected by rng)
+
+sub_12ABFF:
   REP #$30                                  ; $12ABFF |
-  JSL $128875                               ; $12AC01 |
+  JSL rand_byte                             ; $12AC01 |
   AND #$0003                                ; $12AC05 |
   ASL A                                     ; $12AC08 |
   TAX                                       ; $12AC09 |
@@ -5572,6 +5630,10 @@ CODE_12ABB2:
   SEP #$30                                  ; $12AC14 |
   RTL                                       ; $12AC16 |
 
+; === Subroutine ===
+; build_map16 tile func ext 47
+
+sub_12AC17:
   REP #$30                                  ; $12AC17 |
   LDA $28                                   ; $12AC19 |
   ASL A                                     ; $12AC1B |
@@ -5582,22 +5644,26 @@ CODE_12ABB2:
   ASL A                                     ; $12AC22 |
   ORA $00                                   ; $12AC23 |
   TAY                                       ; $12AC25 |
-  BEQ CODE_12AC36                           ; $12AC26 |
+  BEQ .ret                                  ; $12AC26 |
   CPY #$0006                                ; $12AC28 |
-  BEQ CODE_12AC36                           ; $12AC2B |
-  LDX $1D                                   ; $12AC2D |
+  BEQ .ret                                  ; $12AC2B |
+  LDX $1D                                   ; $12AC2D | when y != 0 && y != 3
   LDA $AC39,y                               ; $12AC2F |
   STA $7F8000,x                             ; $12AC32 |
 
-CODE_12AC36:
+.ret:
   SEP #$30                                  ; $12AC36 |
   RTL                                       ; $12AC38 |
 
-  dw $0000, $3D18, $3D19, $0000             ; $12AC39 |
+  dw $0000, $3D18, $3D19, $0000             ; $12AC39 | map16
   dw $3D1A, $3D1B, $3D1C, $3D1D             ; $12AC41 |
   dw $3D1E, $3D26, $3D27, $3D21             ; $12AC49 |
   dw $3D22, $6300, $3D28, $3D25             ; $12AC51 |
 
+; === Subroutine ==
+; build_map16 tile func ext 48
+
+sub_12AC59:
   REP #$30                                  ; $12AC59 |
   LDA $28                                   ; $12AC5B |
   ASL A                                     ; $12AC5D |
@@ -5608,11 +5674,9 @@ CODE_12AC36:
   SEP #$30                                  ; $12AC68 |
   RTL                                       ; $12AC6A |
 
-  dw $AC73                                  ; $12AC6B |
-  dw $AC73                                  ; $12AC6D |
-  dw $AC97                                  ; $12AC6F |
-  dw $AC97                                  ; $12AC71 |
+  dw $AC73, $AC73, $AC97, $AC97             ; $12AC6B | jump table (indexed by x index)
 
+; x index < 2
   LDA $2C                                   ; $12AC73 |
   INC A                                     ; $12AC75 |
   CMP $2E                                   ; $12AC76 |
@@ -5632,11 +5696,12 @@ CODE_12AC7F:
   BRA CODE_12AC96                           ; $12AC92 |
 
 CODE_12AC94:
-  LDA $12                                   ; $12AC94 |
+  LDA $12                                   ; $12AC94 | don't place tile
 
 CODE_12AC96:
   RTS                                       ; $12AC96 |
 
+; x index >= 2
   LDY #$0000                                ; $12AC97 |
   LDA $2C                                   ; $12AC9A |
   BEQ CODE_12ACA7                           ; $12AC9C |
@@ -5659,6 +5724,9 @@ CODE_12ACA7:
 
   dw $00DF, $00E1, $00E3                    ; $12ACB5 |
 
+; === Subroutine ==
+; build_map16 tile func ext 49
+
   REP #$30                                  ; $12ACBB |
   LDA $28                                   ; $12ACBD |
   ASL A                                     ; $12ACBF |
@@ -5669,8 +5737,12 @@ CODE_12ACA7:
   SEP #$30                                  ; $12ACCA |
   RTL                                       ; $12ACCC |
 
-  EOR $4E3D                                 ; $12ACCD |
-  AND $3D4F,x                               ; $12ACD0 |
+  dw $3D4D, $3D4E, $3D4F                    ; $12ACCD | map16
+
+; === Subroutine ==
+; build_map16 tile func ext 4A
+
+sub_12ACD3:
   LDX $1D                                   ; $12ACD3 |
   LDA #$3D4C                                ; $12ACD5 |
   STA $7F8000,x                             ; $12ACD8 |
@@ -5693,12 +5765,16 @@ CODE_12ACF7:
 CODE_12ACFF:
   RTL                                       ; $12ACFF |
 
+; === Subroutine ==
+; build_map16 tile func ext 4B
+
+sub_12AD00:
   LDX $1D                                   ; $12AD00 |
   LDA #$3D41                                ; $12AD02 |
   STA $7F8000,x                             ; $12AD05 |
   LDA $1B                                   ; $12AD09 |
   STA $0E                                   ; $12AD0B |
-  JSL $1287E2                               ; $12AD0D |
+  JSL $1287E2                               ; $12AD0D | TODO
   LDA $7F8000,x                             ; $12AD11 |
   CMP #$3D3B                                ; $12AD15 |
   BEQ CODE_12AD24                           ; $12AD18 |
@@ -5715,10 +5791,17 @@ CODE_12AD24:
 CODE_12AD2C:
   RTL                                       ; $12AD2C |
 
-  LDA $1D1A                                 ; $12AD2D |
+; === Subroutine ==
+; build_map16 tile func ext 4C
+
+sub_12AD2D:
+  LDA $1D1A                                 ; $12AD2D | map16 = 1D1A
   LDX $1D                                   ; $12AD30 |
   STA $7F8000,x                             ; $12AD32 |
   RTL                                       ; $12AD36 |
+
+; === Subroutine ==
+; build_map16 tile func ext 4D
 
   dw $0080, $0081, $014B, $014C             ; $12AD37 |
 
@@ -5737,7 +5820,10 @@ CODE_12AD2C:
   SEP #$30                                  ; $12AD56 |
   RTL                                       ; $12AD58 |
 
-  dw $0082, $014D                           ; $12AD59 |
+; === Subroutine ==
+; build_map16 tile func ext 4E
+
+  dw $0082, $014D                           ; $12AD59 | map16
 
   REP #$30                                  ; $12AD5D |
   LDA $2C                                   ; $12AD5F |
@@ -5749,10 +5835,18 @@ CODE_12AD2C:
   SEP #$30                                  ; $12AD6C |
   RTL                                       ; $12AD6E |
 
+; === Subroutine ==
+; build_map16 tile func ext 4F
+
+sub_12AD6F:
   LDX $1D                                   ; $12AD6F |
   LDA #$014A                                ; $12AD71 |
   STA $7F8000,x                             ; $12AD74 |
   RTL                                       ; $12AD78 |
+
+; === Subroutine ==
+; build_map16 tile func ext 50,A8
+; TODO
 
   dw $000C, $000D                           ; $12AD79 |
 
@@ -5837,10 +5931,16 @@ CODE_12AE19:
   SEP #$30                                  ; $12AE1F |
   RTL                                       ; $12AE21 |
 
+; === Subroutine ==
+; build_map16 tile func ext 51
+
   LDX $1D                                   ; $12AE22 |
-  LDA #$0183                                ; $12AE24 |
+  LDA #$0183                                ; $12AE24 | map16 = 0183
   STA $7F8000,x                             ; $12AE27 |
   RTL                                       ; $12AE2B |
+
+; === Subroutine ==
+; build_map16 tile func ext 52
 
   dw $3D63, $3D64, $3D65, $0000             ; $12AE2C |
   dw $3D66, $3D67, $3D68, $015C             ; $12AE34 |
@@ -5882,6 +5982,9 @@ CODE_12AE66:
 CODE_12AE6F:
   SEP #$30                                  ; $12AE6F |
   RTL                                       ; $12AE71 |
+
+; === Subroutine ==
+; build_map16 tile func ext 53
 
   dw $3D63, $3D6C, $3D65, $0000             ; $12AE72 |
   dw $3D69, $3D6A, $3D6B, $0000             ; $12AE7A |
@@ -5934,16 +6037,18 @@ CODE_12AECB:
   SEP #$30                                  ; $12AECB |
   RTL                                       ; $12AECD |
 
-  dw $0000, $0000, $3DA1, $3D79             ; $12AECE |
-  dw $3D77, $3DA2, $3D7A, $3DA0             ; $12AED6 |
-  dw $0000                                  ; $12AEDE |
+; === Subroutine ==
+; build_map16 tile func ext 54-55, 56-57, 58-5A, 5B-5D
 
-  dw $3DA4, $0000, $0000, $3DA3             ; $12AEE0 |
-  dw $3D78, $3D7C, $0000, $3D9F             ; $12AEE8 |
-  dw $3D7B                                  ; $12AEF0 |
+  dw $0000, $0000, $3DA1                    ; $12AECE | map16 for 54
+  dw $3D79, $3D77, $3DA2                    ; $12AED4 |
+  dw $3D7A, $3DA0, $0000                    ; $12AEDA |
 
-  dw $AECE                                  ; $12AEF2 |
-  dw $AEE0                                  ; $12AEF4 |
+  dw $3DA4, $0000, $0000                    ; $12AEE0 | map16 for 55
+  dw $3DA3, $3D78, $3D7C                    ; $12AEE6 |
+  dw $0000, $3D9F, $3D7B                    ; $12AEEC |
+
+  dw $AECE, $AEE0                           ; $12AEF2 | map16 array ptrs
 
   REP #$30                                  ; $12AEF6 |
   LDX $15                                   ; $12AEF8 |
@@ -5955,18 +6060,15 @@ CODE_12AECB:
   STA $00                                   ; $12AF03 |
   JMP CODE_12AFCE                           ; $12AF05 |
 
-  dw $3D8F, $3D90, $3D91, $3D92             ; $12AF08 |
-  dw $0000, $3D93, $3D94, $3D95             ; $12AF10 |
-  dw $3D96, $3D7C, $0000, $3D8C             ; $12AF18 |
-  dw $3D8D, $3D8E, $3D7B                    ; $12AF20 |
+  dw $3D8F, $3D90, $3D91, $3D92, $0000      ; $12AF08 | map16 for 56
+  dw $3D93, $3D94, $3D95, $3D96, $3D7C      ; $12AF12 |
+  dw $0000, $3D8C, $3D8D, $3D8E, $3D7B      ; $12AF1C |
 
-  dw $0000, $3D81, $3D82, $3D83             ; $12AF26 |
-  dw $3D84, $3D79, $3D85, $3D86             ; $12AF2E |
-  dw $3D87, $3D88, $3D7A, $3D89             ; $12AF36 |
-  dw $3D8A, $3D8B, $0000                    ; $12AF3E |
+  dw $0000, $3D81, $3D82, $3D83, $3D84      ; $12AF26 | map16 for 57
+  dw $3D79, $3D85, $3D86, $3D87, $3D88      ; $12AF30 |
+  dw $3D7A, $3D89, $3D8A, $3D8B, $0000      ; $12AF3A |
 
-  dw $AF08                                  ; $12AF44 |
-  dw $AF26                                  ; $12AF46 |
+  dw $AF08, $AF26                           ; $12AF44 | map16 array ptrs
 
   REP #$30                                  ; $12AF48 |
   LDX $15                                   ; $12AF4A |
@@ -5979,18 +6081,16 @@ CODE_12AECB:
   STA $00                                   ; $12AF56 |
   BRA CODE_12AFCE                           ; $12AF58 |
 
-  dw $0000, $3D80, $3DA6, $0000             ; $12AF5A |
-  dw $3D7F, $0000                           ; $12AF62 |
+  dw $0000, $3D80, $3DA6                    ; $12AF5A | map16 for 58
+  dw $0000, $3D7F, $0000                    ; $12AF60 |
 
-  dw $0000, $3D79, $3D73, $0000             ; $12AF66 |
-  dw $3D7A, $3DA0                           ; $12AF6E |
+  dw $0000, $3D79, $3D73                    ; $12AF66 | map16 for 59
+  dw $0000, $3D7A, $3DA0                    ; $12AF6C |
 
-  dw $3D9D, $3D9E, $0000, $3D9B             ; $12AF72 |
-  dw $3D9C, $3D72                           ; $12AF7A |
+  dw $3D9D, $3D9E, $0000                    ; $12AF72 | map16 for 5A
+  dw $3D9B, $3D9C, $3D72                    ; $12AF78 |
 
-  dw $AF5A                                  ; $12AF7E |
-  dw $AF66                                  ; $12AF80 |
-  dw $AF72                                  ; $12AF82 |
+  dw $AF5A, $AF66, $AF72                    ; $12AF7E | map16 array ptrs
 
   REP #$30                                  ; $12AF84 |
   LDX $15                                   ; $12AF86 |
@@ -6002,18 +6102,16 @@ CODE_12AECB:
   STA $00                                   ; $12AF91 |
   BRA CODE_12AFCE                           ; $12AF93 |
 
-  dw $3DA5, $3D7D, $0000, $0000             ; $12AF95 |
-  dw $3D7E, $0000                           ; $12AF9D |
+  dw $3DA5, $3D7D, $0000                    ; $12AF95 | map16 for 5B
+  dw $0000, $3D7E, $0000                    ; $12AF9B |
 
-  dw $3D74, $3D7C, $0000, $3D9F             ; $12AFA1 |
-  dw $3D7B, $0000                           ; $12AFA9 |
+  dw $3D74, $3D7C, $0000                    ; $12AFA1 | map16 for 5C
+  dw $3D9F, $3D7B, $0000                    ; $12AFA7 |
 
-  dw $0000, $3D97, $3D98, $3D71             ; $12AFAD |
-  dw $3D99, $3D9A                           ; $12AFB5 |
+  dw $0000, $3D97, $3D98                    ; $12AFAD | map16 for 5D
+  dw $3D71, $3D99, $3D9A                    ; $12AFB3 |
 
-  dw $AF95                                  ; $12AFB9 |
-  dw $AFA1                                  ; $12AFBB |
-  dw $AFAD                                  ; $12AFBD |
+  dw $AF95, $AFA1, $AFAD                    ; $12AFB9 | map16 array ptrs
 
   REP #$30                                  ; $12AFBF |
   LDX $15                                   ; $12AFC1 |
@@ -6058,58 +6156,57 @@ CODE_12AFFE:
   SEP #$30                                  ; $12AFFE |
   RTL                                       ; $12B000 |
 
+; === Subroutine ==
+; build_map16 tile func ext 5E
+
   LDX $1D                                   ; $12B001 |
-  LDA #$7502                                ; $12B003 |
+  LDA #$7502                                ; $12B003 | map16 = 7502
   STA $7F8000,x                             ; $12B006 |
   RTL                                       ; $12B00A |
 
-  dw $01A7, $01A8, $01A9, $01AA             ; $12B00B |
+; === Subroutine ==
+; build_map16 tile func ext 5F-66
+
+  dw $01A7, $01A8, $01A9, $01AA             ; $12B00B | map16 referred by ptrs below
   dw $01AB, $01AC, $01AD, $01AE             ; $12B013 |
   dw $01AF, $01B0, $01B1, $01B2             ; $12B01B |
   dw $01B3, $01B4, $01B5, $01B6             ; $12B023 |
 
-  dw $19DC, $1A44, $1A52, $0000             ; $12B02B |
+  dw $19DC, $1A44, $1A52, $0000             ; $12B02B | map16 ptrs for 5F
   dw $19E6, $B00D, $B01D, $1A1A             ; $12B033 |
 
-  dw $0000, $1A04, $1A44, $1A52             ; $12B03B |
-  dw $0000, $19DC, $B01F, $B021             ; $12B043 |
-  dw $B023, $19F0, $19E6, $B025             ; $12B04B |
-  dw $B027, $B029, $19FA                    ; $12B053 |
+  dw $0000, $1A04, $1A44, $1A52, $0000      ; $12B03B | map16 ptrs for 5F 60
+  dw $19DC, $B01F, $B021, $B023, $19F0      ; $12B045 |
+  dw $19E6, $B025, $B027, $B029, $19FA      ; $12B04F |
 
-  dw $19DC, $B00B, $1A18, $19E6             ; $12B059 |
-  dw $B00D, $B00F                           ; $12B061 |
+  dw $19DC, $B00B, $1A18                    ; $12B059 | map16 ptrs for 61
+  dw $19E6, $B00D, $B00F                    ; $12B05F |
 
-  dw $19DC, $B00B, $19F0, $19E6             ; $12B065 |
-  dw $B00D, $19F8                           ; $12B06D |
+  dw $19DC, $B00B, $19F0                    ; $12B065 | map16 ptrs for 62
+  dw $19E6, $B00D, $19F8                    ; $12B06B |
 
-  dw $0000, $19DC, $1A44, $1A52             ; $12B071 |
-  dw $0000, $0000, $19E4, $B011             ; $12B079 |
-  dw $B013, $0000, $19DC, $B01F             ; $12B081 |
-  dw $B021, $B015, $19F0, $19E6             ; $12B089 |
-  dw $B025, $B027, $B017, $19FA             ; $12B091 |
+  dw $0000, $19DC, $1A44, $1A52, $0000      ; $12B071 | map16 ptrs for 63
+  dw $0000, $19E4, $B011, $B013, $0000      ; $12B07B |
+  dw $19DC, $B01F, $B021, $B015, $19F0      ; $12B085 |
+  dw $19E6, $B025, $B027, $B017, $19FA      ; $12B08F |
 
-  dw $0000, $19DC, $B00B, $1A18             ; $12B099 |
-  dw $0000, $0000, $19E4, $B011             ; $12B0A1 |
-  dw $B013, $0000, $19DC, $B01F             ; $12B0A9 |
-  dw $B021, $B015, $19F0, $19E6             ; $12B0B1 |
-  dw $B025, $B027, $B017, $19FA             ; $12B0B9 |
+  dw $0000, $19DC, $B00B, $1A18, $0000      ; $12B099 | map16 ptrs for 64
+  dw $0000, $19E4, $B011, $B013, $0000      ; $12B0A3 |
+  dw $19DC, $B01F, $B021, $B015, $19F0      ; $12B0AD |
+  dw $19E6, $B025, $B027, $B017, $19FA      ; $12B0B7 |
 
-  dw $0000, $1A04, $1A18, $0000             ; $12B0C1 |
+
+  dw $0000, $1A04, $1A18, $0000             ; $12B0C1 | map16 ptrs for 65
   dw $19DC, $B01F, $B023, $19F0             ; $12B0C9 |
   dw $19E6, $B019, $B029, $19FA             ; $12B0D1 |
 
-  dw $19DC, $1A18, $19E6, $B00F             ; $12B0D9 |
+  dw $19DC, $1A18                           ; $12B0D9 | map16 ptrs for 66
+  dw $19E6, $B00F                           ; $12B0DD |
 
-  dw $B02B                                  ; $12B0E1 |
-  dw $B03B                                  ; $12B0E3 |
-  dw $B059                                  ; $12B0E5 |
-  dw $B065                                  ; $12B0E7 |
-  dw $B071                                  ; $12B0E9 |
-  dw $B099                                  ; $12B0EB |
-  dw $B0C1                                  ; $12B0ED |
-  dw $B0D9                                  ; $12B0EF |
+  dw $B02B, $B03B, $B059, $B065             ; $12B0E1 | map16 ptrs array ptrs
+  dw $B071, $B099, $B0C1, $B0D9             ; $12B0E9 |
 
-  dw $0008, $000A, $0006, $0006             ; $12B0F1 |
+  dw $0008, $000A, $0006, $0006             ; $12B0F1 | widths * 2
   dw $000A, $000A, $0008, $0004             ; $12B0F9 |
 
   REP #$30                                  ; $12B101 |
@@ -6140,6 +6237,9 @@ CODE_12B127:
   SEP #$30                                  ; $12B127 |
   RTL                                       ; $12B129 |
 
+; === Subroutine ==
+; build_map16 tile func ext 67
+
   dw $3DBD, $3DC0                           ; $12B12A |
 
   dw $1A06, $1A1E, $1A2C, $1A56             ; $12B12E |
@@ -6150,6 +6250,7 @@ CODE_12B127:
   dw $B13A                                  ; $12B146 |
   dw $B13C                                  ; $12B148 |
 
+sub_12B14A:
   REP #$30                                  ; $12B14A |
   LDY #$0000                                ; $12B14C |
 
@@ -6178,8 +6279,12 @@ CODE_12B172:
   SEP #$30                                  ; $12B172 |
   RTL                                       ; $12B174 |
 
+; === Subroutine ==
+; build_map16 tile func ext 68-69
+
   dw $775E, $775F                           ; $12B175 |
 
+sub_12B179:
   REP #$30                                  ; $12B179 |
   LDX $1D                                   ; $12B17B |
   LDA $15                                   ; $12B17D |
@@ -6190,6 +6295,9 @@ CODE_12B172:
   STA $7F8000,x                             ; $12B187 |
   SEP #$30                                  ; $12B18B |
   RTL                                       ; $12B18D |
+
+; === Subroutine ==
+; build_map16 tile func ext 6A-6C
 
   dw $B1BF                                  ; $12B18E |
   dw $B1DB                                  ; $12B190 |
@@ -6244,6 +6352,9 @@ CODE_12B172:
 
   dw $7D14, $7D18, $7D0C, $7D10             ; $12B212 |
 
+; === Subroutine ==
+; build_map16 tile func ext D-70
+
   REP #$30                                  ; $12B21A |
   LDX $1D                                   ; $12B21C |
   LDY $15                                   ; $12B21E |
@@ -6255,6 +6366,9 @@ CODE_12B172:
   STA $7F8000,x                             ; $12B229 |
   SEP #$30                                  ; $12B22D |
   RTL                                       ; $12B22F |
+
+; === Subroutine ==
+; build_map16 tile func ext 71
 
   dw $791E, $0A2F, $77BB, $77BA             ; $12B230 |
   dw $082D, $791D                           ; $12B238 |
@@ -6271,6 +6385,9 @@ CODE_12B245:
   SEP #$30                                  ; $12B24B |
   RTL                                       ; $12B24D |
 
+; === Subroutine ==
+; build_map16 tile func ext 72
+
   dw $792E, $5D09, $77B9, $77CC             ; $12B24E |
   dw $5B0D, $792D                           ; $12B256 |
 
@@ -6280,6 +6397,9 @@ CODE_12B245:
   TAY                                       ; $12B25F |
   LDA $B24E,y                               ; $12B260 |
   BRA CODE_12B245                           ; $12B263 |
+
+; === Subroutine ==
+; build_map16 tile func ext 73
 
   dw $792D, $5B0C, $77C9, $77BA             ; $12B265 |
   dw $082D, $791D                           ; $12B26D |
@@ -6291,6 +6411,9 @@ CODE_12B245:
   LDA $B265,y                               ; $12B277 |
   BRA CODE_12B245                           ; $12B27A |
 
+; === Subroutine ==
+; build_map16 tile func ext 74
+
   dw $792E, $5D09, $77B9, $77CA             ; $12B27C |
   dw $0A2E, $791E                           ; $12B284 |
 
@@ -6300,6 +6423,9 @@ CODE_12B245:
   TAY                                       ; $12B28D |
   LDA $B27C,y                               ; $12B28E |
   BRA CODE_12B245                           ; $12B291 |
+
+; === Subroutine ==
+; build_map16 tile func ext 75
 
   dw $7917, $77B1, $77B4, $7927             ; $12B293 |
   dw $7918, $0000, $0000, $7928             ; $12B29B |
@@ -6322,6 +6448,9 @@ CODE_12B2B8:
   SEP #$30                                  ; $12B2B8 |
   RTL                                       ; $12B2BA |
 
+; === Subroutine ==
+; build_map16 tile func ext 76
+
   dw $7919, $0000, $0000, $7929             ; $12B2BB |
   dw $791A, $77B5, $77B8, $792A             ; $12B2C3 |
 
@@ -6335,6 +6464,9 @@ CODE_12B2B8:
   TAY                                       ; $12B2D6 |
   LDA $B2BB,y                               ; $12B2D7 |
   BRA CODE_12B2B2                           ; $12B2DA |
+
+; === Subroutine ==
+; build_map16 tile func ext 77
 
   dw $7917, $77B1, $77B2, $77B3             ; $12B2DC |
   dw $77B4, $7927, $0000, $0000             ; $12B2E4 |
@@ -6353,6 +6485,9 @@ CODE_12B2B8:
   LDA $B2DC,y                               ; $12B305 |
   BRA CODE_12B2B2                           ; $12B308 |
 
+; === Subroutine ==
+; build_map16 tile func ext 78
+
   dw $7919, $0000, $0000, $0000             ; $12B30A |
   dw $0000, $7929, $0000, $0000             ; $12B312 |
   dw $791A, $77B5, $77B6, $77B7             ; $12B31A |
@@ -6370,6 +6505,9 @@ CODE_12B2B8:
   LDA $B30A,y                               ; $12B333 |
   JMP CODE_12B2B2                           ; $12B336 |
 
+; === Subroutine ==
+; build_map16 tile func ext 79
+
   dw $7911, $7921, $77A1, $0000             ; $12B339 |
   dw $77A4, $0000, $7912, $7922             ; $12B341 |
 
@@ -6383,6 +6521,9 @@ CODE_12B2B8:
   LDA $B339,y                               ; $12B354 |
   JMP CODE_12B2B2                           ; $12B357 |
 
+; === Subroutine ==
+; build_map16 tile func ext 7A
+
   dw $7913, $7923, $0000, $77A5             ; $12B35A |
   dw $0000, $77A8, $7914, $7924             ; $12B362 |
 
@@ -6395,6 +6536,9 @@ CODE_12B2B8:
   TAY                                       ; $12B374 |
   LDA $B35A,y                               ; $12B375 |
   JMP CODE_12B2B2                           ; $12B378 |
+
+; === Subroutine ==
+; build_map16 tile func ext 7B
 
   dw $7911, $7921, $77A1, $0000             ; $12B37B |
   dw $77A2, $0000, $77A3, $0000             ; $12B383 |
@@ -6410,6 +6554,9 @@ CODE_12B2B8:
   LDA $B37B,y                               ; $12B39E |
   JMP CODE_12B2B2                           ; $12B3A1 |
 
+; === Subroutine ==
+; build_map16 tile func ext 7C
+
   dw $7913, $7923, $0000, $77A5             ; $12B3A4 |
   dw $0000, $77A6, $0000, $77A7             ; $12B3AC |
   dw $0000, $77A8, $7914, $7924             ; $12B3B4 |
@@ -6424,6 +6571,9 @@ CODE_12B2B8:
   LDA $B3A4,y                               ; $12B3C7 |
   JMP CODE_12B2B2                           ; $12B3CA |
 
+; === Subroutine ==
+; build_map16 tile func ext 7D
+
   dw $77C6, $77C7                           ; $12B3CD |
 
   REP #$30                                  ; $12B3D1 |
@@ -6432,6 +6582,9 @@ CODE_12B2B8:
   TAY                                       ; $12B3D6 |
   LDA $B3CD,y                               ; $12B3D7 |
   JMP CODE_12B245                           ; $12B3DA |
+
+; === Subroutine ==
+; build_map16 tile func ext 7E-7F
 
   dw $77BB, $77CC                           ; $12B3DD |
 
@@ -6443,10 +6596,16 @@ CODE_12B2B8:
   SEP #$30                                  ; $12B3EE |
   RTL                                       ; $12B3F0 |
 
+; === Subroutine ==
+; build_map16 tile func ext 80
+
   LDX $1D                                   ; $12B3F1 |
   LDA #$0010                                ; $12B3F3 |
   STA $7F8000,x                             ; $12B3F6 |
   RTL                                       ; $12B3FA |
+
+; === Subroutine ==
+; build_map16 tile func ext 81
 
   REP #$30                                  ; $12B3FB |
   LDX $1D                                   ; $12B3FD |
@@ -6456,6 +6615,9 @@ CODE_12B2B8:
   STA $7F8000,x                             ; $12B405 |
   SEP #$30                                  ; $12B409 |
   RTL                                       ; $12B40B |
+
+; === Subroutine ==
+; build_map16 tile func ext 82
 
   dw $8400, $8401, $8402, $8403             ; $12B40C |
   dw $8401, $8402, $8404, $8405             ; $12B414 |
@@ -6484,6 +6646,9 @@ CODE_12B2B8:
   STA $7F8000,x                             ; $12B471 |
   SEP #$30                                  ; $12B475 |
   RTL                                       ; $12B477 |
+
+; === Subroutine ==
+; build_map16 tile func ext 83-87
 
   dw $0000, $0000, $0000, $0000             ; $12B478 |
   dw $0000, $0000, $0302, $0000             ; $12B480 |
@@ -6692,6 +6857,9 @@ CODE_12B970:
   SEP #$30                                  ; $12B970 |
   RTL                                       ; $12B972 |
 
+; === Subroutine ==
+; build_map16 tile func ext 7
+
   dw $B9E0                                  ; $12B973 |
   dw $BA36                                  ; $12B975 |
   dw $BA74                                  ; $12B977 |
@@ -6885,6 +7053,9 @@ CODE_12BAE2:
 CODE_12BAE4:
   RTS                                       ; $12BAE4 |
 
+; === Subroutine ==
+; build_map16 tile func ext 89-8A
+
   dw $851B, $8523, $8521, $8529             ; $12BAE5 |
 
   REP #$30                                  ; $12BAED |
@@ -6913,6 +7084,9 @@ CODE_12BAE4:
 CODE_12BB1F:
   SEP #$30                                  ; $12BB1F |
   RTL                                       ; $12BB21 |
+
+; === Subroutine ==
+; build_map16 tile func ext 8B-8C
 
   dw $852B, $8533                           ; $12BB22 |
 
@@ -6944,6 +7118,9 @@ CODE_12BB1F:
 CODE_12BB5C:
   SEP #$30                                  ; $12BB5C |
   RTL                                       ; $12BB5E |
+
+; === Subroutine ==
+; build_map16 tile func ext 8D
 
   dw $BB82                                  ; $12BB5F |
   dw $BBC0                                  ; $12BB61 |
@@ -7014,6 +7191,9 @@ CODE_12BB5C:
   STA $7F8000,x                             ; $12BBFC |
   RTS                                       ; $12BC00 |
 
+; === Subroutine ==
+; build_map16 tile func ext 8E-91
+
   REP #$30                                  ; $12BC01 |
   LDX $1D                                   ; $12BC03 |
   LDA #$8710                                ; $12BC05 |
@@ -7022,6 +7202,9 @@ CODE_12BB5C:
   STA $7F8000,x                             ; $12BC0B |
   SEP #$30                                  ; $12BC0F |
   RTL                                       ; $12BC11 |
+
+; === Subroutine ==
+; build_map16 tile func ext 92-95
 
   db $14, $15, $18, $00                     ; $12BC12 |
 
@@ -7055,6 +7238,9 @@ CODE_12BB5C:
 CODE_12BC4A:
   SEP #$30                                  ; $12BC4A |
   RTL                                       ; $12BC4C |
+
+; === Subroutine ==
+; build_map16 tile func ext 96-99
 
   db $00, $00, $00, $00, $20, $21, $22, $23 ; $12BC4D |
   db $00, $00, $24, $25, $26, $00, $00, $00 ; $12BC55 |
@@ -7119,6 +7305,9 @@ CODE_12BD77:
   SEP #$30                                  ; $12BD77 |
   RTL                                       ; $12BD79 |
 
+; === Subroutine ==
+; build_map16 tile func ext 9A-9D
+
   dw $872F, $873F, $874F, $875F             ; $12BD7A |
 
   dw $0006, $0007, $0008, $0009             ; $12BD82 |
@@ -7149,6 +7338,9 @@ CODE_12BD77:
   JSL $1287A1                               ; $12BDB7 |
   RTS                                       ; $12BDBB |
 
+; === Subroutine ==
+; build_map16 tile func ext 9E-9F
+
   dw $8562, $8566                           ; $12BDBC |
 
   REP #$30                                  ; $12BDC0 |
@@ -7170,6 +7362,9 @@ CODE_12BD77:
   STA $7F8000,x                             ; $12BDE3 |
   SEP #$30                                  ; $12BDE7 |
   RTL                                       ; $12BDE9 |
+
+; === Subroutine ==
+; build_map16 tile func ext A0
 
   REP #$30                                  ; $12BDEA |
   LDA $1B                                   ; $12BDEC |
@@ -7220,6 +7415,9 @@ CODE_12BE31:
   SEP #$30                                  ; $12BE3F |
   RTL                                       ; $12BE41 |
 
+; === Subroutine ==
+; build_map16 tile func ext A1
+
   REP #$30                                  ; $12BE42 |
   LDA $1B                                   ; $12BE44 |
   STA $0E                                   ; $12BE46 |
@@ -7267,6 +7465,9 @@ CODE_12BE88:
   STA $7F8000,x                             ; $12BE92 |
   SEP #$30                                  ; $12BE96 |
   RTL                                       ; $12BE98 |
+
+; === Subroutine ==
+; build_map16 tile func ext A2
 
   REP #$30                                  ; $12BE99 |
   LDA $1B                                   ; $12BE9B |
@@ -7317,6 +7518,9 @@ CODE_12BEE0:
   SEP #$30                                  ; $12BEEE |
   RTL                                       ; $12BEF0 |
 
+; === Subroutine ==
+; build_map16 tile func ext A3
+
   REP #$30                                  ; $12BEF1 |
   LDA $1B                                   ; $12BEF3 |
   STA $0E                                   ; $12BEF5 |
@@ -7364,6 +7568,9 @@ CODE_12BF36:
   SEP #$30                                  ; $12BF44 |
   RTL                                       ; $12BF46 |
 
+; === Subroutine ==
+; build_map16 tile func ext A4
+
   dw $000A, $8800                           ; $12BF47 |
 
   REP #$30                                  ; $12BF4B |
@@ -7377,6 +7584,9 @@ CODE_12BF36:
   STA $7F8000,x                             ; $12BF59 |
   SEP #$30                                  ; $12BF5D |
   RTL                                       ; $12BF5F |
+
+; === Subroutine ==
+; build_map16 tile func ext A5-A6
 
   dw $0000, $3DDE, $0000, $3DDF             ; $12BF60 |
   dw $8B04, $3DE0, $8B0A, $8B0B             ; $12BF68 |
@@ -7436,6 +7646,9 @@ CODE_12C023:
   SEP #$30                                  ; $12C023 |
   RTL                                       ; $12C025 |
 
+; === Subroutine ==
+; build_map16 tile func ext A9-AC
+
   dw $8E00, $8E01, $8E02, $8D95             ; $12C026 |
 
   dw $8E01, $8E02, $8D95                    ; $12C02E |
@@ -7469,10 +7682,16 @@ CODE_12C05A:
   SEP #$30                                  ; $12C060 |
   RTL                                       ; $12C062 |
 
+; === Subroutine ==
+; build_map16 tile func ext A7
+
   LDX $1D                                   ; $12C063 |
   LDA #$799C                                ; $12C065 |
   STA $7F8000,x                             ; $12C068 |
   RTL                                       ; $12C06C |
+
+; === Subroutine ==
+; build_map16 tile func ext AD-B2
 
   dw $8D54, $8D55, $8D56, $8D57             ; $12C06D |
   dw $8D58, $8D59                           ; $12C075 |
@@ -7512,6 +7731,9 @@ CODE_12C05A:
   SEP #$30                                  ; $12C0CC |
   RTL                                       ; $12C0CE |
 
+; === Subroutine ==
+; build_map16 tile func ext B3
+
   LDX $1D                                   ; $12C0CF |
   LDA #$8D8E                                ; $12C0D1 |
   STA $7F8000,x                             ; $12C0D4 |
@@ -7521,6 +7743,9 @@ CODE_12C05A:
   LDA #$8D8F                                ; $12C0E0 |
   STA $7F8000,x                             ; $12C0E3 |
   RTL                                       ; $12C0E7 |
+
+; === Subroutine ==
+; build_map16 tile func ext B4-B5
 
   dw $1A04, $1A46, $8D00, $8D01             ; $12C0E8 |
   dw $1A06, $1A4E, $8D06, $8D07             ; $12C0F0 |
@@ -7555,6 +7780,9 @@ CODE_12C128:
   STA $7F8000,x                             ; $12C12A |
   SEP #$30                                  ; $12C12E |
   RTL                                       ; $12C130 |
+
+; === Subroutine ==
+; build_map16 tile func ext B6-B7
 
   dw $19DE, $1A4A, $1A52, $19E8             ; $12C131 |
   dw $C143, $C145, $8D0A, $8D0B             ; $12C139 |
@@ -7601,6 +7829,9 @@ CODE_12C1B1:
   STA $7F8000,x                             ; $12C1B3 |
   SEP #$30                                  ; $12C1B7 |
   RTL                                       ; $12C1B9 |
+
+; === Subroutine ==
+; build_map16 tile func ext B8-B9
 
   dw $0000, $1A2C, $1A3A, $19F2             ; $12C1BA |
   dw $0000, $C16F, $C171, $19FC             ; $12C1C2 |
@@ -7662,6 +7893,9 @@ CODE_12C275:
   SEP #$30                                  ; $12C275 |
   RTL                                       ; $12C277 |
 
+; === Subroutine ==
+; build_map16 tile func ext BA-BF
+
   dw $8D42, $8D39                           ; $12C278 |
 
   dw $8D3F, $8D39, $8D3C                    ; $12C27C |
@@ -7706,6 +7940,9 @@ CODE_12C2BE:
   SEP #$30                                  ; $12C2C7 |
   RTL                                       ; $12C2C9 |
 
+; === Subroutine ==
+; build_map16 tile func ext C0
+
   REP #$30                                  ; $12C2CA |
   LDA $2C                                   ; $12C2CC |
   BNE CODE_12C2D8                           ; $12C2CE |
@@ -7739,6 +7976,9 @@ CODE_12C2F9:
   SEP #$30                                  ; $12C2FF |
   RTL                                       ; $12C301 |
 
+; === Subroutine ==
+; build_map16 tile func ext C1
+
   REP #$30                                  ; $12C302 |
   LDA #$8DA5                                ; $12C304 |
   CLC                                       ; $12C307 |
@@ -7765,6 +8005,9 @@ CODE_12C332:
   SEP #$30                                  ; $12C332 |
   RTL                                       ; $12C334 |
 
+; === Subroutine ==
+; build_map16 tile func ext C2-C3
+
   dw $8D96, $8D97, $8D98, $8D99             ; $12C335 |
   dw $152C, $152D, $152E, $152F             ; $12C33D |
   dw $8DB4, $8DB5, $8DB6, $8DB7             ; $12C345 |
@@ -7789,10 +8032,16 @@ CODE_12C332:
   SEP #$30                                  ; $12C38B |
   RTL                                       ; $12C38D |
 
+; === Subroutine ==
+; build_map16 tile func ext C4
+
   LDX $1D                                   ; $12C38E |
   LDA #$5F04                                ; $12C390 |
   STA $7F8000,x                             ; $12C393 |
   RTL                                       ; $12C397 |
+
+; === Subroutine ==
+; build_map16 tile func ext C5-C9
 
   db $CD, $CE, $CF, $D0                     ; $12C398 |
 
@@ -7850,12 +8099,18 @@ CODE_12C3FC:
   SEP #$30                                  ; $12C3FC |
   RTL                                       ; $12C3FE |
 
+; === Subroutine ==
+; build_map16 tile func ext CA-D3
+
   LDA #$79BB                                ; $12C3FF |
   CLC                                       ; $12C402 |
   ADC $15                                   ; $12C403 |
   LDX $1D                                   ; $12C405 |
   STA $7F8000,x                             ; $12C407 |
   RTL                                       ; $12C40B |
+
+; === Subroutine ==
+; build_map16 tile func ext D4-DF
 
   dw $0000, $0000, $0817, $0A18             ; $12C40C |
   dw $0000, $0000, $0817, $9000             ; $12C414 |
@@ -8027,6 +8282,9 @@ CODE_12C6DF:
   SEP #$30                                  ; $12C6DF |
   RTL                                       ; $12C6E1 |
 
+; === Subroutine ==
+; build_map16 tile func ext E0
+
   dw $7D24, $7D25, $0118, $0119             ; $12C6E2 |
 
   REP #$30                                  ; $12C6EA |
@@ -8040,6 +8298,9 @@ CODE_12C6DF:
   STA $7F8000,x                             ; $12C6F8 |
   SEP #$30                                  ; $12C6FC |
   RTL                                       ; $12C6FE |
+
+; === Subroutine ==
+; build_map16 tile func ext FD
 
   LDX $1D                                   ; $12C6FF |
   LDA #$0000                                ; $12C701 |
