@@ -206,9 +206,9 @@ build_map16_jump_table:
 ;
 ; Parameters:
 ; $17: ???
-; $19: y marker
-; $1B: low yx
-; $1C: high yx (screen num)
+; $19: y_marker
+; $1B: low_yx
+; $1C: high_yx (screen num)
 ; $1F: func ptr
 ; $22: func ptr
 ; $25: func ptr
@@ -216,157 +216,158 @@ build_map16_jump_table:
 ; $2E: height
 ;
 ; Variables:
-; $14: ???
-; $28: x index
-; $2C: y index
+; $14: screen offset?
+; $28: x_index
+; $2C: y_index
 ; $9B: ???
 ;
 ; Arguments for tile funcs:
-; $1D: tile table offset
-; $12: existing data at offset
+; $1D: table offset of tile
+; $12: current map16 at offset ($7F8000[offset])
 
 build_map16_object_driver:
-  STZ $28                                   ; $1285EC | x index = 0
-  STZ $2C                                   ; $1285EE | y index = 0
+  STZ $28                                   ; $1285EC | x_index = 0
+  STZ $2C                                   ; $1285EE | y_index = 0
   STZ $9B                                   ; $1285F0 | ??? = 0
 
-.loc_1285F2:
+.get_ofst_call_tile_func:
   SEP #$30                                  ; $1285F2 |
   STZ $14                                   ; $1285F4 | ??? = 0
-  JSR get_map16_table_ofst_ram              ; $1285F6 | table offset -> $1D
+  JSR get_map16_table_ofst_ram              ; $1285F6 | get tile offset for tile func
   REP #$20                                  ; $1285F9 |
 
-.loc_1285FB:
+.call_tile_func:
   SEP #$10                                  ; $1285FB |
   PHK                                       ; $1285FD |
-  PEA $862E                                 ; $1285FE | PUSH $12862F   // return address
-  LDA $2C                                   ; $128601 |\ if y index < y marker:
-  CMP $19                                   ; $128603 | |
-  BCC .loc_128612                           ; $128605 | |
-  LDX $27                                   ; $128607 | |
-  PHX                                       ; $128609 | |
-  PHX                                       ; $12860A | |
-  PLB                                       ; $12860B | |
-  LDA $25                                   ; $12860C | |
-  PHA                                       ; $12860E | |
-  SEP #$20                                  ; $12860F | |
-  RTL                                       ; $128611 |/  JMP [$25]
+  PEA $862E                                 ; $1285FE | push return address = $12862F
+  LDA $2C                                   ; $128601 |
+  CMP $19                                   ; $128603 |
+  BCC .before_y_marker                      ; $128605 | when y_index < y_marker
+  LDX $27                                   ; $128607 |
+  PHX                                       ; $128609 |
+  PHX                                       ; $12860A |
+  PLB                                       ; $12860B |
+  LDA $25                                   ; $12860C |
+  PHA                                       ; $12860E |
+  SEP #$20                                  ; $12860F |
+  RTL                                       ; $128611 | JMP [$25] (y_index > y_marker)
 
-.loc_128612:
-  LDA $28                                   ; $128612 |\ if x index is even:
-  AND #$0001                                ; $128614 | |
-  BNE .loc_128624                           ; $128617 | |
-  LDX $24                                   ; $128619 | |
-  PHX                                       ; $12861B | |
-  PHX                                       ; $12861C | |
-  PLB                                       ; $12861D | |
-  LDA $22                                   ; $12861E | |
-  PHA                                       ; $128620 | |
-  SEP #$20                                  ; $128621 | |
-  RTL                                       ; $128623 |/  JMP [$22]
+.before_y_marker:
+  LDA $28                                   ; $128612 |
+  AND #$0001                                ; $128614 |
+  BNE .x_odd                                ; $128617 |
+  LDX $24                                   ; $128619 |
+  PHX                                       ; $12861B |
+  PHX                                       ; $12861C |
+  PLB                                       ; $12861D |
+  LDA $22                                   ; $12861E |
+  PHA                                       ; $128620 |
+  SEP #$20                                  ; $128621 |
+  RTL                                       ; $128623 | JMP [$22] (x even)
 
-.loc_128624:
-  LDX $21                                   ; $128624 |\ else: // x index is odd
-  PHX                                       ; $128626 | |
-  PHX                                       ; $128627 | |
-  PLB                                       ; $128628 | |
-  LDA $1F                                   ; $128629 | |
-  PHA                                       ; $12862B | |
-  SEP #$20                                  ; $12862C | |
-  RTL                                       ; $12862E |/  JMP [$1F]
+.x_odd:
+  LDX $21                                   ; $128624 |
+  PHX                                       ; $128626 |
+  PHX                                       ; $128627 |
+  PLB                                       ; $128628 |
+  LDA $1F                                   ; $128629 |
+  PHA                                       ; $12862B |
+  SEP #$20                                  ; $12862C |
+  RTL                                       ; $12862E | JMP [$1F] (x odd)
 
 ; subroutine calls return here
+.return:
   PHK                                       ; $12862F |
   PLB                                       ; $128630 |
   REP #$30                                  ; $128631 |
   LDY #$0000                                ; $128633 |
-  LDA $2E                                   ; $128636 |\ if height < 0:
-  BPL .loc_128640                           ; $128638 | | y index -= 1
+  LDA $2E                                   ; $128636 |\
+  BPL .height_posi                          ; $128638 | |
   DEC $2C                                   ; $12863A | |
   INY                                       ; $12863C | |
   INY                                       ; $12863D | |
-  BRA .loc_128642                           ; $12863E |/
+  BRA .loc_128642                           ; $12863E | | y_index += sign(height)
 
-.loc_128640:
-  INC $2C                                   ; $128640 |  else: y index += 1
+.height_posi:
+  INC $2C                                   ; $128640 |/
 
 .loc_128642:
-  LDA $2C                                   ; $128642 |\ if height != y index:
-  CMP $2E                                   ; $128644 | |
-  BEQ .loc_128680                           ; $128646 | |
-  LDA $1D                                   ; $128648 | | // table offset from last iteration
-  CLC                                       ; $12864A | |
-  ADC $86C9,y                               ; $12864B | | A = offset + (height >= 0 ? 0x20 : -0x20)
-  TAX                                       ; $12864E | | X = A
-  BIT #$FE00                                ; $12864F | |\ if A & 0xFE00 == 0 or
-  BEQ .loc_12865C                           ; $128652 | | |   A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
-  AND #$01E0                                ; $128654 | | | // under these conditions (new screen?)
-  CMP $86CD,y                               ; $128657 | | | // we need to recalculate the offset
-  BNE .loc_128675                           ; $12865A | | | // otherwise inc/dec by 0x20 (a row) is good enough
+  LDA $2C                                   ; $128642 |
+  CMP $2E                                   ; $128644 |
+  BEQ .y_loop_done                          ; $128646 |
+  LDA $1D                                   ; $128648 |
+  CLC                                       ; $12864A |
+  ADC $86C9,y                               ; $12864B | table_ofst += 0x20 * sign(height)
+  TAX                                       ; $12864E |
+  BIT #$FE00                                ; $12864F |  if A & 0xFE00 == 0 or
+  BEQ .recalc_ofst                          ; $128652 |     A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
+  AND #$01E0                                ; $128654 |   // under these conditions (new screen?)
+  CMP $86CD,y                               ; $128657 |   // we need to recalculate the offset
+  BNE .store_ofst_call_tile_func            ; $12865A |   // otherwise inc/dec by 0x20 (a row) is good enough
+; TODO
+.recalc_ofst:
+  TXA                                       ; $12865C |
+  AND #$01FF                                ; $12865D |
+  STA $00                                   ; $128660 | $00 (low yx) = table_ofst & 0x1FF
+  SEP #$20                                  ; $128662 |
+  LDA $14                                   ; $128664 |
+  CLC                                       ; $128666 |
+  ADC $86D1,y                               ; $128667 |
+  STA $14                                   ; $12866A |
+  CLC                                       ; $12866C |
+  ADC $1C                                   ; $12866D |
+  TAX                                       ; $12866F |
+  SEP #$10                                  ; $128670 |
+  JSR get_map16_table_ofst                  ; $128672 |
 
-.loc_12865C:
-  TXA                                       ; $12865C | | | TODO
-  AND #$01FF                                ; $12865D | | |
-  STA $00                                   ; $128660 | | |
-  SEP #$20                                  ; $128662 | | |
-  LDA $14                                   ; $128664 | | |
-  CLC                                       ; $128666 | | |
-  ADC $86D1,y                               ; $128667 | | |
-  STA $14                                   ; $12866A | | |
-  CLC                                       ; $12866C | | |
-  ADC $1C                                   ; $12866D | | |
-  TAX                                       ; $12866F | | |
-  SEP #$10                                  ; $128670 | | |
-  JSR get_map16_table_ofst                  ; $128672 | |/
+.store_ofst_call_tile_func:
+  STX $1D                                   ; $128675 |
+  LDA $7F8000,x                             ; $128677 |
+  STA $12                                   ; $12867B | $12 = $7F8000[table_ofst]
+  JMP .call_tile_func                       ; $12867D |
 
-.loc_128675:
-  STX $1D                                   ; $128675 | | offset = X
-  LDA $7F8000,x                             ; $128677 | |
-  STA $12                                   ; $12867B | | $12 = table[offset]
-  JMP .loc_1285FB                           ; $12867D |/  do call subroutine
+.y_loop_done:
+  LDA $1B                                   ; $128680 |
+  AND #$F0F0                                ; $128682 |
+  STA $00                                   ; $128685 |
+  STZ $2C                                   ; $128687 |
+  LDA $2A                                   ; $128689 |
+  BPL .width_posi                           ; $12868B |\
+  DEC $28                                   ; $12868D | |
+  LDA $1B                                   ; $12868F | |
+  AND #$0F0F                                ; $128691 | |
+  DEC A                                     ; $128694 | |
+  BRA .loc_1286A2                           ; $128695 | |
 
-.loc_128680:
-  LDA $1B                                   ; $128680 |\ else: // height == y index
-  AND #$F0F0                                ; $128682 | |
-  STA $00                                   ; $128685 | | $00 = obj y (in format Y0y0)
-  STZ $2C                                   ; $128687 | | y index = 0
-  LDA $2A                                   ; $128689 | |\ if obj width < 0:
-  BPL .loc_128697                           ; $12868B | | |
-  DEC $28                                   ; $12868D | | | x index -= 1
-  LDA $1B                                   ; $12868F | | | // Note: x here is actually index x
-  AND #$0F0F                                ; $128691 | | | //       since the variable is updated in the loop
-  DEC A                                     ; $128694 | | | A = -1 + x (in format 0X0x)
-  BRA .loc_1286A2                           ; $128695 | |/
-
-.loc_128697:
-  INC $28                                   ; $128697 | |\ else:
-  LDA $1B                                   ; $128699 | | | x index += 1
-  AND #$0F0F                                ; $12869B | | |
-  ORA #$00F0                                ; $12869E | | |
-  INC A                                     ; $1286A1 | |/  A = 1 + x (in format 0x0x)
+.width_posi:
+  INC $28                                   ; $128697 | |
+  LDA $1B                                   ; $128699 | |
+  AND #$0F0F                                ; $12869B | |
+  ORA #$00F0                                ; $12869E | |
+  INC A                                     ; $1286A1 | |
 
 .loc_1286A2:
-  AND #$0F0F                                ; $1286A2 | |
-  ORA $00                                   ; $1286A5 | | // basically we update yx with x inc/dec by 1
-  STA $1B                                   ; $1286A7 | | yx = A | $00
-  LDA $28                                   ; $1286A9 | |
-  CMP $2A                                   ; $1286AB | |
-  BEQ .loc_1286C6                           ; $1286AD | | if x index == width: return
-  LDA $9B                                   ; $1286AF | | TODO
-  BEQ .loc_1286C3                           ; $1286B1 | |
-  JSR sub_1286D5                            ; $1286B3 | |
-  LDA $9B                                   ; $1286B6 | |
-  BMI .loc_1286C3                           ; $1286B8 | |
-  LDA $2E                                   ; $1286BA | |
-  CLC                                       ; $1286BC | |
-  ADC $17                                   ; $1286BD | |
-  STA $2E                                   ; $1286BF | |
-  BEQ .loc_1286C6                           ; $1286C1 | |
+  AND #$0F0F                                ; $1286A2 | | x += sign(width)
+  ORA $00                                   ; $1286A5 | | x_index += sign(width)
+  STA $1B                                   ; $1286A7 |/
+  LDA $28                                   ; $1286A9 |
+  CMP $2A                                   ; $1286AB |
+  BEQ .ret                                  ; $1286AD | when x_index == width
+  LDA $9B                                   ; $1286AF | TODO
+  BEQ .j_get_ofst_call_tile_func            ; $1286B1 | when $9B == 0
+  JSR sub_1286D5                            ; $1286B3 |
+  LDA $9B                                   ; $1286B6 |
+  BMI .j_get_ofst_call_tile_func            ; $1286B8 | when $9B < 0
+  LDA $2E                                   ; $1286BA |
+  CLC                                       ; $1286BC |
+  ADC $17                                   ; $1286BD |
+  STA $2E                                   ; $1286BF |
+  BEQ .ret                                  ; $1286C1 | when height == 0
 
-.loc_1286C3:
-  JMP .loc_1285F2                           ; $1286C3 |/  do call subroutine
+.j_get_ofst_call_tile_func:
+  JMP .get_ofst_call_tile_func              ; $1286C3 |
 
-.loc_1286C6:
+.ret:
   SEP #$30                                  ; $1286C6 |
   RTS                                       ; $1286C8 |
 
@@ -376,7 +377,7 @@ build_map16_object_driver:
 ; End of function build_map16_object_driver
 
 ; === Subroutine ===
-; TODO
+; Helper for build_map16_object_driver
 
 sub_1286D5:
   LDA $17                                   ; $1286D5 |
@@ -400,6 +401,7 @@ sub_1286D5:
   ORA $00                                   ; $1286F8 |
   STA $1B                                   ; $1286FA |
   RTS                                       ; $1286FC |
+; End of function sub_1286D5
 
 ; === Subroutine ===
 ; Wrapper around get_map16_table_ofst to use ram vars
@@ -579,8 +581,8 @@ get_map16_table_ofst_ram:
 ; Note: screen id 0 is not used
 ;
 ; Parameters:
-; X:   high xy (screen num)
-; $00: (low xy) * 2
+; X:   high_yx (screen num)
+; $00: low_yx * 2
 ;
 ; Return:
 ; X: offset (from $7F8000)
@@ -4961,7 +4963,7 @@ sub_12A48A:
   STA $00                                   ; $12A491 |
   LDA $A476,x                               ; $12A493 |
   STA $02                                   ; $12A496 |
-  LDY $2C                                   ; $12A498 | y index
+  LDY $2C                                   ; $12A498 | y_index
   BEQ .loc_12A4A2                           ; $12A49A |
   LDA ($02),y                               ; $12A49C |
   AND #$00FF                                ; $12A49E |
@@ -4970,7 +4972,7 @@ sub_12A48A:
 .loc_12A4A2:
   TYA                                       ; $12A4A2 |
   CLC                                       ; $12A4A3 |
-  ADC $28                                   ; $12A4A4 | x index
+  ADC $28                                   ; $12A4A4 | x_index
   ASL A                                     ; $12A4A6 |
   TAY                                       ; $12A4A7 |
   LDA ($00),y                               ; $12A4A8 |
@@ -5674,9 +5676,9 @@ sub_12AC59:
   SEP #$30                                  ; $12AC68 |
   RTL                                       ; $12AC6A |
 
-  dw $AC73, $AC73, $AC97, $AC97             ; $12AC6B | jump table (indexed by x index)
+  dw $AC73, $AC73, $AC97, $AC97             ; $12AC6B | jump table (indexed by x_index)
 
-; x index < 2
+; x_index < 2
   LDA $2C                                   ; $12AC73 |
   INC A                                     ; $12AC75 |
   CMP $2E                                   ; $12AC76 |
@@ -5701,7 +5703,7 @@ CODE_12AC94:
 CODE_12AC96:
   RTS                                       ; $12AC96 |
 
-; x index >= 2
+; x_index >= 2
   LDY #$0000                                ; $12AC97 |
   LDA $2C                                   ; $12AC9A |
   BEQ CODE_12ACA7                           ; $12AC9C |
