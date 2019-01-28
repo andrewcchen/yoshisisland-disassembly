@@ -211,23 +211,23 @@ build_map16_jump_table:
 ; Note: when height reaches 0 tile generation is stopped
 ;
 ; Parameters:
-; $15 (2): obj_id    : (not used here, only used by tile funcs)
-; $17 (2): slope_inc : height increment for slope gen
-; $19 (2): y_marker  : compared with y_index to decide tile func to call
-; $1B (2): yx        : x and y co-ordinates arranged like yyyyxxxxyyyyxxxx
-; $1F (3): funptr_1F : tile func (x_index odd)
-; $22 (3): funptr_22 : tile func (x_index even)
-; $25 (3): funptr_25 : tile func (y_index >= y_marker)
-; $2A (2): width     :
-; $2E (2): height    :
+; $15 (w): obj_id    : (not used here, only used by tile funcs)
+; $17 (w): slope_inc : height increment for slope gen
+; $19 (w): y_marker  : compared with y_index to decide tile func to call
+; $1B (w): yx        : x and y co-ordinates arranged like yyyyxxxxyyyyxxxx
+; $1F (l): funptr_1F : tile func (x_index odd)
+; $22 (l): funptr_22 : tile func (x_index even)
+; $25 (l): funptr_25 : tile func (y_index >= y_marker)
+; $2A (w): width     :
+; $2E (w): height    :
 ;
 ; Variables:
-; $12 (2): current map16 at offset ($7F8000[offset])
-; $14 (1): screen_diff: current tile screen = yx_h + screen_diff
-; $1D (2): table_ofst: offset from $7F8000 to write tile map16
-; $28 (2): x_index
-; $2C (2): y_index
-; $9B (2): slope_flag: flag to control slope gen
+; $12 (w): current map16 at offset ($7F8000[offset])
+; $14 (b): screen_diff: current tile screen = yx_h + screen_diff
+; $1D (w): table_ofst: offset from $7F8000 to write tile map16
+; $28 (w): x_index
+; $2C (w): y_index
+; $9B (w): slope_flag: flag to control slope gen
 ;
 ; Pseudocode:
 ; x_index = 0
@@ -237,15 +237,15 @@ build_map16_jump_table:
 ;     screen_diff = 0
 ;     table_ofst = get_map16_table_offset(yx_h, yx_l * 2);
 ;     $12 = $7F8000[table_ofst];
-; 
+;
 ;     while (1) {
 ;         if (y_index >= y_marker) funptr_25();
 ;         else if (x&1)            funptr_22();
 ;         else                     funptr_1F();
-; 
+;
 ;         y_index += sign(height);
 ;         if (y_index == height) break;
-; 
+;
 ;         table_ofst += 0x10 * sign(height);
 ;         if (table_ofst & 0xFE00 == 0
 ;             || (height >= 0 && table_ofst & 0x1E0 == 0)
@@ -256,12 +256,12 @@ build_map16_jump_table:
 ;         }
 ;         $12 = $7F8000[table_ofst];
 ;     }
-; 
+;
 ;     y_index = 0;
 ;     yx = ADD_X(yx, sign(width));
 ;     x_index += sign(width);
 ;     if (x_index == width) return;
-;     
+;
 ;     if (slope_flag != 0) {
 ;         yx = SUB_Y(yx, slope_inc); // sub_1286D5
 ;         if (slope_flag > 0) {
@@ -309,7 +309,7 @@ build_map16_object_driver:
   LDA $22                                   ; $12861E |
   PHA                                       ; $128620 |
   SEP #$20                                  ; $128621 |
-  RTL                                       ; $128623 | JMP [$22] (x_even)
+  RTL                                       ; $128623 | JMP [$22] (x even)
 
 .x_odd:
   LDX $21                                   ; $128624 |
@@ -319,7 +319,7 @@ build_map16_object_driver:
   LDA $1F                                   ; $128629 |
   PHA                                       ; $12862B |
   SEP #$20                                  ; $12862C |
-  RTL                                       ; $12862E | JMP [$1F] (x_odd)
+  RTL                                       ; $12862E | JMP [$1F] (x odd)
 
 ; subroutine calls return here
 .return:
@@ -345,24 +345,24 @@ build_map16_object_driver:
   CLC                                       ; $12864A |
   ADC $86C9,y                               ; $12864B | table_ofst += 0x20 * sign(height)
   TAX                                       ; $12864E |
-  BIT #$FE00                                ; $12864F |  if A & 0xFE00 == 0 or
-  BEQ .recalc_ofst                          ; $128652 |     A & 0x1E0 == (height >= 0 ? 0 : 0x1E0):
-  AND #$01E0                                ; $128654 |   // under these conditions (new screen?)
-  CMP $86CD,y                               ; $128657 |   // we need to recalculate the offset
-  BNE .store_ofst_call_tile_func            ; $12865A |   // otherwise inc/dec by 0x20 (a row) is good enough
-; TODO
+  BIT #$FE00                                ; $12864F |
+  BEQ .recalc_ofst                          ; $128652 |
+  AND #$01E0                                ; $128654 |
+  CMP $86CD,y                               ; $128657 |
+  BNE .store_ofst_call_tile_func            ; $12865A |
+
 .recalc_ofst:
   TXA                                       ; $12865C |
   AND #$01FF                                ; $12865D |
-  STA $00                                   ; $128660 | $00 (low yx) = table_ofst & 0x1FF
+  STA $00                                   ; $128660 | $00 (param low yx) = table_ofst & 0x1FF
   SEP #$20                                  ; $128662 |
   LDA $14                                   ; $128664 |
   CLC                                       ; $128666 |
   ADC $86D1,y                               ; $128667 |
-  STA $14                                   ; $12866A |
+  STA $14                                   ; $12866A | screen_diff += 0x10 * sign(height)
   CLC                                       ; $12866C |
   ADC $1C                                   ; $12866D |
-  TAX                                       ; $12866F |
+  TAX                                       ; $12866F | X (param high yx) = yx_h + screen_diff
   SEP #$10                                  ; $128670 |
   JSR get_map16_table_ofst                  ; $128672 |
 
@@ -400,10 +400,10 @@ build_map16_object_driver:
   CMP $2A                                   ; $1286AB |
   BEQ .ret                                  ; $1286AD | when x_index == width
   LDA $9B                                   ; $1286AF | TODO
-  BEQ .j_get_ofst_call_tile_func            ; $1286B1 | when $9B == 0
+  BEQ .j_get_ofst_call_tile_func            ; $1286B1 | when slope_flag == 0
   JSR sub_1286D5                            ; $1286B3 |
   LDA $9B                                   ; $1286B6 |
-  BMI .j_get_ofst_call_tile_func            ; $1286B8 | when $9B < 0
+  BMI .j_get_ofst_call_tile_func            ; $1286B8 | when slope_flag < 0
   LDA $2E                                   ; $1286BA |
   CLC                                       ; $1286BC |
   ADC $17                                   ; $1286BD |
@@ -455,12 +455,12 @@ sub_1286D5:
 ; to use ram vars of build_map16_object_driver
 ;
 ; Parameters:
-; $1B: low yx
-; $1C: high yx (screen num)
+; $1B (b): low yx
+; $1C (b): high yx (screen num)
 ;
 ; Return:
-; $1D: map16 index table offset
-; $12: data at that location
+; $1D (w): map16 index table offset
+; $12 (w): data at that location
 
 get_map16_table_ofst_ram:
   REP #$20                                  ; $1286FD |
@@ -623,32 +623,33 @@ get_map16_table_ofst_ram:
 
 ; === Subroutine ===
 ; Since the map16 index table is indexed by screen id (not screen num!)
-; this function first maps screen num to screen id,
+; this function needs to first map the screen num to screen id,
 ; creating a new mapping if necessary in table !s_screen_num_to_id
 ;
 ; Note: screen id 0 is not used
 ;
 ; Parameters:
-; X:   high_yx (screen num)
-; $00: low_yx * 2
+; X   (b): high_yx (screen num)
+; $00 (w): low_yx * 2
 ;
 ; Return:
-; X: offset (from $7F8000)
+; X   (w): offset in map16 index table ($7F8000) of tile
 get_map16_table_ofst:
   CPX #$80                                  ; $128824 |
-  BCS .loc_12883A                           ; $128826 | if (high xy > 0x80) bail out
+  BCS .die                                  ; $128826 | when high_yx > 0x80
   LDA !s_screen_num_to_id,x                 ; $128828 |
   AND #$3F                                  ; $12882B |
   BNE .finish_up                            ; $12882D | found screen num to id mapping
-  INC $0D4D                                 ; $12882F | otherwise create a new mapping
-  LDA $0D4D                                 ; $128832 | TODO $0D4D?
-  AND #$3F                                  ; $128835 |
+  INC $0D4D                                 ; $12882F |
+  LDA $0D4D                                 ; $128832 |
+  AND #$3F                                  ; $128835 | new_id = (++next_id) & 0x3F
   TAY                                       ; $128837 |
-  BNE .loc_128850                           ; $128838 | if (new id != 0) we are good, else bail out
+  BNE .loc_128850                           ; $128838 | if new_id == 0, we ran out => die
 
-.loc_12883A:
-  REP #$30                                  ; $12883A | if high xy > 0x80
-  JSL $109A85                               ; $12883C | TODO invalid xy???
+.die:
+  REP #$30                                  ; $12883A |
+  JSL CODE_109A85                           ; $12883C | infinite loop
+; unused code below?
   SEP #$10                                  ; $128840 |
   LDA #$01F1                                ; $128842 |\ change stack pointer to #$01F1
   TCS                                       ; $128845 |/
@@ -666,12 +667,12 @@ get_map16_table_ofst:
   AND #$3F                                  ; $128857 |
   TAY                                       ; $128859 |
   CMP $0D4D                                 ; $12885A |
-  BEQ .ret                                  ; $12885D |
+  BEQ .ret                                  ; $12885D | why return, not dead?
   BRA .loc_128850                           ; $12885F |
 
 .loc_128861:
   TYA                                       ; $128861 |
-  INC $97                                   ; $128862 |
+  INC $97                                   ; $128862 | num of used screens?
   STA !s_screen_num_to_id,x                 ; $128864 |
   STA $0D4E,y                               ; $128867 |
 
@@ -2038,26 +2039,31 @@ CODE_129084:
 
 ; === Subroutine ===
 ; build_map16 obj func ext FE
+; Scroll Stopper
+; marks screen as unable to be scrolled into
 
-  LDX $1C                                   ; $129186 | TODO
+  LDX $1C                                   ; $129186 |
   LDA !s_screen_num_to_id,x                 ; $129188 |
   ORA #$80                                  ; $12918B |
-  STA !s_screen_num_to_id,x                 ; $12918D |
+  STA !s_screen_num_to_id,x                 ; $12918D | !s_screen_num_to_id[yx_h] |= 0x80
   RTL                                       ; $129190 |
 
 ; === Subroutine ===
 ; build_map16 obj func ext FF
+; Tile Eraser
+; clears the screen this tile is placed on
 
-  LDY $1C                                   ; $129191 | TODO
+sub_129191:
+  LDY $1C                                   ; $129191 |
   LDA !s_screen_num_to_id,y                 ; $129193 |
-  AND #$3F                                  ; $129196 |
-  BEQ CODE_1291D3                           ; $129198 |
+  AND #$3F                                  ; $129196 | screen_id = !s_screen_num_to_id[yx_h] & 0x3F
+  BEQ .ret                                  ; $129198 |
   PHA                                       ; $12919A |
   TAX                                       ; $12919B |
-  STZ $0D4E,x                               ; $12919C |
+  STZ $0D4E,x                               ; $12919C | $0D4E[screen_id]
   TYX                                       ; $12919F |
   LDA #$80                                  ; $1291A0 |
-  STA !s_screen_num_to_id,x                 ; $1291A2 |
+  STA !s_screen_num_to_id,x                 ; $1291A2 | !s_screen_num_to_id[yx_h] = 0x80
   PLA                                       ; $1291A5 |
   TAX                                       ; $1291A6 |
   LDA #$7F                                  ; $1291A7 |
@@ -2070,23 +2076,23 @@ CODE_129084:
   ASL A                                     ; $1291B4 |
   CLC                                       ; $1291B5 |
   ADC #$8000                                ; $1291B6 |
-  STA $20                                   ; $1291B9 |
+  STA $20                                   ; $1291B9 | $20 = 0x7F8000 + screen_id<<9
   CLC                                       ; $1291BB |
   ADC #$0100                                ; $1291BC |
-  STA $24                                   ; $1291BF |
+  STA $24                                   ; $1291BF | $24 = 0x7F8100 + screen_id<<9
   LDA #$0000                                ; $1291C1 |
   LDY #$00                                  ; $1291C4 |
 
-CODE_1291C6:
+.loop:
   STA [$20],y                               ; $1291C6 |
   STA [$24],y                               ; $1291C8 |
   INY                                       ; $1291CA |
   INY                                       ; $1291CB |
-  BNE CODE_1291C6                           ; $1291CC |
-  SEP #$20                                  ; $1291CE |
-  DEC $0D4D                                 ; $1291D0 |
+  BNE .loop                                 ; $1291CC | for in range(0, 0x100, 2)
+  SEP #$20                                  ; $1291CE | clears 0x200 bytes at $7F8000[screen_id<<9]
+  DEC $0D4D                                 ; $1291D0 | ???
 
-CODE_1291D3:
+.ret:
   RTL                                       ; $1291D3 |
 
 ; === Subroutine ===
@@ -2120,7 +2126,7 @@ sub_1291D4:
   STA $25                                   ; $129208 | fun $25 = $1380B4
   LDA #$0003                                ; $12920A |
   STA $19                                   ; $12920D | y_marker = 3
-  STZ $17                                   ; $12920F | TODO $17
+  STZ $17                                   ; $12920F | slope_inc unused
   JSR build_map16_object_driver             ; $129211 |
   SEP #$30                                  ; $129214 |
   RTL                                       ; $129216 |
@@ -2131,7 +2137,7 @@ sub_1291D4:
 
 sub_129217:
   LDX $15                                   ; $129217 |
-  LDA $9284,x                               ; $129219 |
+  LDA $9284,x                               ; $129219 | unused (probably meant to lookup bank)
   LDA #$13                                  ; $12921C |
   STA $24                                   ; $12921E |
   STA $21                                   ; $129220 |
@@ -2187,15 +2193,13 @@ CODE_129280:
   SEP #$30                                  ; $129283 |
   RTL                                       ; $129285 |
 
-  dw $1313, $0000, $0000, $0000             ; $129286 |
+  dw $1313, $0000, $0000, $0000, $1313      ; $129286 | unused
 
-  dw $1313, $81CA, $81CA, $0000             ; $12928E |
-  dw $0000, $0000, $0000, $0000             ; $129296 |
-  dw $0000, $8412                           ; $12929E |
+  dw $81CA, $81CA, $0000, $0000, $0000      ; $129290 | tile funcs
+  dw $0000, $0000, $0000, $8412, $8412      ; $12929A |
 
-  dw $8412, $0003, $0003, $0000             ; $1292A2 |
-  dw $0000, $0000, $0000, $0000             ; $1292AA |
-  dw $0000, $0001, $0001                    ; $1292B2 |
+  dw $0003, $0003, $0000, $0000, $0000      ; $1292A4 | y_markers
+  dw $0000, $0000, $0000, $0001, $0001      ; $1292AE |
 
 ; === Subroutine ===
 ; build_map16 obj func 04-05
@@ -2223,7 +2227,6 @@ CODE_1292D5:
 
 ; === Subroutine ===
 ; build_map16 obj func 06-09
-; TODO
 
   LDA #$13                                  ; $1292DD |
   STA $24                                   ; $1292DF |
@@ -4949,8 +4952,8 @@ CODE_12A384:
 ; A: function address
 ; X: function bank
 build_map16_object_com:
-  STZ $17                                   ; $12A3DB | y_inc unused
-; Entry point for objects using the y incrementor
+  STZ $17                                   ; $12A3DB | slope_inc unused
+; Entry point for objects using slope gen
 build_map16_object_com_w_inc:
   STX $24                                   ; $12A3DD |
   STX $21                                   ; $12A3DF |
@@ -5896,7 +5899,6 @@ sub_12AD6F:
 
 ; === Subroutine ==
 ; build_map16 tile func ext 50,A8
-; TODO
 
   dw $000C, $000D                           ; $12AD79 |
 

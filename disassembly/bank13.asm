@@ -1,5 +1,8 @@
 org $138000
 
+; === Subroutine ==
+; build_map16 tile func 00 ($22)
+
   REP #$30                                  ; $138000 |
   LDA $2C                                   ; $138002 |
   ASL A                                     ; $138004 |
@@ -15,6 +18,10 @@ org $138000
 CODE_138018:
   JSR CODE_138073                           ; $138018 |
   BRA CODE_138038                           ; $13801B |
+
+; === Subroutine ==
+; build_map16 tile func 00 ($1F)
+
   REP #$30                                  ; $13801D |
   LDA $2C                                   ; $13801F |
   ASL A                                     ; $138021 |
@@ -93,6 +100,9 @@ CODE_1380A3:
 
   dw $1CE6, $1CA0, $1CBA, $1CC2             ; $1380A4 |
   dw $1CE4, $1CA2, $1CBC, $1CC4             ; $1380AC |
+
+; === Subroutine ==
+; build_map16 tile func 00 ($25)
 
   REP #$30                                  ; $1380B4 |
   LDA $12                                   ; $1380B6 |
