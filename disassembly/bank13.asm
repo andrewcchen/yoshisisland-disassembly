@@ -1,7 +1,7 @@
 org $138000
 
 ; === Subroutine ==
-; build_map16 tile func 00 ($22)
+; build_map16 tile func 01 ($22)
 
   REP #$30                                  ; $138000 |
   LDA $2C                                   ; $138002 |
@@ -20,7 +20,7 @@ CODE_138018:
   BRA CODE_138038                           ; $13801B |
 
 ; === Subroutine ==
-; build_map16 tile func 00 ($1F)
+; build_map16 tile func 01 ($1F)
 
   REP #$30                                  ; $13801D |
   LDA $2C                                   ; $13801F |
@@ -102,7 +102,7 @@ CODE_1380A3:
   dw $1CE4, $1CA2, $1CBC, $1CC4             ; $1380AC |
 
 ; === Subroutine ==
-; build_map16 tile func 00 ($25)
+; build_map16 tile func 01,06-09 ($25)
 
   REP #$30                                  ; $1380B4 |
   LDA $12                                   ; $1380B6 |
@@ -237,6 +237,9 @@ CODE_1381C8:
 CODE_1381CA:
   RTS                                       ; $1381CA |
 
+; === Subroutine ==
+; build_map16 tile func 02-03 ($1F/$22)
+
   REP #$30                                  ; $1381CB |
   LDA $28                                   ; $1381CD |
   INC A                                     ; $1381CF |
@@ -291,6 +294,9 @@ CODE_138214:
   dw $1D16, $1CD0, $1CD2, $1D18             ; $13821F |
   dw $0000, $1CD4, $1CD6, $1CFE             ; $138227 |
   dw $1D00                                  ; $13822F |
+
+; === Subroutine ==
+; build_map16 tile func 02-03,0A-0B ($25)
 
   REP #$30                                  ; $138231 |
   JSL rand_byte                             ; $138233 |
@@ -396,6 +402,9 @@ CODE_13830A:
   dw $8348                                  ; $13830B |
   dw $8365                                  ; $13830D |
 
+; === Subroutine ==
+; build_map16 tile func 04-05
+
   REP #$30                                  ; $13830F |
   LDA $2C                                   ; $138311 |
   ASL A                                     ; $138313 |
@@ -463,6 +472,9 @@ CODE_138370:
 CODE_138373:
   RTS                                       ; $138373 |
 
+; === Subroutine ==
+; build_map16 tile func 06-09 ($22)
+
   REP #$30                                  ; $138374 |
   STZ $9B                                   ; $138376 |
   LDA $15                                   ; $138378 |
@@ -489,6 +501,9 @@ CODE_138373:
   dw $1A2A                                  ; $1383A1 |
   dw $1A40                                  ; $1383A3 |
   dw $1CC4                                  ; $1383A5 |
+
+; === Subroutine ==
+; build_map16 tile func 04-05 ($1F)
 
 CODE_1383A7:
   REP #$30                                  ; $1383A7 |
@@ -557,6 +572,9 @@ CODE_1383B9:
   dw $19EC                                  ; $13840F |
   dw $1CEE                                  ; $138411 |
 
+; === Subroutine ==
+; build_map16 tile func 0A-0B ($1F/$22)
+
   REP #$30                                  ; $138413 |
   LDA $15                                   ; $138415 |
   AND #$0001                                ; $138417 |
@@ -571,6 +589,9 @@ CODE_1383B9:
   RTL                                       ; $13842B |
 
   dw $1CA4, $1CA6                           ; $13842C |
+
+; === Subroutine ==
+; build_map16 tile func 0C,0E-0F
 
   REP #$30                                  ; $138430 |
   LDX $1D                                   ; $138432 |
@@ -609,6 +630,9 @@ CODE_138451:
 
   dw $0090, $0091                           ; $138470 |
   dw $0094, $0095                           ; $138474 |
+
+; === Subroutine ==
+; build_map16 tile func 0D
 
   REP #$30                                  ; $138478 |
   LDA $12                                   ; $13847A |
